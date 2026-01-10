@@ -1,0 +1,70 @@
+:root {
+    --primary-red: #e53e3e;
+    --primary-red-light: #f56565;
+    --text-dark: #1f2937;
+    --text-light: #6b7280;
+    --border-color: #e5e7eb;
+    --background-light: #f9fafb;
+    --white: #ffffff;
+    
+    /* Paleta de estados */
+    --color-ok: #22c55e;
+    --color-alerta: #f59e0b;
+    --color-peligro: #ef4444;
+    
+    /* Nuevos colores modernos */
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --gradient-warning: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    --gradient-danger: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    
+    --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.1);
+    --shadow-strong: 0 15px 35px rgba(0, 0, 0, 0.15);
+    
+    --border-radius: 16px;
+    --border-radius-lg: 24px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reset básico */
+* {
+    box-sizing: border-box;
+}
+
+/* Clases utilitarias comunes */
+.hidden {
+    display: none !important;
+}
+
+.active {
+    /* Se define en cada componente */
+}
+
+/* Animaciones base */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+} 

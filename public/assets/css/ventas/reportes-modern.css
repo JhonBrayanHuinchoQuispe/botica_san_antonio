@@ -1,0 +1,522 @@
+/* ============================================
+   REPORTES DE VENTAS - DISEÑO PROFESIONAL
+   Sin animaciones, colores profesionales
+   ============================================ */
+
+:root {
+    --color-primary: #2563eb;
+    --color-primary-dark: #1d4ed8;
+    --color-success: #10b981;
+    --color-success-dark: #059669;
+    --color-warning: #f59e0b;
+    --color-warning-dark: #d97706;
+    --color-danger: #ef4444;
+    --color-danger-dark: #dc2626;
+    --color-info: #3b82f6;
+    --color-purple: #8b5cf6;
+    --color-gray-50: #f9fafb;
+    --color-gray-100: #f3f4f6;
+    --color-gray-200: #e5e7eb;
+    --color-gray-300: #d1d5db;
+    --color-gray-400: #9ca3af;
+    --color-gray-500: #6b7280;
+    --color-gray-600: #4b5563;
+    --color-gray-700: #374151;
+    --color-gray-800: #1f2937;
+    --color-gray-900: #111827;
+}
+
+/* ============================================
+   TARJETAS DE ESTADÍSTICAS PRINCIPALES
+   ============================================ */
+.reportes-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.reportes-stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.reportes-stat-content {
+    flex: 1;
+}
+
+.reportes-stat-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.reportes-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-gray-900);
+    margin-bottom: 0.25rem;
+}
+
+.reportes-stat-change {
+    font-size: 0.875rem;
+    color: var(--color-gray-500);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.reportes-stat-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 2rem;
+}
+
+/* Gradientes para tarjetas */
+.reportes-stat-blue-gradient {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-color: #93c5fd;
+}
+
+.reportes-stat-blue-gradient .reportes-stat-icon {
+    background: var(--color-primary);
+    color: white;
+}
+
+.reportes-stat-green-gradient {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-color: #6ee7b7;
+}
+
+.reportes-stat-green-gradient .reportes-stat-icon {
+    background: var(--color-success);
+    color: white;
+}
+
+.reportes-stat-orange-gradient {
+    background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+    border-color: #fb923c;
+}
+
+.reportes-stat-orange-gradient .reportes-stat-icon {
+    background: var(--color-warning);
+    color: white;
+}
+
+.reportes-stat-purple-gradient {
+    background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
+    border-color: #c084fc;
+}
+
+.reportes-stat-purple-gradient .reportes-stat-icon {
+    background: var(--color-purple);
+    color: white;
+}
+
+/* ============================================
+   CONTENEDORES DE GRÁFICOS
+   ============================================ */
+.reportes-chart-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-gray-200);
+    overflow: hidden;
+}
+
+.reportes-chart-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--color-gray-200);
+    background: var(--color-gray-50);
+}
+
+.reportes-chart-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-gray-900);
+}
+
+.reportes-chart-icon {
+    font-size: 1.5rem;
+    color: var(--color-primary);
+}
+
+.reportes-chart-subtitle {
+    font-size: 0.875rem;
+    color: var(--color-gray-500);
+    margin-top: 0.25rem;
+}
+
+.reportes-chart-body {
+    padding: 2rem;
+    position: relative;
+}
+
+.reportes-chart-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: var(--color-gray-500);
+}
+
+.reportes-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--color-gray-200);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   GRID DE GRÁFICOS SECUNDARIOS
+   ============================================ */
+.reportes-charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.reportes-chart-secondary {
+    min-height: 400px;
+}
+
+/* ============================================
+   MINI ESTADÍSTICAS DEL GRÁFICO
+   ============================================ */
+.chart-mini-stats {
+    background: var(--color-gray-50);
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    margin: 0 1.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.mini-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-gray-900);
+}
+
+.mini-stat-badge {
+    background: var(--color-primary);
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.mini-stat-average {
+    color: var(--color-success);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.mini-stat-delta {
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.delta-up {
+    background: #d1fae5;
+    color: var(--color-success-dark);
+}
+
+.delta-down {
+    background: #fee2e2;
+    color: var(--color-danger-dark);
+}
+
+/* ============================================
+   TABLAS DE REPORTES
+   ============================================ */
+.reportes-table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-gray-200);
+    overflow: hidden;
+}
+
+.reportes-table-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-gray-200);
+    overflow: hidden;
+}
+
+.reportes-table-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--color-gray-200);
+    background: var(--color-gray-50);
+}
+
+.reportes-table-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-gray-900);
+}
+
+.reportes-table-icon {
+    font-size: 1.5rem;
+    color: var(--color-warning);
+}
+
+.reportes-table-subtitle {
+    font-size: 0.875rem;
+    color: var(--color-gray-500);
+    margin-top: 0.25rem;
+}
+
+.reportes-table-body {
+    padding: 1.5rem;
+}
+
+.reportes-table-wrapper {
+    overflow-x: auto;
+}
+
+.reportes-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.reportes-table thead th {
+    background: var(--color-gray-50);
+    color: var(--color-gray-700);
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 2px solid var(--color-gray-200);
+}
+
+.reportes-table tbody tr {
+    border-bottom: 1px solid var(--color-gray-100);
+}
+
+.reportes-table tbody tr:hover {
+    background: var(--color-gray-50);
+}
+
+.reportes-table tbody td {
+    padding: 1rem;
+    color: var(--color-gray-700);
+}
+
+/* ============================================
+   BADGES Y ELEMENTOS DE TABLA
+   ============================================ */
+.reportes-rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.reportes-rank-top {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+}
+
+.reportes-rank-normal {
+    background: var(--color-gray-100);
+    color: var(--color-gray-600);
+}
+
+.reportes-product-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.reportes-product-details {
+    flex: 1;
+}
+
+.reportes-product-name {
+    font-weight: 600;
+    color: var(--color-gray-900);
+    margin-bottom: 0.125rem;
+}
+
+.reportes-product-code {
+    font-size: 0.75rem;
+    color: var(--color-gray-500);
+}
+
+.reportes-quantity-badge {
+    background: var(--color-primary);
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.reportes-producto {
+    display: flex;
+    flex-direction: column;
+}
+
+.reportes-producto-nombre {
+    font-weight: 600;
+    color: var(--color-gray-900);
+    margin-bottom: 0.125rem;
+}
+
+.reportes-producto-detalle {
+    font-size: 0.75rem;
+    color: var(--color-gray-500);
+}
+
+.reportes-cantidad {
+    background: var(--color-success);
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    display: inline-block;
+}
+
+/* ============================================
+   ESTADO VACÍO
+   ============================================ */
+.reportes-empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+}
+
+.reportes-empty-icon {
+    font-size: 4rem;
+    color: var(--color-gray-300);
+    margin-bottom: 1rem;
+}
+
+.reportes-empty-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-gray-700);
+    margin-bottom: 0.5rem;
+}
+
+.reportes-empty-text {
+    font-size: 0.875rem;
+    color: var(--color-gray-500);
+}
+
+.reportes-empty {
+    text-align: center;
+    padding: 2rem;
+}
+
+.reportes-empty-text {
+    color: var(--color-gray-500);
+    font-size: 0.875rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+    .reportes-charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .reportes-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .reportes-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .reportes-stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .reportes-chart-body {
+        padding: 1rem;
+    }
+    
+    .chart-mini-stats {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+}
+
+/* ============================================
+   CLASES UTILITARIAS
+   ============================================ */
+.text-center {
+    text-align: center;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem;
+}
+
+/* Estilos para elementos de estadísticas */
+.estadisticas-total {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-gray-900);
+}
+
+.estadisticas-ventas {
+    background: var(--color-primary);
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.estadisticas-promedio {
+    color: var(--color-success);
+    font-size: 0.875rem;
+    font-weight: 600;
+}

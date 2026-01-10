@@ -1,0 +1,803 @@
+/* Importar fuentes premium de Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Concert+One:wght@400&family=Fredoka+One&display=swap');
+
+/* Sidebar Customization - Red Palette */
+
+/* Default link styles */
+.sidebar-menu li a {
+    color: #4B5563; /* Dark Gray */
+    transition: background-color 0.2s, color 0.2s;
+}
+
+/* Link hover state */
+.sidebar-menu li a:hover {
+    background-color: rgba(192, 0, 0, 0.08); /* Light Red background */
+    color: #C00000; /* Main Red */
+}
+
+/* --- ACTIVE STATE STYLES --- */
+
+/* Base reset to prevent flash of blue on page load */
+.sidebar-menu li > a.active-page {
+  background-color: transparent;
+}
+
+/* Parent dropdown (like "Productos") when a child is active */
+.sidebar-menu li.dropdown.dropdown-open > a {
+    background-image: linear-gradient(45deg, #e53935, #c62828) !important;
+    background-color: transparent !important; /* Remove solid color to show gradient */
+    color: #FFFFFF !important; /* White text */
+}
+
+/* Icon of the parent dropdown when a child is active */
+.sidebar-menu li.dropdown.dropdown-open > a .menu-icon {
+    color: #FFFFFF !important; /* White icon */
+}
+
+/* Submenu item (like "Presentaciones") when it's the active page */
+.sidebar-menu .sidebar-submenu li a.active-page {
+    background-color: rgba(192, 0, 0, 0.1); /* Lighter Red background */
+    color: #C00000; /* Main Red text */
+    font-weight: normal; /* Texto normal, no bold */
+}
+
+/* Circle icon for the active submenu item */
+.sidebar-menu .sidebar-submenu li a.active-page i {
+    color: #C00000 !important; /* Main Red */
+}
+
+/* Active top-level links (direct children of the main menu) */
+.sidebar-menu > li > a.active-page,
+.sidebar-menu > li > a.active-page:hover {
+    background-image: linear-gradient(45deg, #e53935, #c62828);
+    background-color: transparent;
+    color: #FFFFFF;
+}
+
+.sidebar-menu li.dropdown.open > a,
+.sidebar-menu li.dropdown.open > a:hover,
+.sidebar-menu .sidebar-submenu li.active-page a {
+    color: #C00000;
+}
+
+/* Submenu link color */
+.sidebar-menu .sidebar-submenu li a {
+    color: #4B5563;
+}
+
+/* --- FOCUS & SELECTION OVERRIDES --- */
+
+/* Aggressively disable the default browser focus outline to prevent blue flash */
+.sidebar-menu a:focus,
+.sidebar-menu a:focus-visible,
+.sidebar-menu a:active {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Force red gradient on top-level items during focus/active state to override browser default */
+.sidebar-menu > li > a:focus,
+.sidebar-menu > li > a:active {
+    background-image: linear-gradient(45deg, #e53935, #c62828) !important;
+    color: #FFFFFF !important;
+}
+
+/* Force light red on sub-menu items during focus/active state */
+.sidebar-menu .sidebar-submenu li a:focus,
+.sidebar-menu .sidebar-submenu li a:active {
+    background-color: rgba(192, 0, 0, 0.08);
+    color: #C00000;
+}
+
+/* Custom text selection style for sidebar to avoid blue highlight */
+.sidebar-menu li a::selection,
+.sidebar-menu li a *::selection {
+    background-color: rgba(229, 57, 53, 0.2);
+    color: #FFFFFF;
+}
+
+/* --- ESPACIADO MEJORADO PARA TODO EL MENÚ --- */
+
+/* Espaciado mejorado para elementos principales del menú */
+.sidebar-menu li {
+    margin-bottom: 0.25rem !important;  /* Separación entre elementos principales */
+}
+
+/* Asegurar que el último elemento principal no tenga margen inferior */
+.sidebar-menu > li:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* Elementos principales del menú con mejor padding */
+.sidebar-menu li > a {
+    padding-top: 0.75rem !important;    /* Más espacio arriba */
+    padding-bottom: 0.75rem !important; /* Más espacio abajo */
+    margin-bottom: 0.1rem !important;   /* Pequeña separación adicional */
+    border-radius: 8px !important;      /* Esquinas más redondeadas */
+}
+
+/* Dar más espacio a los elementos del submenú */
+.sidebar-menu .sidebar-submenu li a {
+    padding-top: 0.65rem !important;    /* Más espacio arriba */
+    padding-bottom: 0.65rem !important; /* Más espacio abajo */
+    margin-bottom: 0.15rem !important;  /* Separación entre elementos */
+    border-radius: 6px !important;      /* Esquinas redondeadas para mejor hover */
+}
+
+/* Asegurar que el último elemento no tenga margen inferior */
+.sidebar-menu .sidebar-submenu li:last-child a {
+    margin-bottom: 0 !important;
+}
+
+/* Espacio extra en el submenú contenedor */
+.sidebar-menu .sidebar-submenu {
+    padding-top: 0.85rem !important;    /* Más espacio desde el elemento padre */
+    padding-bottom: 0.35rem !important; /* Espacio al final del submenú */
+    margin-top: 0.15rem !important;     /* Separación del elemento padre */
+}
+
+/* Mejor hover para elementos principales del menú (SOLO si NO están activos) */
+.sidebar-menu li > a:hover:not(.active-page):not(.dropdown-open) {
+    background-color: rgba(192, 0, 0, 0.08) !important;
+    color: #C00000 !important; /* Letras rojitas */
+    transform: translateX(2px) !important; /* Ligero desplazamiento para indicar hover */
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 8px rgba(192, 0, 0, 0.15) !important; /* Sombra sutil */
+}
+
+/* FORZAR que elementos activos NO cambien en hover */
+.sidebar-menu li > a.active-page:hover,
+.sidebar-menu li.active-page > a:hover {
+    background-image: linear-gradient(45deg, #e53935, #c62828) !important;
+    background-color: transparent !important;
+    color: #FFFFFF !important; /* Mantener blanco */
+    transform: none !important;
+    box-shadow: none !important;
+    transition: none !important;
+}
+
+/* Mejor hover para submenús con el espaciado correcto (SOLO si NO están activos) */
+.sidebar-menu .sidebar-submenu li:not(.active-page) a:hover {
+    background-color: rgba(192, 0, 0, 0.08) !important;
+    color: #C00000 !important;
+    transform: translateX(2px) !important; /* Ligero desplazamiento para indicar hover */
+    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 4px rgba(192, 0, 0, 0.1) !important; /* Sombra más sutil para submenús */
+}
+
+/* Deshabilitar hover en elementos activos - mantener su estilo original */
+.sidebar-menu li > a.active-page:hover {
+    background-image: linear-gradient(45deg, #e53935, #c62828) !important;
+    background-color: transparent !important;
+    color: #FFFFFF !important;
+    transform: none !important; /* Sin desplazamiento */
+    box-shadow: none !important; /* Sin sombra adicional */
+}
+
+/* Deshabilitar hover en submenús activos - mantener su estilo original - FORCED */
+.sidebar .sidebar-menu .sidebar-submenu li.active-page a:hover,
+.sidebar-menu .sidebar-submenu li.active-page a:hover,
+body .sidebar-menu .sidebar-submenu li.active-page a:hover {
+    background-color: rgba(192, 0, 0, 0.1) !important; /* Keep original background */
+    color: #C00000 !important; /* Keep original color */
+    transform: none !important; /* No transform */
+    box-shadow: none !important; /* No shadow */
+    --tw-text-opacity: 1 !important;
+    --tw-bg-opacity: 1 !important;
+    background: rgba(192, 0, 0, 0.1) !important;
+    text-decoration: none !important;
+}
+
+/* Deshabilitar hover en dropdowns abiertos (elementos padre activos) */
+.sidebar-menu li.dropdown.dropdown-open > a:hover {
+    background-image: linear-gradient(45deg, #e53935, #c62828) !important;
+    background-color: transparent !important;
+    color: #FFFFFF !important;
+    transform: none !important; /* Sin desplazamiento */
+    box-shadow: none !important; /* Sin sombra adicional */
+}
+
+/* --- MODO OSCURO - ADAPTACIONES --- */
+
+/* Submenú activo en modo oscuro - cambiar a blanco para mejor contraste */
+.dark .sidebar-menu .sidebar-submenu li a.active-page {
+    background-color: rgba(255, 255, 255, 0.15) !important; /* Fondo blanco semitransparente */
+    color: #FFFFFF !important; /* Texto blanco */
+    font-weight: normal; /* Texto normal, no bold */
+}
+
+/* Icono del submenú activo en modo oscuro */
+.dark .sidebar-menu .sidebar-submenu li a.active-page i {
+    color: #FFFFFF !important; /* Icono blanco */
+}
+
+/* Hover en elementos principales en modo oscuro (SOLO si NO están activos) */
+.dark .sidebar-menu li > a:hover:not(.active-page) {
+    background-color: rgba(255, 255, 255, 0.05) !important; /* Fondo blanco muy tenue */
+    /* NO cambiar el color del texto - mantener el original */
+    transform: translateX(2px) !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.08) !important; /* Sombra blanca muy sutil */
+}
+
+/* Hover en submenús en modo oscuro (SOLO si NO están activos) */
+.dark .sidebar-menu .sidebar-submenu li:not(.active-page) a:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important; /* Fondo blanco tenue */
+    color: #FFFFFF !important; /* Texto blanco */
+    transform: translateX(2px) !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 4px rgba(255, 255, 255, 0.08) !important; /* Sombra blanca más sutil */
+}
+
+/* Deshabilitar hover en elementos activos en modo oscuro - mantener estilo original */
+.dark .sidebar-menu li > a.active-page:hover,
+.dark .sidebar-menu li.active-page > a:hover {
+    background-image: linear-gradient(45deg, #4B5563, #374151) !important;
+    background-color: transparent !important;
+    color: #FFFFFF !important; /* Mantener blanco */
+    transform: none !important; /* Sin desplazamiento */
+    box-shadow: none !important; /* Sin sombra adicional */
+    transition: none !important;
+}
+
+/* Deshabilitar hover en dropdowns abiertos en modo oscuro */
+.dark .sidebar-menu li.dropdown.dropdown-open > a:hover {
+    background-image: linear-gradient(45deg, #4B5563, #374151) !important;
+    background-color: transparent !important;
+    color: #FFFFFF !important;
+    transform: none !important; /* Sin desplazamiento */
+    box-shadow: none !important; /* Sin sombra adicional */
+}
+
+/* Texto normal del submenú en modo oscuro (no activo) */
+.dark .sidebar-menu .sidebar-submenu li a {
+    color: #D1D5DB !important; /* Gris claro para mejor legibilidad */
+}
+
+/* Disable hover effect on active submenu items in dark mode - FORCED */
+.dark .sidebar .sidebar-menu .sidebar-submenu li.active-page a:hover,
+.dark .sidebar-menu .sidebar-submenu li.active-page a:hover,
+body.dark .sidebar-menu .sidebar-submenu li.active-page a:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important; /* Keep original white background for dark mode */
+    color: #FFFFFF !important; /* Keep original white color for dark mode */
+    transform: none !important; /* No transform */
+    box-shadow: none !important; /* No shadow */
+    --tw-text-opacity: 1 !important;
+    --tw-bg-opacity: 1 !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    text-decoration: none !important;
+}
+
+/* --- MENÚ PRINCIPAL EN MODO OSCURO --- */
+
+/* Menú padre (como "Almacén") cuando está abierto en modo oscuro */
+.dark .sidebar-menu li.dropdown.dropdown-open > a {
+    background-image: linear-gradient(45deg, #4B5563, #374151) !important; /* Gradiente gris en lugar de rojo */
+    background-color: transparent !important;
+    color: #FFFFFF !important;
+}
+
+/* Icono del menú padre en modo oscuro */
+.dark .sidebar-menu li.dropdown.dropdown-open > a .menu-icon {
+    color: #FFFFFF !important;
+}
+
+/* Menú padre al hacer hover en modo oscuro */
+.dark .sidebar-menu li.dropdown.dropdown-open > a:hover {
+    background-image: linear-gradient(45deg, #374151, #1F2937) !important; /* Gradiente más oscuro */
+    color: #FFFFFF !important;
+}
+
+/* Menús de nivel superior activos en modo oscuro */
+.dark .sidebar-menu > li > a.active-page,
+.dark .sidebar-menu > li > a.active-page:hover {
+    background-image: linear-gradient(45deg, #4B5563, #374151) !important; /* Gris en lugar de rojo */
+    background-color: transparent !important;
+    color: #FFFFFF !important;
+}
+
+/* --- BRANDING DEL SIDEBAR --- */
+
+/* Texto del brand "San Antonio" - DISEÑO PREMIUM */
+.sidebar-brand-text {
+    font-size: 1.7rem !important;           /* Tamaño más grande y equilibrado */
+    font-weight: 900 !important;            /* Extra Black - súper grueso */
+    color: #F56565 !important;              /* Color base más claro */
+    margin-left: 0.65rem !important;        /* Separación perfecta del logo */
+    line-height: 0.95 !important;          /* Línea súper compacta */
+    letter-spacing: 0.02em !important;      /* Espaciado premium */
+    font-family: 'Concert One', 'Fredoka One', 'Inter', sans-serif !important; /* Fuentes gruesas */
+    
+    /* SIN SOMBRAS PARA MEJOR LEGIBILIDAD */
+    text-shadow: none !important;
+    
+    /* SIN OUTLINE PARA MÁXIMA CLARIDAD */
+    -webkit-text-stroke: none !important;
+    
+    /* SIN TRANSICIONES PARA DISEÑO ESTÁTICO */
+    transition: none !important;
+    
+    /* SIN TRANSFORMACIONES 3D */
+    transform: none !important;
+    transform-style: initial !important;
+}
+
+/* Texto del brand en modo oscuro - BLANCO SÓLIDO */
+.dark .sidebar-brand-text {
+    /* COLOR BLANCO SÓLIDO - IGUAL QUE EL HOVER */
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    -webkit-text-fill-color: initial !important;
+    background-clip: initial !important;
+    color: #FFFFFF !important;              /* Blanco sólido */
+    
+    /* SIN SOMBRAS EN MODO OSCURO PARA CLARIDAD */
+    text-shadow: none !important;
+    
+    /* SIN OUTLINE EN MODO OSCURO */
+    -webkit-text-stroke: none !important;
+}
+
+/* Cuando el sidebar está minimizado - ocultar texto */
+.sidebar.active .sidebar-brand-text {
+    display: none !important;
+}
+
+/* Cuando el sidebar minimizado hace hover - mostrar texto */
+.sidebar.active:hover .sidebar-brand-text {
+    display: inline-block !important;
+}
+
+/* Asegurar que el logo y texto estén bien alineados */
+.sidebar-logo {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 0.5rem 0 0.5rem 1.25rem !important; /* Más padding izquierdo para separar del borde */
+    position: relative !important;          /* Para efectos especiales */
+    overflow: hidden !important;            /* Para efectos de brillo */
+}
+
+/* SIN EFECTOS DE BRILLO PARA DISEÑO ESTÁTICO */
+.sidebar-logo::before {
+    display: none !important;
+}
+
+/* SIN ANIMACIONES DE PULSACIÓN PARA DISEÑO ESTÁTICO */
+.sidebar-brand-text {
+    animation: none !important;
+}
+
+/* Ajustar tamaño del logo para mejor proporción */
+.sidebar-logo img {
+    max-height: 3.5rem !important;       /* Más grande para aprovechar el espacio */
+    width: auto !important;              /* Mantener proporción */
+    object-fit: contain !important;      /* Ajuste perfecto */
+    filter: drop-shadow(0 2px 4px rgba(245, 101, 101, 0.12)) !important; /* Sombra elegante más suave */
+    transition: none !important; /* Sin transiciones para diseño estático */
+}
+
+/* Efectos hover adaptados al nuevo color */
+.sidebar-logo:hover img {
+    transform: none !important;
+    filter: drop-shadow(0 2px 6px rgba(255, 255, 255, 0.4)) !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.sidebar-logo:hover .sidebar-brand-text {
+    /* SIN TRANSFORMACIONES COMPLEJAS */
+    transform: none !important;
+    
+    /* MANTENER EL COLOR ORIGINAL */
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    -webkit-text-fill-color: initial !important;
+    background-clip: initial !important;
+    
+    /* SOMBRA BLANCA MÁS DEFINIDA EN HOVER */
+    text-shadow: 
+        -1px -1px 0 rgba(255, 255, 255, 1),
+        1px -1px 0 rgba(255, 255, 255, 1),
+        -1px 1px 0 rgba(255, 255, 255, 1),
+        1px 1px 0 rgba(255, 255, 255, 1),
+        0 0 10px rgba(255, 255, 255, 0.8) !important;
+    
+    /* SIN OUTLINE EN HOVER */
+    -webkit-text-stroke: none !important;
+    
+    /* SIN FILTROS DE BRILLO */
+    filter: none !important;
+}
+
+/* Hover en modo oscuro - ELEGANTE */
+.dark .sidebar-logo:hover img {
+    filter: drop-shadow(0 2px 6px rgba(255, 255, 255, 0.2)) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+.dark .sidebar-logo:hover .sidebar-brand-text {
+    /* COLOR BLANCO SÓLIDO */
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    -webkit-text-fill-color: initial !important;
+    background-clip: initial !important;
+    color: #ffffff !important;
+    
+    /* SIN SOMBRA EN MODO OSCURO */
+    text-shadow: none !important;
+    
+    /* SIN OUTLINE EN HOVER MODO OSCURO */
+    -webkit-text-stroke: none !important;
+    
+    /* SIN FILTROS DE BRILLO */
+    filter: none !important;
+}
+
+/* Responsive - DISEÑO PREMIUM EN MÓVILES */
+@media (max-width: 1199px) {
+    .sidebar-brand-text {
+        font-size: 1.65rem !important;     /* Tamaño más grande para móvil */
+        font-weight: 900 !important;       /* Mantener súper grueso */
+        letter-spacing: 0.015em !important; /* Espaciado premium móvil */
+        margin-left: 0.55rem !important;   /* Espacio optimizado */
+        
+        /* SIN SOMBRAS EN MÓVIL PARA CLARIDAD */
+        text-shadow: none !important;
+        
+        /* SIN OUTLINE EN MÓVIL */
+        -webkit-text-stroke: none !important;
+    }
+    
+    .sidebar-logo img {
+        max-height: 3.25rem !important;    /* Logo perfecto en móvil */
+    }
+}
+
+/* --- FONDO GRADIENTE ROJIZO PARA SIDEBAR --- */
+
+/* Fondo blanco simple para modo claro */
+.sidebar {
+    background: #ffffff !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Fondo oscuro elegante para modo oscuro */
+.dark .sidebar {
+    background: #1e293b !important;
+}
+
+/* Transiciones suaves para el sidebar activo */
+.sidebar.active {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Transiciones para el contenido principal */
+.dashboard-main {
+    transition: margin-inline-start 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-main.active {
+    transition: margin-inline-start 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Transiciones suaves para elementos del menú */
+.sidebar-menu li a {
+    transition: all 0.2s ease-in-out;
+}
+
+.sidebar-menu li a span {
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.sidebar-menu li a .menu-icon {
+    transition: margin-inline-end 0.3s ease-in-out;
+}
+
+/* Transiciones para el logo del sidebar */
+.sidebar-logo img {
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+/* Transiciones para submenús */
+.sidebar-submenu {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Transiciones para el botón toggle */
+.sidebar-toggle {
+    transition: all 0.2s ease-in-out;
+}
+
+.sidebar-toggle .icon {
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+/* --- HEADER DEL SIDEBAR MÁS OSCURO --- */
+
+/* Header con fondo rojo sólido */
+.sidebar-logo {
+    background: #ef6060 !important;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Header en modo oscuro - elegante */
+.dark .sidebar-logo {
+    background: #334155 !important;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* --- BORDES BLANCOS PARA LOGO Y TEXTO --- */
+
+/* Logo con borde blanco */
+.sidebar-logo img {
+    border: 2px solid rgba(255, 255, 255, 0.8) !important;
+    border-radius: 50% !important;
+    padding: 4px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Texto "San Antonio" con borde blanco */
+.sidebar-brand-text {
+    text-shadow: 
+        -1px -1px 0 rgba(255, 255, 255, 0.8),
+        1px -1px 0 rgba(255, 255, 255, 0.8),
+        -1px 1px 0 rgba(255, 255, 255, 0.8),
+        1px 1px 0 rgba(255, 255, 255, 0.8),
+        0 0 8px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Texto en modo oscuro normal */
+.dark .sidebar-brand-text {
+    color: #ffffff !important;
+    text-shadow: none !important;
+}
+
+/* Logo normal en modo oscuro */
+.dark .sidebar-logo img {
+    border: 2px solid rgba(255, 255, 255, 0.6) !important;
+    border-radius: 50% !important;
+    padding: 4px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ULTIMATE OVERRIDE - Force no hover effect on active submenu items */
+html body .sidebar-menu .sidebar-submenu li.active-page a:hover,
+html .sidebar-menu .sidebar-submenu li.active-page a:hover {
+    background-color: rgba(192, 0, 0, 0.1) !important;
+    color: #C00000 !important;
+    background: rgba(192, 0, 0, 0.1) !important;
+    --tw-text-opacity: 1 !important;
+    --tw-bg-opacity: 1 !important;
+    transform: none !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    transition: none !important;
+}
+
+/* ULTIMATE OVERRIDE - Force no hover effect on active submenu items in DARK MODE */
+html body.dark .sidebar-menu .sidebar-submenu li.active-page a:hover,
+html.dark .sidebar-menu .sidebar-submenu li.active-page a:hover,
+.dark html body .sidebar-menu .sidebar-submenu li.active-page a:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    --tw-text-opacity: 1 !important;
+    --tw-bg-opacity: 1 !important;
+    transform: none !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    transition: none !important;
+}
+
+/* ULTIMATE OVERRIDE - Force no hover effect on MAIN MENU active items */
+html body .sidebar-menu li > a.active-page:hover,
+html body .sidebar-menu li.active-page > a:hover,
+html .sidebar-menu li > a.active-page:hover,
+html .sidebar-menu li.active-page > a:hover {
+    background-image: linear-gradient(45deg, #e53935, #c62828) !important;
+    background-color: transparent !important;
+    color: #FFFFFF !important; /* MANTENER BLANCO SIEMPRE */
+    transform: none !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    transition: none !important;
+    --tw-text-opacity: 1 !important;
+    --tw-bg-opacity: 1 !important;
+}
+
+/* ULTIMATE OVERRIDE - Force no hover effect on MAIN MENU active items in DARK MODE */
+html body.dark .sidebar-menu li > a.active-page:hover,
+html body.dark .sidebar-menu li.active-page > a:hover,
+html.dark .sidebar-menu li > a.active-page:hover,
+html.dark .sidebar-menu li.active-page > a:hover,
+.dark html body .sidebar-menu li > a.active-page:hover,
+.dark html body .sidebar-menu li.active-page > a:hover {
+    background-image: linear-gradient(45deg, #4B5563, #374151) !important;
+    background-color: transparent !important;
+    color: #FFFFFF !important; /* MANTENER BLANCO SIEMPRE */
+    transform: none !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    transition: none !important;
+    --tw-text-opacity: 1 !important;
+    --tw-bg-opacity: 1 !important;
+}
+/* --- CORRECCIÓN SIDEBAR COLLAPSED HOVER --- */
+
+/* Forzar visualización de textos cuando se hace hover en sidebar colapsado */
+.sidebar.active:hover .sidebar-menu li a span {
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: auto !important;
+}
+
+/* Forzar visualización de submenús en hover */
+.sidebar.active:hover .sidebar-menu li.dropdown.dropdown-open .sidebar-submenu,
+.sidebar.active:hover .sidebar-menu li.dropdown.open .sidebar-submenu {
+    display: block !important;
+}
+
+.sidebar.active:hover .sidebar-menu .sidebar-submenu {
+    display: block !important;
+}
+
+.sidebar.active:hover .sidebar-menu .sidebar-submenu li {
+    display: block !important;
+}
+
+.sidebar.active:hover .sidebar-menu .sidebar-submenu li a {
+    display: flex !important;
+}
+
+/* Asegurar que los iconos se comporten bien */
+.sidebar.active:hover .sidebar-menu li a .menu-icon {
+    margin-right: 0.5rem !important;
+}
+
+/* Ancho del sidebar expandido en hover */
+.sidebar.active:hover {
+    width: 250px !important;
+}
+
+@media (min-width: 1536px) {
+    .sidebar.active:hover {
+        width: 275px !important;
+    }
+}
+
+
+/* --- REPARACIÓN FINAL SIDEBAR HOVER --- */
+
+/* Asegurar prioridad sobre cualquier otra regla */
+.sidebar.active:hover {
+    width: 250px !important;
+    z-index: 9999 !important;
+    background: #ffffff !important;
+    box-shadow: 5px 0 15px rgba(0,0,0,0.1) !important;
+}
+
+/* En modo oscuro */
+.dark .sidebar.active:hover {
+    background: #1e293b !important;
+}
+
+/* Mostrar TODOS los textos al hacer hover */
+.sidebar.active:hover .sidebar-menu li a span {
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: auto !important;
+    margin-left: 0 !important;
+}
+
+/* Mostrar logo completo al hacer hover */
+.sidebar.active:hover .sidebar-logo img.logo-icon {
+    display: none !important;
+}
+
+.sidebar.active:hover .sidebar-logo img.light-logo {
+    display: inline-block !important;
+}
+
+.sidebar.active:hover .sidebar-brand-text {
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Mostrar títulos de grupo */
+.sidebar.active:hover .sidebar-menu-group-title {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Mostrar flechas de dropdown */
+.sidebar.active:hover .sidebar-menu li.dropdown a::after {
+    display: block !important;
+}
+
+/* Mostrar submenús si están abiertos */
+.sidebar.active:hover .sidebar-menu li.dropdown.dropdown-open .sidebar-submenu,
+.sidebar.active:hover .sidebar-menu li.dropdown.open .sidebar-submenu {
+    display: block !important;
+}
+
+/* Asegurar que el contenido principal NO se mueva (efecto overlay) */
+.dashboard-main.active {
+    margin-left: 5.375rem !important; /* Mantener margen pequeño */
+}
+
+/* Ajustes para pantallas grandes */
+@media (min-width: 1536px) {
+    .sidebar.active:hover {
+        width: 275px !important;
+    }
+}
+
+
+/* --- AJUSTE SIDEBAR COLAPSADO ESTÁTICO --- */
+
+/* Hacer el sidebar colapsado un poco más ancho (default 64px -> 80px) para que no se vea tan 'aplastado' */
+.sidebar.active {
+    width: 5.375rem !important; /* 86px para coincidir con el margen del contenido */
+}
+
+/* Ajustar el padding del logo cuando está colapsado */
+.sidebar.active .sidebar-logo {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    justify-content: center !important;
+}
+
+/* Asegurar que el icono del logo se vea bien centrado */
+.sidebar.active .sidebar-logo img.logo-icon {
+    display: block !important;
+    margin: 0 auto !important;
+    max-height: 42px !important; /* Un poco más grande */
+}
+
+/* Centrar iconos del menú */
+.sidebar.active .sidebar-menu li a {
+    justify-content: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.sidebar.active .sidebar-menu li a .menu-icon {
+    margin-right: 0 !important;
+    font-size: 1.5rem !important; /* Iconos más grandes cuando está colapsado */
+}
+
+/* Ajustar posición del botón de cierre (X) */
+.sidebar-close-btn {
+    display: none !important; /* En desktop no necesitamos botón de cierre visible */
+}
+
+/* --- ESTILOS ESPECÍFICOS PARA HOVER (EXPANDIR) --- */
+.sidebar.active:hover {
+    width: 275px !important; /* Ancho completo al expandir */
+}
+
+.sidebar.active:hover .sidebar-logo {
+    justify-content: flex-start !important;
+    padding-left: 1.5rem !important;
+}
+
+.sidebar.active:hover .sidebar-menu li a {
+    justify-content: flex-start !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+
+.sidebar.active:hover .sidebar-menu li a .menu-icon {
+    margin-right: 0.75rem !important;
+    font-size: 1.25rem !important; /* Tamaño normal al expandir */
+}
+

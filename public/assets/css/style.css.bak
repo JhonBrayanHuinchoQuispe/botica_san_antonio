@@ -1,0 +1,60 @@
+
+/* === Mobile Responsiveness Fixes === */
+
+/* Overlay for mobile sidebar */
+body.overlay-active::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 29; /* Just below sidebar (z-index 30) */
+    backdrop-filter: blur(2px);
+    transition: all 0.3s ease-in-out;
+}
+
+/* Ensure dashboard doesn't shift on mobile when active class is present */
+@media (max-width: 1199px) {
+    .dashboard-main.active {
+        margin-inline-start: 0px !important;
+    }
+    
+    /* Ensure sidebar is properly hidden/shown on mobile */
+    .sidebar {
+        width: 250px !important;
+        inset-inline-start: -105%;
+        transition: inset-inline-start 0.3s ease;
+    }
+    
+    .sidebar.active,
+    .sidebar.sidebar-open {
+        inset-inline-start: 0px !important;
+    }
+}
+
+/* Table Responsive Fixes */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+/* Ensure tables take full width */
+.users-table, .roles-table {
+    width: 100%;
+    min-width: 800px; /* Ensure table doesn't squash too much */
+}
+
+/* Adjust card grid for very small screens */
+@media (max-width: 576px) {
+    .dashboard-main-body {
+        padding: 0.75rem; /* Reduce padding on small screens */
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+}

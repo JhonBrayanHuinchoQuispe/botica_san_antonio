@@ -1,0 +1,234 @@
+/* --- Estilos para el Modal de Editar Producto (Verde, acentos solo en header, íconos y botón) --- */
+
+#modalEditar .modal-container {
+    background-color: #f8fafc;
+    max-width: 800px;
+    border-radius: 12px;
+}
+
+#modalEditar .modal-header {
+    background: linear-gradient(135deg, #43a047, #388e3c);
+    color: white;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#modalEditar .modal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+#modalEditar .modal-close-edit {
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    color: #fff;
+    background: transparent;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+}
+#modalEditar .modal-close-edit:hover {
+    opacity: 1;
+    color: #b9f6ca;
+}
+
+#modalEditar .modal-content {
+    padding: 1.5rem 2rem;
+    background: #f8fafc;
+}
+
+#formEditarProducto .form-section {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px 0 rgba(67, 160, 71, 0.05);
+}
+
+#formEditarProducto .form-section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+#formEditarProducto .form-section-title iconify-icon {
+    color: #43a047;
+}
+
+#formEditarProducto .input-group {
+    position: relative;
+}
+
+#formEditarProducto .input-group iconify-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 1.2rem;
+}
+
+#formEditarProducto .input-group input,
+#formEditarProducto .input-group select {
+    padding-left: 40px;
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#formEditarProducto .input-group input:focus,
+#formEditarProducto .input-group select:focus {
+    border-color: #43a047;
+    box-shadow: 0 0 0 2px rgba(67, 160, 71, 0.15);
+    outline: none;
+}
+
+#formEditarProducto .input-group select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: #fff;
+    background-image: none;
+}
+
+#formEditarProducto .input-group select:focus {
+    outline: none;
+}
+
+#formEditarProducto .input-group select::-ms-expand {
+    display: none;
+}
+
+#formEditarProducto .input-group select {
+    position: relative;
+    z-index: 2;
+}
+
+#formEditarProducto .input-group.select-group {
+    position: relative;
+}
+#formEditarProducto .input-group.select-group select {
+    padding-right: 40px;
+}
+#formEditarProducto .input-group.select-group::after {
+    content: '';
+    display: block;
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+    background: url('data:image/svg+xml;utf8,<svg fill="none" stroke="%239ca3af" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>') no-repeat center/16px 16px;
+    transform: translateY(-50%);
+    z-index: 3;
+}
+#formEditarProducto .input-group.select-group iconify-icon {
+    left: 12px;
+    color: #9ca3af;
+    z-index: 4;
+}
+
+/* Estilos para el campo de subida de imagen */
+#modalEditar .image-upload-wrapper {
+    position: relative;
+    border: 2px dashed #e5e7eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: border-color 0.2s;
+    background-color: #f8fafc;
+}
+#modalEditar .image-upload-wrapper:hover {
+    border-color: #43a047;
+}
+#modalEditar .image-upload-wrapper .upload-icon {
+    font-size: 2.5rem;
+    color: #388e3c;
+    margin-bottom: 0.5rem;
+}
+#modalEditar .image-upload-wrapper .upload-text {
+    color: #388e3c;
+    font-weight: 500;
+}
+#modalEditar .image-upload-wrapper .upload-hint {
+    font-size: 0.875rem;
+    color: #81c784;
+}
+#modalEditar .image-upload-wrapper input[type="file"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+#edit-preview-container {
+    margin-top: 1rem;
+    text-align: center;
+}
+#edit-preview-image {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 4px 6px -1px rgba(67, 160, 71, 0.1);
+}
+
+/* Botones */
+#modalEditar .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+#modalEditar .form-actions .btn-cancel-edit {
+    background-color: #ffffff;
+    color: #388e3c;
+    border: 1px solid #e5e7eb;
+}
+#modalEditar .form-actions .btn-cancel-edit:hover {
+    background-color: #f8fafc;
+}
+#modalEditar .form-actions .btn-save-edit {
+    background-color: #43a047;
+    color: white;
+}
+#modalEditar .form-actions .btn-save-edit:hover {
+    background-color: #388e3c;
+}
+
+/* Scrollbar personalizado */
+#modalEditar .modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+#modalEditar .modal-content::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 4px;
+}
+#modalEditar .modal-content::-webkit-scrollbar-thumb:hover {
+    background: #43a047;
+}
+
+@media (max-width: 768px) {
+    #modalEditar .modal-content {
+        padding: 1rem 0.5rem;
+    }
+    #formEditarProducto .form-section {
+        padding: 1rem 0.5rem;
+    }
+}

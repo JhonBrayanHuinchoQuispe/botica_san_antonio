@@ -1,0 +1,693 @@
+/* ===================================
+   VISTA PREVIA BOLETA - ESTILOS
+   =================================== */
+
+/* Variables específicas */
+:root {
+    --vista-primary: #e53e3e;
+    --vista-primary-dark: #c53030;
+    --vista-success: #28a745;
+    --vista-secondary: #6c757d;
+    --vista-info: #17a2b8;
+    
+    --vista-bg-primary: #ffffff;
+    --vista-bg-light: #f8f9fa;
+    --vista-bg-secondary: #e9ecef;
+    
+    --vista-text-primary: #212529;
+    --vista-text-secondary: #6c757d;
+    --vista-text-light: #ffffff;
+    --vista-text-muted: #868e96;
+    
+    --vista-border: #dee2e6;
+    --vista-border-light: #e9ecef;
+    
+    --vista-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    --vista-shadow-lg: 0 4px 8px rgba(0,0,0,0.15);
+    --vista-shadow-xl: 0 8px 16px rgba(0,0,0,0.2);
+    
+    --vista-radius: 8px;
+    --vista-radius-lg: 12px;
+    
+    --vista-transition: all 0.3s ease;
+}
+
+/* Contenedor Principal */
+.pos-vista-previa-container {
+    min-height: 100vh;
+    background: var(--vista-bg-light);
+    padding: 2rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Header de la Vista Previa */
+.pos-vista-previa-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem 2rem;
+    background: var(--vista-bg-primary);
+    border-radius: var(--vista-radius-lg);
+    box-shadow: var(--vista-shadow);
+}
+
+.pos-vista-previa-title {
+    text-align: center;
+    flex: 1;
+}
+
+.pos-vista-previa-title h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--vista-text-primary);
+    margin: 0 0 0.25rem 0;
+}
+
+.pos-numero-venta {
+    font-size: 1rem;
+    color: var(--vista-primary);
+    font-weight: 600;
+}
+
+.pos-vista-previa-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Botones */
+.pos-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    border-radius: var(--vista-radius);
+    cursor: pointer;
+    transition: var(--vista-transition);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.pos-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--vista-shadow-lg);
+}
+
+.pos-btn-primary {
+    background: var(--vista-primary);
+    color: var(--vista-text-light);
+}
+
+.pos-btn-primary:hover {
+    background: var(--vista-primary-dark);
+}
+
+.pos-btn-secondary {
+    background: var(--vista-secondary);
+    color: var(--vista-text-light);
+}
+
+.pos-btn-secondary:hover {
+    background: #5a6268;
+}
+
+.pos-btn-success {
+    background: var(--vista-success);
+    color: var(--vista-text-light);
+}
+
+.pos-btn-success:hover {
+    background: #218838;
+}
+
+.pos-btn-large {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+/* Contenedor de la Boleta */
+.pos-boleta-container {
+    max-width: 800px;
+    margin: 0 auto 2rem auto;
+    background: var(--vista-bg-primary);
+    border-radius: var(--vista-radius-lg);
+    box-shadow: var(--vista-shadow-xl);
+    overflow: hidden;
+}
+
+.pos-boleta {
+    padding: 2rem;
+    color: var(--vista-text-primary);
+    line-height: 1.6;
+}
+
+/* Header de la Boleta */
+.pos-boleta-header {
+    display: grid;
+    grid-template-columns: 120px 1fr 150px;
+    gap: 1.5rem;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--vista-border);
+}
+
+.pos-empresa-logo img {
+    width: 100px;
+    height: auto;
+    max-height: 100px;
+    object-fit: contain;
+}
+
+.pos-empresa-info {
+    text-align: center;
+}
+
+.pos-empresa-info h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--vista-primary);
+    margin: 0 0 0.5rem 0;
+    letter-spacing: 1px;
+}
+
+.pos-empresa-info p {
+    font-size: 0.875rem;
+    color: var(--vista-text-secondary);
+    margin: 0.25rem 0;
+    font-weight: 500;
+}
+
+.pos-comprobante-tipo {
+    text-align: center;
+}
+
+.pos-comprobante-box {
+    border: 2px solid var(--vista-primary);
+    border-radius: var(--vista-radius);
+    padding: 1rem;
+    background: rgba(229, 62, 62, 0.05);
+}
+
+.pos-comprobante-box h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--vista-primary);
+    margin: 0 0 0.5rem 0;
+}
+
+.pos-comprobante-box p {
+    font-size: 0.875rem;
+    color: var(--vista-text-secondary);
+    margin: 0;
+    font-weight: 600;
+}
+
+/* Datos del Cliente */
+.pos-cliente-datos {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--vista-bg-light);
+    border-radius: var(--vista-radius);
+    border-left: 4px solid var(--vista-primary);
+}
+
+.pos-cliente-datos h4 {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--vista-primary);
+    margin: 0 0 0.75rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pos-cliente-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.pos-cliente-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pos-label {
+    font-weight: 600;
+    color: var(--vista-text-secondary);
+    font-size: 0.875rem;
+}
+
+.pos-value {
+    font-weight: 600;
+    color: var(--vista-text-primary);
+    font-size: 0.875rem;
+}
+
+/* Información de la Venta */
+.pos-venta-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--vista-bg-light);
+    border-radius: var(--vista-radius);
+}
+
+.pos-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+}
+
+/* Detalle de Productos */
+.pos-productos-detalle {
+    margin-bottom: 1.5rem;
+}
+
+.pos-productos-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.pos-productos-table thead {
+    background: var(--vista-bg-secondary);
+}
+
+.pos-productos-table th {
+    padding: 0.75rem 0.5rem;
+    text-align: left;
+    font-weight: 700;
+    color: var(--vista-text-primary);
+    border-bottom: 2px solid var(--vista-border);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pos-productos-table th:last-child,
+.pos-productos-table th:nth-child(3) {
+    text-align: right;
+}
+
+.pos-productos-table td {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid var(--vista-border-light);
+    vertical-align: top;
+}
+
+.pos-productos-table tr:hover {
+    background: rgba(229, 62, 62, 0.02);
+}
+
+.pos-producto-desc strong {
+    color: var(--vista-text-primary);
+    font-weight: 600;
+}
+
+.pos-producto-desc small {
+    color: var(--vista-text-muted);
+    font-style: italic;
+}
+
+.pos-text-center {
+    text-align: center;
+}
+
+.pos-text-right {
+    text-align: right;
+    font-weight: 600;
+}
+
+/* Totales */
+.pos-totales-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--vista-bg-light);
+    border-radius: var(--vista-radius);
+}
+
+.pos-totales-table {
+    max-width: 300px;
+    margin-left: auto;
+}
+
+.pos-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--vista-border-light);
+}
+
+.pos-total-row:last-child {
+    border-bottom: none;
+}
+
+.pos-total-final {
+    border-top: 2px solid var(--vista-border);
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.pos-total-label {
+    font-weight: 600;
+    color: var(--vista-text-secondary);
+}
+
+.pos-total-value {
+    font-weight: 700;
+    color: var(--vista-text-primary);
+}
+
+.pos-total-final .pos-total-label,
+.pos-total-final .pos-total-value {
+    color: var(--vista-primary);
+    font-size: 1.125rem;
+}
+
+/* Información de Pago */
+.pos-pago-info {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(40, 167, 69, 0.05);
+    border-radius: var(--vista-radius);
+    border-left: 4px solid var(--vista-success);
+}
+
+.pos-pago-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.pos-pago-row:last-child {
+    margin-bottom: 0;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--vista-success);
+}
+
+/* Pie de Página de la Boleta */
+.pos-boleta-footer {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--vista-border);
+    text-align: center;
+}
+
+.pos-footer-message {
+    margin-bottom: 1rem;
+}
+
+.pos-footer-message p {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--vista-primary);
+    margin: 0.25rem 0;
+}
+
+.pos-footer-legal {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: var(--vista-bg-light);
+    border-radius: var(--vista-radius);
+}
+
+.pos-footer-legal p {
+    font-size: 0.75rem;
+    color: var(--vista-text-muted);
+    margin: 0.25rem 0;
+    font-style: italic;
+}
+
+.pos-footer-sistema {
+    border-top: 1px solid var(--vista-border-light);
+    padding-top: 0.75rem;
+}
+
+.pos-footer-sistema p {
+    font-size: 0.75rem;
+    color: var(--vista-text-muted);
+    margin: 0.25rem 0;
+}
+
+/* Botones de Acción Inferiores */
+.pos-vista-previa-bottom-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Efectos de Hover para la Boleta */
+.pos-boleta-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    transition: var(--vista-transition);
+}
+
+/* Estilos para Impresión */
+@media print {
+    .pos-vista-previa-container {
+        padding: 0;
+        background: white;
+    }
+    
+    .pos-vista-previa-header,
+    .pos-vista-previa-bottom-actions {
+        display: none;
+    }
+    
+    .pos-boleta-container {
+        box-shadow: none;
+        border-radius: 0;
+        margin: 0;
+    }
+    
+    .pos-boleta {
+        padding: 1rem;
+    }
+    
+    .pos-boleta-header {
+        grid-template-columns: 80px 1fr 120px;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+    }
+    
+    .pos-empresa-logo img {
+        width: 70px;
+        max-height: 70px;
+    }
+    
+    .pos-empresa-info h2 {
+        font-size: 1.25rem;
+    }
+    
+    .pos-empresa-info p {
+        font-size: 0.75rem;
+    }
+    
+    .pos-comprobante-box {
+        padding: 0.75rem;
+    }
+    
+    .pos-productos-table {
+        font-size: 0.75rem;
+    }
+    
+    .pos-productos-table th,
+    .pos-productos-table td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .pos-cliente-datos,
+    .pos-venta-info,
+    .pos-totales-section,
+    .pos-pago-info {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .pos-boleta-footer {
+        margin-top: 1rem;
+        padding-top: 1rem;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .pos-vista-previa-container {
+        padding: 1rem;
+    }
+    
+    .pos-vista-previa-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .pos-boleta {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .pos-vista-previa-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .pos-vista-previa-actions {
+        justify-content: center;
+    }
+    
+    .pos-boleta-header {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .pos-empresa-logo {
+        justify-self: center;
+    }
+    
+    .pos-venta-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .pos-vista-previa-bottom-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .pos-btn-large {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pos-vista-previa-container {
+        padding: 0.5rem;
+    }
+    
+    .pos-vista-previa-header {
+        padding: 1rem;
+    }
+    
+    .pos-vista-previa-title h1 {
+        font-size: 1.25rem;
+    }
+    
+    .pos-boleta {
+        padding: 1rem;
+    }
+    
+    .pos-empresa-info h2 {
+        font-size: 1.25rem;
+    }
+    
+    .pos-productos-table {
+        font-size: 0.75rem;
+    }
+    
+    .pos-productos-table th,
+    .pos-productos-table td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .pos-totales-table {
+        max-width: none;
+    }
+    
+    .pos-btn {
+        padding: 0.675rem 1rem;
+        font-size: 0.8125rem;
+    }
+    
+    .pos-btn-large {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9375rem;
+    }
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pos-boleta-container {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.pos-vista-previa-header {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+.pos-vista-previa-bottom-actions {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+/* Mejoras de Accesibilidad */
+.pos-btn:focus {
+    outline: 2px solid var(--vista-primary);
+    outline-offset: 2px;
+}
+
+/* Estados de Carga */
+.pos-btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.pos-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Utilidades */
+.pos-mb-0 { margin-bottom: 0; }
+.pos-mb-1 { margin-bottom: 0.25rem; }
+.pos-mb-2 { margin-bottom: 0.5rem; }
+.pos-mb-3 { margin-bottom: 0.75rem; }
+.pos-mb-4 { margin-bottom: 1rem; }
+
+.pos-font-bold { font-weight: 700; }
+.pos-font-semibold { font-weight: 600; }
+.pos-font-medium { font-weight: 500; } 

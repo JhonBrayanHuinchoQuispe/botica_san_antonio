@@ -1,0 +1,87 @@
+/* Estilos personalizados */
+.dashboard-card {
+    transition: transform 0.2s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+}
+
+.stats-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+/* SweetAlert2 siempre por delante del modal */
+.swal2-container {
+    z-index: 100000 !important;
+}
+
+/* Evitar que SweetAlert2 deje el scroll deshabilitado en el documento */
+html.swal2-shown, body.swal2-shown {
+    overflow: auto !important;
+}
+
+/* Fila de RUC: input dominante y botón compacto */
+.modal-profesional .ruc-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: nowrap;
+}
+.modal-profesional .ruc-row .campo-input {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.modal-profesional .btn-buscar-ruc {
+    width: 70px !important;
+    min-width: 70px !important;
+    height: 42px;
+    padding: 0 !important;
+    background: #2563eb;
+    flex: 0 0 70px;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.modal-profesional .btn-buscar-ruc.loading {
+    opacity: 0.9;
+}
+.modal-profesional .btn-buscar-ruc iconify-icon {
+    color: #fff;
+    font-size: 18px;
+}
+/* Mensajes de error bajo inputs */
+.modal-profesional .input-error {
+    margin-top: 6px;
+    color: #dc2626;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.modal-profesional .input-error .error-icon iconify-icon {
+    color: #dc2626;
+    font-size: 16px;
+}
+@media (max-width: 480px) {
+    .modal-profesional .btn-buscar-ruc {
+        width: 64px !important;
+        min-width: 64px !important;
+        height: 40px;
+    }
+    .modal-profesional .ruc-row {
+        gap: 8px;
+    }
+}

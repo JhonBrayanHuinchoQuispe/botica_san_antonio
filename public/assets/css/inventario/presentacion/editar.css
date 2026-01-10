@@ -1,0 +1,199 @@
+/* El overlay es compartido, no es necesario repetirlo */
+
+#modalEditarPresentacion .modal-presentacion-container {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(40,50,80,0.15);
+    padding: 2rem 2.2rem;
+    width: 100%;
+    max-width: 450px;
+    margin: 1rem;
+    font-family: 'Inter', sans-serif;
+}
+.modal-presentacion-header-edit {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #16a34a; /* Verde */
+    margin-bottom: 1.5rem;
+}
+.modal-presentacion-header-edit iconify-icon {
+    font-size: 1.5rem;
+}
+
+#modalEditarPresentacion .input-modal-presentacion:focus {
+    border-color: #22c55e; /* Verde */
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+}
+
+#modalEditarPresentacion .btn-modal-presentacion.btn-cancelar-edit {
+    background: #f3f4f6;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+}
+#modalEditarPresentacion .btn-modal-presentacion.btn-cancelar-edit:hover {
+    background: #e5e7eb;
+}
+
+#modalEditarPresentacion .btn-modal-presentacion.btn-guardar-edit {
+    background: #22c55e;
+    color: #fff;
+}
+#modalEditarPresentacion .btn-modal-presentacion.btn-guardar-edit:hover {
+    background: #16a34a;
+}
+#modalEditarPresentacion .btn-modal-presentacion.btn-guardar-edit:disabled {
+    background: #86efac;
+    cursor: not-allowed;
+}
+
+#modalEditarPresentacion .input-modal-presentacion {
+    width: 100%;
+    border: 1px solid #d1d5db; /* Gris */
+    border-radius: 10px;
+    background: #f9fafb;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+}
+
+#modalEditarPresentacion .input-with-icon {
+    padding-left: 3rem !important; /* Ajuste para el icono */
+}
+
+#modalEditarPresentacion .input-modal-presentacion:focus {
+    border-color: #16a34a; /* Verde al enfocar */
+    box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+}
+
+.modal-presentacion-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem; /* Espacio entre botones */
+}
+
+/* Estilos para el nuevo diseño de filas - Modal Editar */
+#modalEditarPresentacion .presentacion-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+#modalEditarPresentacion .form-row {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+#modalEditarPresentacion .form-field {
+    display: flex;
+    flex-direction: column;
+}
+
+#modalEditarPresentacion .form-field.flex-1 {
+    flex: 1;
+}
+
+#modalEditarPresentacion .form-field.flex-2 {
+    flex: 2;
+}
+
+#modalEditarPresentacion .form-field.toggle-field {
+    justify-content: center;
+    align-items: center;
+    padding-top: 1.8rem;
+}
+
+#modalEditarPresentacion .form-field.toggle-field label:first-child {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+#modalEditarPresentacion .auto-calc-section {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+#modalEditarPresentacion .auto-calc-section .form-field.toggle-field {
+    padding-top: 1.5rem;
+}
+
+#modalEditarPresentacion .hint {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+
+#modalEditarPresentacion .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+    margin: 0;
+}
+
+#modalEditarPresentacion .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+#modalEditarPresentacion .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+#modalEditarPresentacion .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+#modalEditarPresentacion input:checked + .toggle-slider {
+    background-color: #22c55e;
+}
+
+#modalEditarPresentacion input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+@media (max-width: 600px) {
+    #modalEditarPresentacion .form-row {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    #modalEditarPresentacion .form-field.toggle-field {
+        padding-top: 0;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    #modalEditarPresentacion .auto-calc-section {
+        padding: 0.8rem;
+    }
+}

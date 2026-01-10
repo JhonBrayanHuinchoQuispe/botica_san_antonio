@@ -1,0 +1,24 @@
+/* Estilos optimizados de la aplicación */
+:root{--primary-color:#667eea;--secondary-color:#764ba2;--bg-color:#f8f9fa;--text-color:#212529;--border-color:rgba(0,0,0,.125);--shadow:0 .125rem .25rem rgba(0,0,0,.075)}
+*{box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-color:var(--bg-color);color:var(--text-color);margin:0;padding:0;line-height:1.5}
+.container{max-width:1200px;margin:0 auto;padding:0 15px}
+.navbar-brand{font-weight:700;color:var(--primary-color)}
+.card{box-shadow:var(--shadow);border:1px solid var(--border-color);border-radius:.375rem;background:#fff;margin-bottom:1rem}
+.card-header{padding:.75rem 1rem;background-color:#f8f9fa;border-bottom:1px solid var(--border-color);font-weight:600}
+.card-body{padding:1rem}
+.btn{display:inline-block;padding:.375rem .75rem;margin-bottom:0;font-size:.875rem;font-weight:400;line-height:1.5;text-align:center;text-decoration:none;vertical-align:middle;cursor:pointer;border:1px solid transparent;border-radius:.375rem;transition:all .15s ease-in-out}
+.btn-primary{color:#fff;background:linear-gradient(135deg,var(--primary-color) 0%,var(--secondary-color) 100%);border:none}
+.btn-primary:hover{background:linear-gradient(135deg,#5a6fd8 0%,#6a4190 100%);transform:translateY(-1px)}
+.table{width:100%;margin-bottom:0;border-collapse:collapse}
+.table th,.table td{padding:.75rem;vertical-align:top;border-top:1px solid #dee2e6}
+.table thead th{vertical-align:bottom;border-bottom:2px solid #dee2e6;font-weight:600}
+.loading{opacity:.6;pointer-events:none}
+.dashboard-card{transition:transform .2s ease}
+.dashboard-card:hover{transform:translateY(-2px)}
+.stats-card{background:linear-gradient(135deg,var(--primary-color) 0%,var(--secondary-color) 100%);color:#fff;padding:1.5rem;border-radius:.5rem}
+.form-control{display:block;width:100%;padding:.375rem .75rem;font-size:.875rem;line-height:1.5;color:#495057;background-color:#fff;border:1px solid #ced4da;border-radius:.375rem;transition:border-color .15s ease-in-out,box-shadow .15s ease-in-out}
+.form-control:focus{color:#495057;background-color:#fff;border-color:#80bdff;outline:0;box-shadow:0 0 0 .2rem rgba(0,123,255,.25)}
+@media (max-width:768px){.table-responsive{font-size:.875rem;overflow-x:auto}.container{padding:0 10px}.card{margin-bottom:.5rem}}
+.spinner-border{display:inline-block;width:1rem;height:1rem;vertical-align:text-bottom;border:.125em solid currentColor;border-right-color:transparent;border-radius:50%;animation:spinner-border .75s linear infinite}
+@keyframes spinner-border{to{transform:rotate(360deg)}}

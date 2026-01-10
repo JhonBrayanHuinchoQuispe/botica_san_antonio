@@ -1,0 +1,51 @@
+/* Estilos personalizados para SweetAlert2 */
+.swal2-confirm-custom {
+    background-color: #dc2626 !important;
+    color: white !important;
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 500 !important;
+    border: none !important;
+    border-radius: 0.375rem !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.swal2-confirm-custom:hover {
+    background-color: #b91c1c !important;
+    transform: translateY(-1px) !important;
+}
+
+.swal2-cancel-custom {
+    background-color: #F3F4F6 !important;
+    color: #374151 !important;
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 500 !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 0.375rem !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.swal2-cancel-custom:hover {
+    background-color: #E5E7EB !important;
+    color: #111827 !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Mejoras adicionales para el modal */
+.swal2-popup {
+    padding: 2rem !important;
+}
+
+.swal2-title {
+    color: #111827 !important;
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+}
+
+.swal2-html-container {
+    margin-top: 1rem !important;
+}
+
+.swal2-actions {
+    margin-top: 2rem !important;
+    gap: 1rem !important;
+}

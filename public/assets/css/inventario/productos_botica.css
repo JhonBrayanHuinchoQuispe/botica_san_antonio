@@ -1,0 +1,188 @@
+/* Estilos compactos para Productos Botica */
+.card-body-botica { padding: 1rem 1.25rem; background: #fff; border-radius: 12px; box-shadow: 0 6px 24px rgba(60,60,100,0.08); }
+.botica-header .registros-label { color:#64748b; font-size:.9rem; margin-right:.35rem; }
+.botica-search { display:flex; align-items:center; gap:.5rem; border:1px solid #E9EDF5; border-radius:12px; padding:0 .85rem; height:44px; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,0.035); }
+.botica-search .search-icon { color:#64748b; font-size:18px; }
+.botica-search .search-input { flex:1; border:none; outline:none; background:transparent; font-size:14px; }
+.search-clear { display:none; border:none; background:transparent; color:#9ca3af; cursor:pointer; }
+.registros-select { border:1px solid #E9EDF5; border-radius:12px; background:#fff; padding:.25rem .75rem; min-height:44px; box-shadow:0 1px 2px rgba(0,0,0,0.035); }
+.btn-ir-agregar { background:#3b82f6 !important; color:#fff !important; border-radius:10px; padding:.65rem 1rem; font-weight:600; box-shadow:0 6px 14px rgba(59,130,246,.18); opacity:1 !important; visibility:visible !important; transition:background .2s ease, transform .15s ease; }
+.btn-ir-agregar:hover { background:#2563eb !important; transform:translateY(-1px); }
+/* Botones de acción en la tabla */
+.btn-view, .btn-edit, .btn-delete { width:32px; height:32px; border-radius:9999px; display:inline-flex; align-items:center; justify-content:center; margin:0 2px; }
+.btn-view { background:#eff6ff; color:#2563eb; }
+.btn-edit { background:#dcfce7; color:#16a34a; }
+.btn-delete { background:#fee2e2; color:#dc2626; }
+.btn-view:hover { background:#dbeafe; }
+.btn-edit:hover { background:#bbf7d0; }
+.btn-delete:hover { background:#fecaca; }
+.img-loading { background:#f1f5f9; }
+
+.tabla-productos-botica { width:100%; border-collapse: separate; border-spacing:0; background:#fff; border-radius:12px; border:1px solid #e5e7eb; }
+.tabla-productos-botica { min-width: 1200px; }
+.tabla-productos-botica th, .tabla-productos-botica td { vertical-align: middle; }
+.tabla-productos-botica thead th { background:#f87171; color:#fff; font-weight:700; padding:1rem .7rem; text-align:left; }
+.tabla-productos-botica tbody td { padding:1rem .7rem; color:#374151; vertical-align:middle; }
+.tabla-productos-botica tbody tr { border-bottom:1px solid #f1f5f9; }
+
+/* Badges de estado – mayor altura y ancho (forzado) */
+.estado-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: .5rem !important;
+  padding: .55rem 1.25rem !important; /* alto y ancho visibles */
+  border-radius: 9999px !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  line-height: 1 !important;
+  border: 1px solid transparent !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,.02) !important;
+}
+.tabla-productos-botica .estado-badge {
+  padding: .55rem 1.25rem !important;
+  font-size: 1rem !important;
+}
+/* Colores alineados al módulo original */
+.estado-normal { background:#e7f5ec !important; color:#166534 !important; border-color:#c9e9d6 !important; }
+.estado-bajo-stock { background:#fff1b8 !important; color:#a16207 !important; border-color:#f7d768 !important; }
+.estado-por-vencer { background:#ffe0a8 !important; color:#92400e !important; border-color:#f7c66a !important; }
+.estado-vencido { background:#ffd9d9 !important; color:#b91c1c !important; border-color:#f5b6b6 !important; }
+.estado-agotado { background:#eef2f7 !important; color:#374151 !important; border-color:#d1d5db !important; }
+
+.ubicacion-badge {
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:.45rem !important;
+  padding:.55rem 1rem !important; /* altura igual a estado, ancho moderado */
+  border-radius:9999px !important;
+  font-size:.95rem !important;
+  line-height:1 !important;
+  box-shadow:inset 0 1px 0 rgba(0,0,0,.02) !important;
+}
+.ubicacion-badge .ubicacion-icon {
+  width:28px !important;
+  height:28px !important;
+  border-radius:9999px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+.ubicacion-badge .ubicacion-icon iconify-icon { font-size:18px !important; }
+.ubicacion-badge .ubicacion-info { display:flex; flex-direction:column; line-height:1; }
+.ubicacion-badge .ubicacion-texto { font-weight:600; color:#e2e8f0; }
+.ubicacion-badge .ubicacion-subtexto { font-size:.75rem; color:#cbd5e1; }
+.ubicacion-badge.multiple { background:#3b82f6 !important; color:#fff !important; }
+.ubicacion-badge.ubicado { background:#1e293b !important; color:#e2e8f0 !important; }
+/* Sin ubicar en gris suave (plomo claro) */
+.ubicacion-badge.sin-ubicar { background:#9ca3af !important; color:#111827 !important; border:1px solid #6b7280 !important; }
+.ubicacion-badge.sin-ubicar .ubicacion-icon { background:#6b7280 !important; color:#ffffff !important; }
+.ubicacion-badge:hover { filter:brightness(1.05); }
+
+/* Estado tooltip bubble */
+.estado-badge { position: relative; }
+.estado-badge[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: -34px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #374151; /* slate-700 */
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  text-align: left;
+  line-height: 1.4;
+  box-shadow: 0 8px 18px rgba(0,0,0,.22);
+  font-size: .85rem;
+  width: max-content;
+  max-width: 250px;
+  z-index: 100;
+  }
+.estado-badge[data-tooltip]:hover::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #374151 transparent transparent transparent;
+}
+
+.modal-botica-overlay { position:fixed; inset:0; background:rgba(30,40,60,.25); backdrop-filter:blur(2px); display:none; align-items:center; justify-content:center; z-index:1000; }
+.modal-botica-container { background:#fff; border-radius:12px; box-shadow:0 10px 24px rgba(0,0,0,.1); width:90%; max-width:700px; }
+.modal-botica-header { display:flex; align-items:center; gap:.5rem; padding:1rem; border-bottom:1px solid #e5e7eb; }
+.modal-botica-body { padding:1rem; }
+.detalle-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:.6rem; }
+.modal-botica-actions { display:flex; justify-content:flex-end; gap:.5rem; padding:1rem; border-top:1px solid #e5e7eb; }
+.btn-modal-cerrar { background:#f3f4f6; color:#374151; border:1px solid #e5e7eb; border-radius:10px; padding:.6rem .9rem; font-weight:600; }
+.acciones-cell { display:flex; align-items:center; justify-content:center; gap:.3rem; flex-wrap: nowrap; min-width: 120px; padding:1rem .7rem; vertical-align: middle; height: 100%; position: relative; top: 6px; }
+.btn-ir-agregar { cursor:pointer; display:inline-flex; align-items:center; gap:.5rem; opacity:1; }
+.modal-overlay { background: rgba(0,0,0,.5); }
+
+/* Price cell styling */
+.price-cell .pv { color:#1e40af; font-weight:700; } /* indigo-800 */
+.price-cell .pc { color:#6b7280; } /* slate-500 */
+.price-cell .price-icon { color:inherit; font-size:16px; margin-right:6px; vertical-align:middle; }
+
+/* Chips estandarizados y hover */
+.chip { display:inline-flex; align-items:center; padding:.25rem .6rem; border-radius:9999px; font-weight:600; font-size:.85rem; border:1px solid transparent; transition:filter .15s ease, transform .15s ease; }
+.chip:hover { filter:brightness(1.03); transform: translateY(-1px); }
+
+/* Zebra rows y hover */
+.tabla-productos-botica tbody tr:nth-child(odd) { background:#fbfbfc; }
+.tabla-productos-botica tbody tr:hover { background:#f9fafb; }
+
+/* --- Export dropdown styles --- */
+.export-dropdown-container { position: relative; display:inline-flex; align-items:center; }
+.btn-exportar-dropdown { display:inline-flex; align-items:center; gap:.5rem; background:#3b82f6 !important; color:#fff !important; border:1px solid #E9EDF5; border-radius:12px; padding:0 1rem; height:44px; min-height:44px; font-weight:600; box-shadow:0 6px 14px rgba(59,130,246,.18); transition:background .2s ease, transform .15s ease; }
+.btn-exportar-dropdown:hover { background:#2563eb !important; transform: translateY(-1px); }
+.btn-exportar-dropdown.active { background:#1d4ed8 !important; }
+
+.exportar-dropdown-menu { position:absolute; top:52px; left:0; background:#fff; border:1px solid #e5e7eb; border-radius:14px; box-shadow:0 12px 30px rgba(0,0,0,.12); padding:.5rem; display:flex; flex-direction:column; gap:.4rem; min-width:220px; z-index:50; }
+.exportar-dropdown-menu.hidden { display:none; }
+.exportar-option { display:flex; align-items:center; gap:.55rem; padding:.5rem .75rem; border-radius:12px; font-weight:600; cursor:pointer; background:#ffffff; border:1px solid #e5e7eb; color:#374151; min-height:38px; }
+.exportar-option:hover { background:#f9fafb; border-color:#d1d5db; }
+.exportar-option::before { content:""; width:4px; height:22px; border-radius:9999px; display:inline-block; margin-right:.4rem; }
+.exportar-option.excel::before { background:#16a34a; }
+.exportar-option.pdf::before { background:#dc2626; }
+.exportar-option iconify-icon { font-size:16px; color:inherit; }
+/* Horizontal table scroll styling */
+.table-scroll { overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; padding-bottom: 8px; }
+.table-scroll::-webkit-scrollbar { height:8px; }
+.table-scroll::-webkit-scrollbar-thumb { background:#6b7280; border-radius:9999px; }
+.table-scroll::-webkit-scrollbar-track { background:#e5e7eb; border-radius:9999px; }
+.rotation-cell .rot-wrapper { display:flex; flex-direction:column; gap:.25rem; align-items:flex-start; }
+.rotation-cell .rot-badge { display:inline-flex; align-items:center; gap:.45rem; padding:.45rem .9rem; border-radius:9999px; font-weight:700; font-size:.95rem; box-shadow:0 1px 2px rgba(0,0,0,.05); border:1px solid transparent; }
+.rotation-cell .rot-badge.high { background:#e7f5ec; color:#166534; border-color:#c9e9d6; }
+.rotation-cell .rot-badge.medium { background:#fff7ed; color:#92400e; border-color:#fed7aa; }
+.rotation-cell .rot-badge.low { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
+.rotation-cell .rot-icon iconify-icon { font-size:18px; color:#1e40af; }
+.rotation-cell .rot-units { letter-spacing:.01em; }
+.rotation-cell .rot-tier-chip { font-size:.75rem; font-weight:700; padding:.2rem .6rem; border-radius:9999px; border:1px solid transparent; }
+.rotation-cell .rot-tier-chip.high { background:#dcfce7; color:#065f46; border-color:#86efac; }
+.rotation-cell .rot-tier-chip.medium { background:#fef3c7; color:#92400e; border-color:#fcd34d; }
+.rotation-cell .rot-tier-chip.low { background:#e5e7eb; color:#374151; border-color:#d1d5db; }
+
+/* Stock chip improvements */
+.stock-chip { display:inline-flex; align-items:center; gap:.45rem; padding:.35rem .7rem; border-radius:9999px; font-weight:700; font-size:.95rem; border:1px solid transparent; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+.stock-chip .stock-icon iconify-icon { font-size:18px; }
+.stock-chip .stock-units { letter-spacing:.01em; }
+.stock-chip.high { background:#e7f5ec; color:#166534; border-color:#c9e9d6; }
+.stock-chip.medium { background:#fff7ed; color:#92400e; border-color:#fed7aa; }
+.stock-chip.low { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
+/* --- Hover para Badges de Lotes Múltiples --- */
+.lote-badge.multiple {
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+  will-change: transform;
+}
+.lote-badge.multiple:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); /* Sombra azul suave */
+  border-color: #bfdbfe; /* Azul muy claro */
+}
+.lote-badge.multiple:active {
+  transform: translateY(0) scale(0.98);
+}

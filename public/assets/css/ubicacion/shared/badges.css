@@ -1,0 +1,181 @@
+/* --- ESTILOS DE BADGES Y ESTADOS --- */
+
+/* Estados básicos */
+.estado-badge {
+    padding: 0.3rem 0.75rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.estado-badge.ok {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #15803d;
+}
+
+.estado-badge.alerta {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+}
+
+.estado-badge.peligro {
+    background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+    color: #dc2626;
+}
+
+/* Badge de ubicación */
+.ubicacion-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);
+    color: #0277bd;
+    border-radius: 0.4rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+    width: fit-content;
+}
+
+.ubicacion-badge iconify-icon {
+    font-size: 1rem;
+}
+
+/* Badges de categoría */
+.categoria-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.4rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+    width: fit-content;
+}
+
+.categoria-badge.medicamentos {
+    background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+    color: #dc2626;
+}
+
+.categoria-badge.vitaminas {
+    background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+    color: #ea580c;
+}
+
+.categoria-badge.perfumes {
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    color: #4338ca;
+}
+
+.categoria-badge.accesorios {
+    background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+    color: #be185d;
+}
+
+/* Badges de prioridad */
+.prioridad-badge {
+    padding: 0.3rem 0.75rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.prioridad-badge.alta {
+    background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+    color: #dc2626;
+}
+
+.prioridad-badge.media {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+}
+
+.prioridad-badge.baja {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #15803d;
+}
+
+/* Badge de posición */
+.posicion-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.6rem;
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    color: var(--text-dark);
+    border-radius: 0.4rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    min-width: 2.5rem;
+}
+
+/* Stock badge para estantes */
+.stock-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.3rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+.stock-badge.ok {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #15803d;
+}
+
+.stock-badge.alerta {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+}
+
+.stock-badge.peligro {
+    background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+    color: #dc2626;
+}
+
+/* Indicadores de estado en modales */
+.estado-indicador {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.estado-indicador.exito {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #15803d;
+}
+
+.estado-indicador.proceso {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+}
+
+.estado-indicador.error {
+    background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+    color: #dc2626;
+}
+
+/* Responsive para badges */
+@media (max-width: 768px) {
+    .categoria-badge,
+    .ubicacion-badge {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
+    }
+    
+    .estado-badge,
+    .prioridad-badge {
+        font-size: 0.7rem;
+    }
+} 

@@ -1,0 +1,25 @@
+{
+  "_vendor-BTL6WMOf.js": {
+    "file": "assets/vendor-BTL6WMOf.js",
+    "name": "vendor"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-BpDoBlGP.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/css/inventario/tablas.css": {
+    "file": "assets/tablas-CYYxYR8e.css",
+    "src": "resources/css/inventario/tablas.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-DtOK7lYH.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "imports": [
+      "_vendor-BTL6WMOf.js"
+    ]
+  }
+}

@@ -1,0 +1,327 @@
+/* ===================================
+   ESTILOS PARA MÚLTIPLES UBICACIONES
+   =================================== */
+
+/* Badge de ubicación base */
+.ubicacion-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    min-width: 160px;
+    max-width: 160px;
+    height: 40px;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+/* Ubicación simple (una sola ubicación) */
+.ubicacion-badge.ubicado {
+    background: linear-gradient(135deg, #0891b2, #0e7490);
+    color: white !important;
+    box-shadow: 0 2px 6px rgba(8, 145, 178, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ubicacion-badge.ubicado:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(8, 145, 178, 0.35);
+    background: linear-gradient(135deg, #0e7490, #155e75);
+}
+
+.ubicacion-badge.ubicado .ubicacion-texto,
+.ubicacion-badge.ubicado .ubicacion-info {
+    color: white !important;
+}
+
+/* Sin ubicar */
+.ubicacion-badge.sin-ubicar {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white !important;
+    box-shadow: 0 2px 6px rgba(107, 114, 128, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ubicacion-badge.sin-ubicar .ubicacion-texto,
+.ubicacion-badge.sin-ubicar .ubicacion-info {
+    color: white !important;
+}
+
+.ubicacion-badge.sin-ubicar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(107, 114, 128, 0.35);
+    background: linear-gradient(135deg, #4b5563, #374151);
+}
+
+/* Múltiples ubicaciones */
+.ubicacion-badge.multiple {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    box-shadow: 0 3px 8px rgba(99, 102, 241, 0.3);
+    border: 2px solid #4338ca;
+    animation: pulseMultiple 3s infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+.ubicacion-badge.multiple::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: slideShine 4s infinite;
+}
+
+.ubicacion-badge.multiple:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(99, 102, 241, 0.4);
+    animation: none;
+    background: linear-gradient(135deg, #4f46e5, #4338ca);
+}
+
+/* Animaciones para múltiples ubicaciones */
+@keyframes pulseMultiple {
+    0% {
+        box-shadow: 0 3px 8px rgba(99, 102, 241, 0.3);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 5px 12px rgba(99, 102, 241, 0.45);
+        transform: scale(1.02);
+    }
+    100% {
+        box-shadow: 0 3px 8px rgba(99, 102, 241, 0.3);
+        transform: scale(1);
+    }
+}
+
+@keyframes slideShine {
+    0% {
+        left: -100%;
+    }
+    50% {
+        left: 100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+
+
+/* Iconos */
+.ubicacion-icon {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.ubicacion-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.ubicacion-texto {
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.ubicacion-subtexto {
+    font-size: 10px;
+    opacity: 0.8;
+    margin-top: 1px;
+}
+
+/* Modal de detalles de ubicaciones */
+.modal-ubicaciones-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-ubicaciones-container {
+    background: white;
+    border-radius: 16px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-ubicaciones-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: between;
+}
+
+.modal-ubicaciones-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.modal-ubicaciones-close {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.modal-ubicaciones-close:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    transform: scale(1.1);
+}
+
+.modal-ubicaciones-body {
+    padding: 20px 24px;
+}
+
+/* Lista de ubicaciones en el modal */
+.ubicacion-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.ubicacion-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(99, 102, 241, 0.15);
+    border-color: #6366f1;
+    background: linear-gradient(135deg, #f8fafc, #ede9fe);
+}
+
+.ubicacion-item-info {
+    flex: 1;
+}
+
+.ubicacion-item-nombre {
+    font-weight: 600;
+    color: #111827;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.ubicacion-item-detalles {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.ubicacion-item-cantidad {
+    background: #3b82f6;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .ubicacion-badge {
+        min-width: 120px;
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+    
+    .modal-ubicaciones-container {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .ubicacion-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .ubicacion-item-detalles {
+        flex-direction: column;
+        gap: 4px;
+    }
+}
+
+/* Estados especiales */
+.ubicacion-badge.multiple.warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border-color: #b45309;
+}
+
+.ubicacion-badge.multiple.success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-color: #047857;
+}
+
+/* Tooltip para información adicional */
+.ubicacion-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #111827;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.ubicacion-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: #111827;
+}
+
+.ubicacion-badge:hover .ubicacion-tooltip {
+    opacity: 1;
+    visibility: visible;
+    bottom: calc(100% + 8px);
+} 

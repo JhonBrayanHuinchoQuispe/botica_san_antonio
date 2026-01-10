@@ -1,0 +1,77 @@
+/* El overlay es compartido, no es necesario repetirlo */
+
+#modalEditarCategoria .modal-categoria-container {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(40,50,80,0.15);
+    padding: 2rem 2.2rem;
+    width: 100%;
+    max-width: 450px;
+    margin: 1rem;
+    font-family: 'Inter', sans-serif;
+}
+.modal-categoria-header-edit {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #16a34a; /* Verde */
+    margin-bottom: 1.5rem;
+}
+.modal-categoria-header-edit iconify-icon {
+    font-size: 1.5rem;
+}
+
+#modalEditarCategoria .input-modal-categoria:focus {
+    border-color: #22c55e; /* Verde */
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+}
+
+#modalEditarCategoria .btn-modal-categoria.btn-cancelar-edit {
+    background: #f3f4f6;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+}
+#modalEditarCategoria .btn-modal-categoria.btn-cancelar-edit:hover {
+    background: #e5e7eb;
+}
+
+#modalEditarCategoria .btn-modal-categoria.btn-guardar-edit {
+    background: #22c55e;
+    color: #fff;
+}
+#modalEditarCategoria .btn-modal-categoria.btn-guardar-edit:hover {
+    background: #16a34a;
+}
+#modalEditarCategoria .btn-modal-categoria.btn-guardar-edit:disabled {
+    background: #86efac;
+    cursor: not-allowed;
+}
+
+#modalEditarCategoria .input-modal-categoria {
+    width: 100%;
+    border: 1px solid #d1d5db; /* Gris */
+    border-radius: 10px;
+    background: #f9fafb;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+}
+
+#modalEditarCategoria .input-with-icon {
+    padding-left: 3rem !important; /* Ajuste para el icono */
+}
+
+#modalEditarCategoria .input-modal-categoria:focus {
+    border-color: #16a34a; /* Verde al enfocar */
+    box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+}
+
+.modal-categoria-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem; /* Espacio entre botones */
+}

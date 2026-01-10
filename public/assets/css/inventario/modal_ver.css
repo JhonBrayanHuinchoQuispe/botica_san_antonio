@@ -1,0 +1,526 @@
+/* --- Container Principal del Modal --- */
+.modal-detail-container {
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    max-height: 85vh;
+    width: 90vw;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Header del Modal --- */
+.modal-header-detail {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.modal-title-detail {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.modal-close-detail {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0.5rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.2rem;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    line-height: 1;
+}
+
+.modal-close-detail:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-close-detail:active {
+    transform: scale(0.95);
+}
+
+/* --- Estilos para el Contenido del Modal de Detalles --- */
+.modal-content-details {
+    padding: 1.5rem;
+    background-color: #f7f8fc;
+    overflow-y: auto;
+    overflow-x: hidden; /* Eliminar scroll horizontal */
+    flex-grow: 1;
+    min-height: 0; /* Importante para flex */
+}
+
+/* Scrollbar personalizado para el modal de detalles */
+.modal-content-details::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content-details::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 4px;
+}
+
+.modal-content-details::-webkit-scrollbar-thumb {
+    background: #a0aec0;
+    border-radius: 4px;
+}
+
+.modal-content-details::-webkit-scrollbar-thumb:hover {
+    background: #718096;
+}
+
+.details-grid-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    max-width: 100%;
+}
+
+@media (min-width: 768px) {
+    .details-grid-container {
+        grid-template-columns: 1fr 1.2fr; /* Columna derecha un poco más ancha */
+    }
+}
+
+@media (min-width: 1024px) {
+    .details-grid-container {
+        grid-template-columns: 1fr 1.5fr; /* Columna derecha más ancha en pantallas grandes */
+    }
+}
+
+.details-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0; /* Importante para evitar overflow */
+}
+
+/* --- Secciones y Tarjetas de Detalles --- */
+.detail-section {
+    background-color: #ffffff;
+    padding: 1.25rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+    min-width: 0; /* Importante para evitar overflow */
+}
+
+.detail-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #10b981;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+/* --- Estilos de la Columna Izquierda --- */
+.product-main-info {
+    text-align: center;
+}
+
+.product-image-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 0.75rem;
+}
+
+.product-main-info img {
+    width: 8rem;
+    height: 8rem;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    margin-left: auto;
+    margin-right: auto;
+    border: 3px solid #ffffff;
+    box-shadow: 0 8px 12px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    display: block;
+}
+
+.product-icon-overlay {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: white;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border: 2px solid #10b981;
+    z-index: 2;
+}
+
+.product-icon-overlay i {
+    font-size: 18px !important;
+    color: #10b981 !important;
+}
+
+.product-icon-fallback {
+    font-size: 20px;
+    line-height: 1;
+    display: block;
+}
+
+/* Mostrar FontAwesome si está disponible, sino mostrar emoji */
+.product-icon-overlay:has(i.fas) .product-icon-fallback {
+    display: none;
+}
+
+.product-icon-overlay:has(i.fas) i {
+    display: block !important;
+}
+
+/* Fallback para cuando no hay imagen */
+.product-main-info img[src*="default-product.png"] + .product-icon-overlay {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.product-main-info img[src*="default-product.png"] + .product-icon-overlay i {
+    color: #6b7280 !important;
+}
+
+.product-main-info img[src*="default-product.png"] + .product-icon-overlay .product-icon-fallback {
+    filter: grayscale(1);
+    opacity: 0.7;
+}
+
+/* Estilos adicionales para mejor visibilidad */
+.product-image-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 0.5rem;
+    background: linear-gradient(45deg, transparent 30%, rgba(16, 185, 129, 0.1) 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+#modal-nombre {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+    word-wrap: break-word; /* Permitir salto de línea en nombres largos */
+}
+
+#modal-concentracion {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.75rem;
+}
+
+.detail-item-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f3f4f6;
+    min-width: 0; /* Importante para evitar overflow */
+}
+
+.detail-item-grid:last-child {
+    border-bottom: none;
+}
+
+.detail-item-grid .detail-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    flex-shrink: 0; /* No permitir que se encoja */
+}
+
+.detail-item-grid .detail-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #374151;
+    text-align: right;
+    word-wrap: break-word; /* Permitir salto de línea */
+    min-width: 0; /* Importante para evitar overflow */
+}
+
+/* --- Estilos de la Columna Derecha --- */
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1rem;
+}
+
+/* Grid para tarjetas de códigos - más responsive */
+.codes-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+/* Grid para tarjetas de stock y fechas - más responsive */
+.stock-dates-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+}
+
+.detail-card {
+    background-color: #f9fafb;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0; /* Importante para evitar overflow */
+}
+
+.detail-card .detail-label {
+    margin-bottom: 0.5rem;
+    color: #6b7280;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.detail-card .detail-value-lg {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.2;
+    word-wrap: break-word; /* Permitir salto de línea */
+}
+
+/* Estilo para la tarjeta de ubicación que puede ser más ancha */
+.ubicacion-card {
+    grid-column: span 2 / span 2;
+}
+
+@media (max-width: 640px) {
+    .ubicacion-card {
+        grid-column: span 1 / span 1; /* En móviles, una sola columna */
+    }
+}
+
+/* --- Estado del Producto --- */
+#modal-estado-container {
+    text-align: center;
+}
+
+#modal-estado {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+/* Estados del producto */
+.bg-red-100 {
+    background-color: #fee2e2;
+}
+
+.text-red-800 {
+    color: #991b1b;
+}
+
+.border-red-200 {
+    border-color: #fecaca;
+}
+
+.bg-yellow-100 {
+    background-color: #fef3c7;
+}
+
+.text-yellow-800 {
+    color: #92400e;
+}
+
+.border-yellow-200 {
+    border-color: #fde68a;
+}
+
+.bg-orange-100 {
+    background-color: #ffedd5;
+}
+
+.text-orange-800 {
+    color: #9a3412;
+}
+
+.border-orange-200 {
+    border-color: #fed7aa;
+}
+
+.bg-green-100 {
+    background-color: #dcfce7;
+}
+
+.text-green-800 {
+    color: #166534;
+}
+
+.border-green-200 {
+    border-color: #bbf7d0;
+}
+
+/* Tarjetas con colores específicos */
+.stock-card {
+    background-color: #dcfce7;
+    border-color: #bbf7d0;
+}
+
+.stock-card .detail-value-lg {
+    color: #166534;
+}
+
+.low-stock {
+    background-color: #fef3c7;
+    border-color: #fde68a;
+}
+
+.low-stock .detail-value-lg {
+    color: #92400e;
+}
+
+.price-card.buy-price {
+    background-color: #fee2e2;
+    border-color: #fecaca;
+}
+
+.price-card.buy-price .detail-value-lg {
+    color: #991b1b;
+}
+
+.price-card.sell-price {
+    background-color: #dcfce7;
+    border-color: #bbf7d0;
+}
+
+.price-card.sell-price .detail-value-lg {
+    color: #166534;
+}
+
+.financial-card {
+    background-color: #dbeafe;
+    border-color: #93c5fd;
+}
+
+.financial-card .detail-value-lg {
+    color: #1e40af;
+}
+
+.warning-card {
+    background-color: #fef3c7;
+    border-color: #fde68a;
+}
+
+.warning-card .detail-value-lg {
+    color: #92400e;
+}
+
+/* Alerta de vencimiento */
+.alert-warning {
+    background-color: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    color: #92400e;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Estilos para SweetAlert2 */
+.swal2-modal-details {
+    border-radius: 12px !important;
+    padding: 0 !important;
+}
+
+.swal2-modal-details .swal2-html-container {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Responsive para el modal */
+@media (max-width: 768px) {
+    .modal-detail-container {
+        width: 95vw;
+        max-height: 90vh;
+    }
+    
+    .details-grid-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .modal-content-details {
+        padding: 1rem;
+    }
+    
+    .detail-section {
+        padding: 1rem;
+    }
+    
+    .modal-header-detail {
+        padding: 1rem 1.25rem;
+    }
+    
+    .modal-title-detail {
+        font-size: 1.125rem;
+    }
+    
+    .product-main-info img {
+        width: 6rem;
+        height: 6rem;
+    }
+    
+    #modal-nombre {
+        font-size: 1.125rem;
+    }
+    
+    .codes-cards-grid,
+    .stock-dates-cards-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+    
+    .detail-card {
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .codes-cards-grid,
+    .stock-dates-cards-grid {
+        grid-template-columns: 1fr; /* Una sola columna en móviles muy pequeños */
+    }
+}

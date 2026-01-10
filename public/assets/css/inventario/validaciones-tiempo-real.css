@@ -1,0 +1,284 @@
+/* Estilos para Validaciones en Tiempo Real */
+
+/* Estados de campos */
+.form-input, .form-textarea, .form-select {
+    transition: all 0.3s ease;
+    border-width: 2px;
+}
+
+/* Campo con error */
+.form-input.border-red-500,
+.form-textarea.border-red-500,
+.form-select.border-red-500 {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Campo válido */
+.form-input.border-green-500,
+.form-textarea.border-green-500,
+.form-select.border-green-500 {
+    border-color: #10b981 !important;
+    background-color: #f0fdf4 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+/* Campo con advertencia */
+.form-input.border-yellow-500,
+.form-textarea.border-yellow-500,
+.form-select.border-yellow-500 {
+    border-color: #f59e0b !important;
+    background-color: #fffbeb !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1) !important;
+}
+
+/* Mensajes de validación */
+.validation-message {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mensaje de error */
+.error-message {
+    color: #dc2626;
+}
+
+.error-message iconify-icon {
+    color: #dc2626;
+    font-size: 1rem;
+}
+
+/* Mensaje de éxito */
+.success-message {
+    color: #059669;
+}
+
+.success-message iconify-icon {
+    color: #059669;
+    font-size: 1rem;
+}
+
+/* Mensaje de advertencia */
+.warning-message {
+    color: #d97706;
+}
+
+.warning-message iconify-icon {
+    color: #d97706;
+    font-size: 1rem;
+}
+
+/* Estilos específicos para los modales */
+#modalAgregar .validation-message,
+#modalEditar .validation-message {
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* Hover effects para campos */
+.form-input:hover:not(.border-red-500):not(.border-green-500):not(.border-yellow-500),
+.form-textarea:hover:not(.border-red-500):not(.border-green-500):not(.border-yellow-500),
+.form-select:hover:not(.border-red-500):not(.border-green-500):not(.border-yellow-500) {
+    border-color: #6b7280;
+    box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.1);
+}
+
+/* Focus effects */
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    outline: none;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Estilos para campos requeridos */
+.form-input[required]:not([value=""]):valid,
+.form-textarea[required]:not([value=""]):valid {
+    border-color: #10b981;
+    background-color: #f0fdf4;
+}
+
+/* Indicador de campo requerido */
+.required-field::after {
+    content: " *";
+    color: #dc2626;
+    font-weight: bold;
+}
+
+/* Estilos para autocompletado */
+.autocomplete-container {
+    position: relative;
+}
+
+.autocomplete-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.autocomplete-suggestion {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.2s ease;
+}
+
+.autocomplete-suggestion:hover,
+.autocomplete-suggestion.highlighted {
+    background-color: #f3f4f6;
+}
+
+.autocomplete-suggestion:last-child {
+    border-bottom: none;
+}
+
+/* Estilos para indicadores de carga */
+.validation-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.validation-loading iconify-icon {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .validation-message {
+        font-size: 0.8rem;
+    }
+    
+    .validation-message iconify-icon {
+        font-size: 0.9rem;
+    }
+}
+
+/* Estilos para campos de precio con margen */
+.precio-margen-info {
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border: 1px solid #0ea5e9;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #0369a1;
+}
+
+.precio-margen-info iconify-icon {
+    color: #0ea5e9;
+    margin-right: 0.25rem;
+}
+
+/* Estilos para campos de fecha con validación */
+.fecha-validacion-info {
+    background: linear-gradient(135deg, #fefce8, #fef3c7);
+    border: 1px solid #f59e0b;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: #92400e;
+}
+
+/* Animaciones para transiciones suaves */
+.field-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Estilos para tooltips de ayuda */
+.validation-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.validation-tooltip .tooltip-text {
+    visibility: hidden;
+    width: 200px;
+    background-color: #374151;
+    color: white;
+    text-align: center;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    position: absolute;
+    z-index: 1001;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.8rem;
+}
+
+.validation-tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Estilos para el estado de validación del formulario */
+.form-validation-summary {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: none;
+}
+
+.form-validation-summary.show {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+}
+
+.form-validation-summary h4 {
+    color: #dc2626;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.form-validation-summary ul {
+    color: #dc2626;
+    margin-left: 1rem;
+}
+
+.form-validation-summary li {
+    margin-bottom: 0.25rem;
+}

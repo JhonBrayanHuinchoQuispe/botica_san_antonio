@@ -1,0 +1,201 @@
+/* Estilos para validaciones del formulario de agregar producto */
+
+/* Campo con error - solo borde rojo */
+.campo-invalido {
+    border-color: #ef4444 !important;
+    border-width: 2px !important;
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Campo válido - borde verde */
+.campo-valido {
+    border-color: #10b981 !important;
+    border-width: 2px !important;
+    box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Campos obligatorios vacíos al cargar - borde gris normal */
+input[required]:invalid:not(:focus):not(.campo-invalido),
+select[required]:invalid:not(:focus):not(.campo-invalido) {
+    border-color: #d1d5db !important;
+    border-width: 1px !important;
+    transition: border-color 0.3s ease !important;
+}
+
+/* Evitar bordes rojos en campos recién reseteados */
+.modal-overlay input[required]:invalid:not(:focus):not(.campo-invalido):not(.border-red-500),
+.modal-overlay select[required]:invalid:not(:focus):not(.campo-invalido):not(.border-red-500) {
+    border-color: #d1d5db !important;
+    border-width: 1px !important;
+    background-color: white !important;
+}
+
+/* Campos obligatorios válidos - borde verde */
+input[required]:valid:not(:placeholder-shown),
+select[required]:valid:not([value=""]) {
+    border-color: #10b981 !important;
+    border-width: 2px !important;
+    transition: border-color 0.3s ease !important;
+}
+
+/* Transiciones suaves para todos los campos */
+input, select {
+    transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* Mensaje de error */
+.mensaje-error {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+    font-weight: 500;
+}
+
+/* Botón deshabilitado */
+.btn-disabled {
+    background-color: #9ca3af !important;
+    color: #6b7280 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
+
+.btn-disabled:hover {
+    background-color: #9ca3af !important;
+    transform: none !important;
+}
+
+/* Botón habilitado */
+.btn-enabled {
+    background-color: #4f46e5 !important;
+    color: white !important;
+    cursor: pointer !important;
+    opacity: 1 !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-enabled:hover {
+    background-color: #4338ca !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3) !important;
+}
+
+/* Animación para campos con error */
+.campo-invalido {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Estilos para inputs y selects en general */
+input[required], select[required] {
+    position: relative;
+}
+
+/* Indicador visual de campo obligatorio */
+input[required]:not([value=""]):valid,
+select[required]:not([value=""]):valid {
+    border-color: #10b981;
+}
+
+/* Tooltip para campos obligatorios */
+.campo-obligatorio::after {
+    content: " *";
+    color: #ef4444;
+    font-weight: bold;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .mensaje-error {
+        font-size: 0.75rem;
+    }
+}
+
+/* Estilos para el estado de carga del botón */
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+}
+
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Mejoras visuales para el formulario */
+.form-section {
+    border-left: 3px solid #e5e7eb;
+    padding-left: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-section.has-errors {
+    border-left-color: #ef4444;
+}
+
+.form-section.all-valid {
+    border-left-color: #10b981;
+}
+
+/* Contador de campos completados */
+.progress-indicator {
+    background: linear-gradient(90deg, #10b981 var(--progress, 0%), #e5e7eb var(--progress, 0%));
+    height: 4px;
+    border-radius: 2px;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+/* Estilos para labels de campos obligatorios */
+label.required::after {
+    content: " *";
+    color: #ef4444;
+    font-weight: bold;
+}
+
+/* --- Mensajes de validación consistentes con JS (error/success/warning) --- */
+.validation-message {
+    font-size: 0.875rem; /* text-sm */
+    margin-top: 0.25rem; /* mt-1 */
+    display: flex;
+    align-items: center;
+    gap: 0.25rem; /* espacio entre icono y texto */
+}
+
+.error-message { color: #ef4444; }
+.success-message { color: #10b981; }
+.warning-message { color: #f59e0b; }
+
+.validation-message iconify-icon {
+    color: inherit; /* hereda el color del mensaje */
+    font-size: 1rem;
+}
+
+/* Estados visuales usados por validaciones-tiempo-real.js */
+.border-red-500 { border-color: #ef4444 !important; }
+.bg-red-50 { background-color: #fef2f2 !important; }
+.border-green-500 { border-color: #10b981 !important; }
+.bg-green-50 { background-color: #ecfdf5 !important; }
+.border-yellow-500 { border-color: #f59e0b !important; }
+.bg-yellow-50 { background-color: #fffbeb !important; }

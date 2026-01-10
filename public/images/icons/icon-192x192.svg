@@ -1,0 +1,17 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" rx="24" fill="#fb7185"/>
+  <rect x="16" y="16" width="160" height="160" rx="16" fill="#f43f5e"/>
+  
+  <!-- Cruz médica -->
+  <rect x="84" y="48" width="24" height="96" rx="4" fill="white"/>
+  <rect x="48" y="84" width="96" height="24" rx="4" fill="white"/>
+  
+  <!-- Pastillas decorativas -->
+  <circle cx="64" cy="64" r="8" fill="#fecdd3" opacity="0.8"/>
+  <circle cx="128" cy="64" r="8" fill="#fecdd3" opacity="0.8"/>
+  <circle cx="64" cy="128" r="8" fill="#fecdd3" opacity="0.8"/>
+  <circle cx="128" cy="128" r="8" fill="#fecdd3" opacity="0.8"/>
+  
+  <!-- Texto "Rx" -->
+  <text x="96" y="160" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Rx</text>
+</svg>

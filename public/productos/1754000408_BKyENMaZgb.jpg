@@ -1,0 +1,26 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="estanteGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Fondo -->
+  <rect width="200" height="200" fill="#F3E8FF"/>
+  
+  <!-- Frasco/Botella -->
+  <rect x="75" y="60" width="50" height="80" rx="5" ry="5" fill="url(#estanteGradient)" stroke="#5B21B6" stroke-width="2"/>
+  
+  <!-- Tapa -->
+  <rect x="80" y="50" width="40" height="15" rx="3" ry="3" fill="#5B21B6"/>
+  
+  <!-- Etiqueta -->
+  <rect x="80" y="80" width="40" height="30" fill="#FFFFFF" opacity="0.9"/>
+  
+  <!-- Texto -->
+  <text x="100" y="160" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#5B21B6">Estante B</text>
+  
+  <!-- Texto en etiqueta -->
+  <text x="100" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#5B21B6">B</text>
+</svg>

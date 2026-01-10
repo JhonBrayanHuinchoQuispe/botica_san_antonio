@@ -1,0 +1,747 @@
+/* =================================
+   MODAL MOVER PRODUCTO - DISEÑO MEJORADO
+================================= */
+
+/* Overlay del modal - Fondo oscuro centrado */
+.modal-overlay-estante.modal-mover {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(4px);
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+    padding: 20px;
+}
+
+.modal-mover .modal-container-estante {
+    max-width: 600px !important;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    position: relative;
+    margin: auto;
+}
+
+/* Estado oculto del modal */
+.modal-overlay-estante.hidden {
+    display: none !important;
+}
+
+/* Animaciones y transiciones del modal */
+.modal-overlay-estante {
+    transition: opacity 0.3s ease, backdrop-filter 0.3s ease;
+}
+
+.modal-overlay-estante .modal-container-estante {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform: scale(1);
+    opacity: 1;
+}
+
+.modal-mover .modal-header-estante {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    color: white;
+    padding: 20px 25px;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+}
+
+.modal-mover .modal-header-estante h3 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.modal-mover .modal-header-estante h3 iconify-icon {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.modal-mover .modal-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-mover .modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* ===================================
+   PRODUCTO A MOVER - DISEÑO DESTACADO
+================================== */
+
+.producto-mover-info {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+    border-radius: 16px;
+    border: 2px solid #f97316;
+    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.1);
+}
+
+.producto-mover-info h4 {
+    color: #ea580c;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 15px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.producto-mover-info h4::before {
+    content: "•";
+    color: #f97316;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.producto-card-mover {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: white;
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(249, 115, 22, 0.2);
+    transition: all 0.3s ease !important;
+}
+
+.producto-card-mover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(249, 115, 22, 0.15);
+}
+
+.producto-imagen-mover {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    flex-shrink: 0;
+}
+
+.producto-imagen-mover iconify-icon {
+    font-size: 2rem;
+    color: white;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.producto-detalles-mover {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.producto-nombre-mover {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #1f2937;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.producto-concentracion-mover {
+    font-size: 0.95rem;
+    color: #f97316;
+    font-weight: 700;
+    background: rgba(249, 115, 22, 0.1);
+    padding: 4px 10px;
+    border-radius: 15px;
+    display: inline-block;
+    width: fit-content;
+    border: 1px solid rgba(249, 115, 22, 0.3);
+}
+
+.producto-stock-mover {
+    font-size: 0.9rem;
+    color: #6b7280;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.producto-stock-mover::before {
+    content: "📦";
+    font-size: 0.8rem;
+}
+
+/* ===================================
+   ORIGEN Y DESTINO
+================================== */
+
+.origen-destino {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+}
+
+.slot-info {
+    flex: 1;
+}
+
+.slot-info h4 {
+    color: #4b5563;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.slot-card {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease !important;
+}
+
+.slot-card:hover {
+    border-color: #f97316;
+    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.1);
+}
+
+.slot-numero {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #1f2937;
+    margin-bottom: 4px;
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.slot-descripcion {
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.origen .slot-card {
+    border-color: #10b981;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+}
+
+.origen .slot-numero {
+    color: #059669;
+}
+
+.destino .form-select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    background: white;
+    font-size: 0.95rem;
+    color: #374151;
+    transition: all 0.3s ease !important;
+}
+
+.destino .form-select:focus {
+    outline: none;
+    border-color: #f97316;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.destino .form-select option {
+    padding: 8px;
+    color: #374151;
+}
+
+.destino .form-select optgroup {
+    font-weight: 700;
+    color: #f97316;
+    background: #fef3c7;
+}
+
+/* ===================================
+   FLECHA DE MOVIMIENTO
+================================== */
+
+.flecha-mover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    border-radius: 50%;
+    color: white;
+    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+    transition: all 0.3s ease !important;
+    flex-shrink: 0;
+}
+
+.flecha-mover iconify-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.flecha-mover:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+}
+
+/* ===================================
+   BOTONES DEL MODAL
+================================== */
+
+.modal-mover .modal-footer-estante {
+    padding: 20px 25px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 0 0 12px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #e5e7eb;
+    gap: 12px;
+}
+
+.modal-mover .btn-modal-secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease !important;
+    font-size: 0.95rem;
+}
+
+.modal-mover .btn-modal-secondary:hover {
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+    transform: translateY(-1px);
+}
+
+.modal-mover .btn-modal-primary {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modal-mover .btn-modal-primary:hover {
+    background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+}
+
+.modal-mover .btn-modal-primary iconify-icon {
+    font-size: 1.1rem;
+}
+
+/* ===================================
+   ESTILOS PARA SWEETALERT - MODAL DE CONFIRMACIÓN
+================================== */
+
+/* Modal principal */
+.swal-modal-mover {
+    border-radius: 16px !important;
+    padding: 0 !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25) !important;
+    background: white !important;
+    max-width: 500px !important;
+    width: 90% !important;
+}
+
+.swal-modal-mover .swal2-title {
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+    color: #1f2937 !important;
+    margin: 20px 0 25px 0 !important;
+    text-align: center !important;
+}
+
+/* Container del HTML personalizado */
+.swal-html-mover {
+    padding: 0 25px 20px 25px !important;
+    margin: 0 !important;
+}
+
+/* Diseño de la confirmación */
+.confirmacion-movimiento {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: left;
+}
+
+.producto-confirmacion {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid #f97316;
+}
+
+.icono-producto {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.icono-producto iconify-icon {
+    font-size: 1.8rem;
+    color: white;
+}
+
+.info-producto h4 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin: 0 0 4px 0;
+}
+
+.info-producto .concentracion {
+    font-size: 0.9rem;
+    color: #f97316;
+    font-weight: 700;
+    background: rgba(249, 115, 22, 0.15);
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    margin: 0;
+}
+
+.movimiento-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 18px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.posicion-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.posicion-item .label {
+    font-size: 0.8rem;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.posicion-item .posicion {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #1f2937;
+    background: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.posicion-item.origen .posicion {
+    border-color: #10b981;
+    color: #059669;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+}
+
+.posicion-item.destino .posicion {
+    border-color: #3b82f6;
+    color: #1d4ed8;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.flecha-confirmacion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    border-radius: 50%;
+    color: white;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.flecha-confirmacion iconify-icon {
+    font-size: 1.3rem;
+}
+
+.stock-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #0ea5e9;
+    font-weight: 600;
+    color: #0c4a6e;
+}
+
+.stock-info iconify-icon {
+    font-size: 1.2rem;
+    color: #0ea5e9;
+}
+
+/* Botones personalizados */
+.swal-modal-mover .swal2-actions {
+    gap: 15px !important;
+    margin: 25px 0 20px 0 !important;
+    justify-content: center !important;
+}
+
+.swal-btn-confirmar {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 120px !important;
+    justify-content: center !important;
+}
+
+.swal-btn-confirmar:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+}
+
+.swal-btn-cancelar {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 120px !important;
+    justify-content: center !important;
+}
+
+.swal-btn-cancelar:hover {
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4) !important;
+}
+
+.swal-btn-error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3) !important;
+    min-width: 120px !important;
+}
+
+.swal-btn-error:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4) !important;
+}
+
+/* Overlay del SweetAlert */
+.swal2-backdrop-show {
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(4px) !important;
+}
+
+/* Notificación de éxito */
+.success-toast-mover {
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2) !important;
+    border: 2px solid rgba(16, 185, 129, 0.3) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+.success-title-mover {
+    font-weight: 800 !important;
+    font-size: 1rem !important;
+    color: #047857 !important;
+}
+
+.success-icon-mover {
+    border: 2px solid #10b981 !important;
+    color: #10b981 !important;
+}
+
+/* Responsive para SweetAlert */
+@media (max-width: 480px) {
+    .swal-modal-mover {
+        max-width: 95% !important;
+    }
+    
+    .confirmacion-movimiento {
+        gap: 15px;
+    }
+    
+    .producto-confirmacion {
+        padding: 12px;
+        gap: 12px;
+    }
+    
+    .icono-producto {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .movimiento-info {
+        padding: 15px;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .flecha-confirmacion {
+        transform: rotate(90deg);
+        width: 35px;
+        height: 35px;
+    }
+    
+    .swal-btn-confirmar,
+    .swal-btn-cancelar {
+        min-width: 100px !important;
+        padding: 10px 18px !important;
+        font-size: 0.9rem !important;
+    }
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+================================== */
+
+@media (max-width: 768px) {
+    .origen-destino {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .flecha-mover {
+        transform: rotate(90deg);
+        width: 40px;
+        height: 40px;
+    }
+    
+    .producto-card-mover {
+        padding: 15px;
+        gap: 12px;
+    }
+    
+    .producto-imagen-mover {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .producto-nombre-mover {
+        font-size: 1.2rem;
+    }
+    
+    .modal-mover .modal-footer-estante {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .modal-mover .btn-modal-secondary,
+    .modal-mover .btn-modal-primary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .producto-mover-info {
+        padding: 15px;
+    }
+    
+    .origen-destino {
+        padding: 15px;
+    }
+    
+    .producto-card-mover {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+    }
+    
+    .producto-detalles-mover {
+        align-items: center;
+    }
+} 

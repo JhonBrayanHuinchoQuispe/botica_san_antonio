@@ -1,0 +1,1075 @@
+/* CSS para modulo de compras */
+
+/* ===== ESTILOS PARA MÓDULO DE COMPRAS ===== */
+
+/* Variables CSS para consistencia */
+:root {
+    --compras-primary: #4f46e5;
+    --compras-primary-light: #6366f1;
+    --compras-primary-dark: #3730a3;
+    --compras-success: #10b981;
+    --compras-warning: #f59e0b;
+    --compras-danger: #ef4444;
+    --compras-info: #06b6d4;
+    --compras-gray-50: #f9fafb;
+    --compras-gray-100: #f3f4f6;
+    --compras-gray-200: #e5e7eb;
+    --compras-gray-300: #d1d5db;
+    --compras-gray-400: #9ca3af;
+    --compras-gray-500: #6b7280;
+    --compras-gray-600: #4b5563;
+    --compras-gray-700: #374151;
+    --compras-gray-800: #1f2937;
+    --compras-gray-900: #111827;
+    --compras-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --compras-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --compras-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --compras-radius: 12px;
+    --compras-radius-lg: 16px;
+}
+
+/* ===== HEADER Y TÍTULOS ===== */
+.compras-header {
+    background: linear-gradient(135deg, var(--compras-primary) 0%, var(--compras-primary-light) 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: var(--compras-radius-lg);
+    margin-bottom: 2rem;
+    box-shadow: var(--compras-shadow-lg);
+}
+
+.compras-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.compras-header p {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+.compras-breadcrumb {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.75rem 1rem;
+    border-radius: var(--compras-radius);
+    margin-top: 1rem;
+}
+
+.compras-breadcrumb a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.compras-breadcrumb a:hover {
+    color: white;
+}
+
+/* ===== TARJETAS DE ESTADÍSTICAS ===== */
+.compras-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.compras-stat-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--compras-radius-lg);
+    box-shadow: var(--compras-shadow);
+    border: 1px solid var(--compras-gray-200);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.compras-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--card-color, var(--compras-primary)), var(--card-color-light, var(--compras-primary-light)));
+    border-radius: var(--compras-radius-lg) var(--compras-radius-lg) 0 0;
+}
+
+.compras-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--compras-shadow-lg);
+}
+
+.compras-stat-card.primary {
+    --card-color: var(--compras-primary);
+    --card-color-light: var(--compras-primary-light);
+}
+
+.compras-stat-card.success {
+    --card-color: var(--compras-success);
+    --card-color-light: #34d399;
+}
+
+.compras-stat-card.warning {
+    --card-color: var(--compras-warning);
+    --card-color-light: #fbbf24;
+}
+
+.compras-stat-card.info {
+    --card-color: var(--compras-info);
+    --card-color-light: #22d3ee;
+}
+
+.compras-stat-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.compras-stat-text h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--compras-gray-800);
+}
+
+.compras-stat-text p {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--compras-gray-600);
+    margin: 0.25rem 0 0 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.compras-stat-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: white;
+    background: linear-gradient(135deg, var(--card-color, var(--compras-primary)), var(--card-color-light, var(--compras-primary-light)));
+}
+
+/* ===== SECCIONES DE FORMULARIO ===== */
+.compras-form-section {
+    background: white;
+    border-radius: var(--compras-radius-lg);
+    border: 1px solid var(--compras-gray-200);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    box-shadow: var(--compras-shadow);
+    transition: all 0.3s ease;
+}
+
+.compras-form-section:hover {
+    box-shadow: var(--compras-shadow-md);
+}
+
+.compras-section-header {
+    background: linear-gradient(135deg, var(--compras-gray-50) 0%, white 100%);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--compras-gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.compras-section-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--compras-gray-800);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.compras-section-header iconify-icon {
+    font-size: 1.5rem;
+    color: var(--compras-primary);
+}
+
+.compras-section-content {
+    padding: 2rem;
+}
+
+/* ===== CAMPOS DE FORMULARIO MODERNOS ===== */
+.compras-form-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.compras-form-grid.cols-2 {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.compras-form-grid.cols-3 {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.compras-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.compras-form-label {
+    font-weight: 600;
+    color: var(--compras-gray-700);
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.compras-form-label iconify-icon {
+    color: var(--compras-primary);
+    font-size: 1rem;
+}
+
+.compras-form-input,
+.compras-form-select,
+.compras-form-textarea {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--compras-gray-200);
+    border-radius: var(--compras-radius);
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    background: white;
+    color: var(--compras-gray-800);
+}
+
+.compras-form-input:focus,
+.compras-form-select:focus,
+.compras-form-textarea:focus {
+    outline: none;
+    border-color: var(--compras-primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.compras-form-input:hover,
+.compras-form-select:hover,
+.compras-form-textarea:hover {
+    border-color: var(--compras-gray-300);
+}
+
+.compras-form-hint {
+    font-size: 0.75rem;
+    color: var(--compras-gray-500);
+    margin-top: 0.25rem;
+}
+
+/* ===== BOTONES MODERNOS ===== */
+.compras-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--compras-radius);
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.compras-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.compras-btn:hover::before {
+    left: 100%;
+}
+
+.compras-btn-primary {
+    background: linear-gradient(135deg, var(--compras-primary) 0%, var(--compras-primary-light) 100%);
+    color: white;
+    box-shadow: var(--compras-shadow);
+}
+
+.compras-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--compras-shadow-md);
+}
+
+.compras-btn-success {
+    background: linear-gradient(135deg, var(--compras-success) 0%, #34d399 100%);
+    color: white;
+    box-shadow: var(--compras-shadow);
+}
+
+.compras-btn-secondary {
+    background: var(--compras-gray-100);
+    color: var(--compras-gray-700);
+    border: 1px solid var(--compras-gray-300);
+}
+
+.compras-btn-secondary:hover {
+    background: var(--compras-gray-200);
+}
+
+.compras-btn-danger {
+    background: linear-gradient(135deg, var(--compras-danger) 0%, #f87171 100%);
+    color: white;
+    box-shadow: var(--compras-shadow);
+}
+
+.compras-btn-group {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--compras-gray-200);
+}
+
+/* ===== ALERTAS Y NOTIFICACIONES ===== */
+.compras-alert {
+    padding: 1rem 1.5rem;
+    border-radius: var(--compras-radius);
+    border: 1px solid;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.compras-alert-info {
+    background: rgba(6, 182, 212, 0.1);
+    border-color: rgba(6, 182, 212, 0.3);
+    color: var(--compras-info);
+}
+
+.compras-alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: var(--compras-success);
+}
+
+.compras-alert-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.3);
+    color: var(--compras-warning);
+}
+
+.compras-alert-icon {
+    font-size: 1.25rem;
+    margin-top: 0.125rem;
+}
+
+.compras-alert-content h4 {
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+}
+
+.compras-alert-content p {
+    margin: 0;
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+/* ===== TABLA MODERNA ===== */
+.compras-table-container {
+    background: white;
+    border-radius: var(--compras-radius-lg);
+    border: 1px solid var(--compras-gray-200);
+    box-shadow: var(--compras-shadow);
+    overflow: hidden;
+}
+
+.compras-table-header {
+    background: linear-gradient(135deg, var(--compras-gray-50) 0%, white 100%);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--compras-gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.compras-table-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--compras-gray-800);
+    margin: 0;
+}
+
+.compras-table-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.compras-search-input {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--compras-gray-200);
+    border-radius: var(--compras-radius);
+    font-size: 0.875rem;
+    min-width: 250px;
+    transition: all 0.2s ease;
+}
+
+.compras-search-input:focus {
+    outline: none;
+    border-color: var(--compras-primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.compras-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.compras-table thead {
+    background: linear-gradient(135deg, var(--compras-primary) 0%, var(--compras-primary-light) 100%);
+}
+
+.compras-table thead th {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-weight: 600;
+    color: white;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: none;
+}
+
+.compras-table tbody tr {
+    border-bottom: 1px solid var(--compras-gray-200);
+    transition: background-color 0.2s ease;
+}
+
+.compras-table tbody tr:hover {
+    background: var(--compras-gray-50);
+}
+
+.compras-table tbody td {
+    padding: 1rem 1.5rem;
+    font-size: 0.875rem;
+    color: var(--compras-gray-700);
+    vertical-align: middle;
+}
+
+/* ===== BADGES Y ESTADOS ===== */
+.compras-badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.compras-badge-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--compras-success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.compras-badge-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--compras-warning);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.compras-badge-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--compras-danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.compras-badge-info {
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--compras-info);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+.compras-badge-secondary {
+    background: var(--compras-gray-100);
+    color: var(--compras-gray-600);
+    border: 1px solid var(--compras-gray-300);
+}
+
+/* ===== BOTONES DE ACCIÓN EN TABLA ===== */
+.compras-action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+/* Contenedor de acciones específico de Proveedores */
+.proveedores-action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+}
+
+  .proveedores-action-btn {
+     display: inline-flex !important;
+     align-items: center !important;
+     justify-content: center !important;
+     width: 36px !important;
+     height: 36px !important;
+     border-radius: 8px !important;
+     border: none !important;
+     cursor: pointer !important;
+     font-size: 16px !important;
+     transition: all 0.2s ease !important;
+     color: white !important;
+  }
+  
+  .proveedores-action-btn-edit {
+     background: linear-gradient(135deg, #f97316, #ea580c) !important;
+  }
+  
+  .proveedores-action-btn-edit:hover {
+     background: linear-gradient(135deg, #ea580c, #dc2626) !important;
+     transform: translateY(-1px) !important;
+  }
+  
+  .proveedores-action-btn-delete {
+     background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  }
+  
+  .proveedores-action-btn-delete:hover {
+     background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+     transform: translateY(-1px) !important;
+  }
+  
+  .proveedores-action-btn-success {
+     background: linear-gradient(135deg, #10b981, #059669) !important;
+  }
+  
+  .proveedores-action-btn-success:hover {
+     background: linear-gradient(135deg, #059669, #047857) !important;
+     transform: translateY(-1px) !important;
+  }
+
+/* ===== FILTROS AVANZADOS ===== */
+.compras-filters-section {
+    background: white;
+    border-radius: var(--compras-radius-lg);
+    border: 1px solid var(--compras-gray-200);
+    box-shadow: var(--compras-shadow);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.compras-filters-header {
+    background: linear-gradient(135deg, var(--compras-gray-50) 0%, white 100%);
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--compras-gray-200);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.compras-filters-title {
+    font-weight: 600;
+    color: var(--compras-gray-800);
+    margin: 0;
+    font-size: 1rem;
+}
+
+.compras-filters-content {
+    padding: 1.5rem;
+}
+
+.compras-filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.compras-filters-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+/* ===== EMPTY STATE ===== */
+.compras-empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--compras-gray-500);
+}
+
+.compras-empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.compras-empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--compras-gray-700);
+}
+
+.compras-empty-description {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .compras-header {
+        padding: 1.5rem;
+    }
+    
+    .compras-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .compras-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .compras-stat-card {
+        padding: 1.5rem;
+    }
+    
+    .compras-section-content {
+        padding: 1.5rem;
+    }
+    
+    .compras-form-grid.cols-2,
+    .compras-form-grid.cols-3 {
+        grid-template-columns: 1fr;
+    }
+    
+    .compras-table-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .compras-table-actions {
+        justify-content: stretch;
+    }
+    
+    .compras-search-input {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .compras-btn-group {
+        flex-direction: column;
+    }
+    
+    .compras-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .compras-filters-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .compras-filters-actions {
+        flex-direction: column;
+    }
+    
+         .proveedores-action-buttons {
+         gap: 0.25rem;
+     }
+     
+     .proveedores-action-btn {
+         width: 32px !important;
+         height: 32px !important;
+         font-size: 14px !important;
+     }
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes compras-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.compras-fade-in {
+    animation: compras-fade-in 0.6s ease-out;
+}
+
+@keyframes compras-slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.compras-slide-in {
+    animation: compras-slide-in 0.4s ease-out;
+}
+
+/* ===== UTILIDADES ===== */
+.compras-text-primary { color: var(--compras-primary) !important; }
+.compras-text-success { color: var(--compras-success) !important; }
+.compras-text-warning { color: var(--compras-warning) !important; }
+.compras-text-danger { color: var(--compras-danger) !important; }
+.compras-text-info { color: var(--compras-info) !important; }
+
+.compras-bg-primary { background-color: var(--compras-primary) !important; }
+.compras-bg-success { background-color: var(--compras-success) !important; }
+.compras-bg-warning { background-color: var(--compras-warning) !important; }
+.compras-bg-danger { background-color: var(--compras-danger) !important; }
+.compras-bg-info { background-color: var(--compras-info) !important; }
+
+.compras-shadow { box-shadow: var(--compras-shadow) !important; }
+.compras-shadow-md { box-shadow: var(--compras-shadow-md) !important; }
+.compras-shadow-lg { box-shadow: var(--compras-shadow-lg) !important; }
+
+.compras-rounded { border-radius: var(--compras-radius) !important; }
+.compras-rounded-lg { border-radius: var(--compras-radius-lg) !important; }
+
+/* Estilos del modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-container {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Responsivo para móviles */
+@media (max-width: 768px) {
+    .modal-container {
+        width: 95%;
+        margin: 1rem;
+    }
+}
+
+/* Estilos globales para SweetAlert2 */
+.swal2-popup {
+    border-radius: 16px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+.swal2-title {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: #1f2937 !important;
+    margin-bottom: 1rem !important;
+}
+
+.swal2-html-container {
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+    color: #4b5563 !important;
+}
+
+/* Botones personalizados de SweetAlert2 */
+.swal-btn-confirm-custom,
+.swal-btn-cancel-custom,
+.swal-btn-confirm-estado,
+.swal-btn-cancel-estado {
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    margin: 0 0.25rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.swal-btn-confirm-custom {
+    background: linear-gradient(135deg, #e53e3e, #dc2626) !important;
+    color: white !important;
+}
+
+.swal-btn-confirm-custom:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.swal-btn-cancel-custom {
+    background: linear-gradient(135deg, #6b7280, #4b5563) !important;
+    color: white !important;
+}
+
+.swal-btn-cancel-custom:hover {
+    background: linear-gradient(135deg, #4b5563, #374151) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Botones de estado específicos */
+.swal-btn-confirm-estado {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white !important;
+    min-width: 120px !important;
+}
+
+.swal-btn-confirm-estado:hover {
+    background: linear-gradient(135deg, #059669, #047857) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.swal-btn-cancel-estado {
+    background: linear-gradient(135deg, #6b7280, #4b5563) !important;
+    color: white !important;
+    min-width: 120px !important;
+}
+
+.swal-btn-cancel-estado:hover {
+    background: linear-gradient(135deg, #4b5563, #374151) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Forzar estilos de inputs en modales */
+.swal2-input {
+    background: #f9fafb !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    padding: 0.75rem !important;
+    font-size: 0.875rem !important;
+    transition: all 0.2s ease !important;
+    color: #374151 !important;
+}
+
+.swal2-input:focus {
+    border-color: #e53e3e !important;
+    box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1) !important;
+    background: white !important;
+    outline: none !important;
+}
+
+/* Asegurar que todos los botones sean visibles */
+.swal2-actions button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+/* Responsivo para modales */
+@media (max-width: 768px) {
+    .swal2-popup {
+        width: 95% !important;
+        margin: 1rem !important;
+    }
+    
+    .swal-btn-confirm-custom,
+    .swal-btn-cancel-custom,
+    .swal-btn-confirm-estado,
+    .swal-btn-cancel-estado {
+        padding: 0.625rem 1rem !important;
+        font-size: 0.8125rem !important;
+        min-width: 100px !important;
+    }
+}
+
+/* Botones específicos para modal nuevo */
+.swal-btn-confirm-nuevo {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    color: white !important;
+    min-width: 140px !important;
+}
+
+.swal-btn-confirm-nuevo:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.swal-btn-cancel-nuevo {
+    background: linear-gradient(135deg, #6b7280, #4b5563) !important;
+    color: white !important;
+    min-width: 120px !important;
+}
+
+.swal-btn-cancel-nuevo:hover {
+    background: linear-gradient(135deg, #4b5563, #374151) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ===== ESTILOS PARA ESTADOS DE PRODUCTOS EN BÚSQUEDA ===== */
+
+/* Estados de stock */
+.compras-resultado-item.stock-agotado {
+    border-left: 4px solid var(--compras-danger);
+    background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+}
+
+.compras-resultado-item.stock-bajo {
+    border-left: 4px solid var(--compras-warning);
+    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+}
+
+.compras-resultado-item.proximo-vencimiento {
+    border-left: 4px solid #d97706;
+    background: linear-gradient(135deg, #fef3c7 0%, #ffffff 100%);
+}
+
+.compras-resultado-item.vencido {
+    border-left: 4px solid #dc2626;
+    background: linear-gradient(135deg, #fee2e2 0%, #ffffff 100%);
+}
+
+/* Combinaciones de estados */
+.compras-resultado-item.stock-agotado.vencido {
+    border-left: 4px solid #991b1b;
+    background: linear-gradient(135deg, #fecaca 0%, #ffffff 100%);
+}
+
+.compras-resultado-item.stock-bajo.proximo-vencimiento {
+    border-left: 4px solid #b45309;
+    background: linear-gradient(135deg, #fed7aa 0%, #ffffff 100%);
+}
+
+.compras-resultado-item.stock-bajo.vencido {
+    border-left: 4px solid #b91c1c;
+    background: linear-gradient(135deg, #fca5a5 0%, #ffffff 100%);
+}
+
+/* Estilos para iconos de estado */
+.compras-resultado-item .estado-icono {
+    margin-left: 8px;
+    font-size: 14px;
+}
+
+/* Estilos para texto de estado */
+.compras-estado-texto {
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 4px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.compras-resultado-item.stock-agotado .compras-estado-texto {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--compras-danger);
+}
+
+.compras-resultado-item.stock-bajo .compras-estado-texto {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--compras-warning);
+}
+
+.compras-resultado-item.proximo-vencimiento .compras-estado-texto {
+    background: rgba(217, 119, 6, 0.1);
+    color: #d97706;
+}
+
+.compras-resultado-item.vencido .compras-estado-texto {
+    background: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
+}
+
+/* Estilos para stock con estado */
+.compras-stock.stock-agotado {
+    color: var(--compras-danger) !important;
+    font-weight: 700;
+}
+
+.compras-stock.stock-bajo {
+    color: var(--compras-warning) !important;
+    font-weight: 700;
+}
+
+.compras-stock.proximo-vencimiento {
+    color: #d97706 !important;
+    font-weight: 700;
+}
+
+.compras-stock.vencido {
+    color: #dc2626 !important;
+    font-weight: 700;
+}
+
+/* Hover effects para items con estados */
+.compras-resultado-item.stock-agotado:hover {
+    background: linear-gradient(135deg, #fef2f2 0%, #f9fafb 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+.compras-resultado-item.stock-bajo:hover {
+    background: linear-gradient(135deg, #fffbeb 0%, #f9fafb 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+}
+
+.compras-resultado-item.proximo-vencimiento:hover {
+    background: linear-gradient(135deg, #fef3c7 0%, #f9fafb 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.15);
+}
+
+.compras-resultado-item.vencido:hover {
+    background: linear-gradient(135deg, #fee2e2 0%, #f9fafb 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+}

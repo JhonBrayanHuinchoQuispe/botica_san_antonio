@@ -1,0 +1,6 @@
+{
+    "css\/app.css": "\/dist\/css\/app.min.css",
+    "css\/combined.css": "\/dist\/css\/combined.min.css",
+    "js\/app.js": "\/dist\/js\/app.min.js",
+    "js\/combined.js": "\/dist\/js\/combined.min.js"
+}

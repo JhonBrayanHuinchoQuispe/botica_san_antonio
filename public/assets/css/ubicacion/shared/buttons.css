@@ -1,0 +1,710 @@
+/* --- ESTILOS DE BOTONES --- */
+
+.btn {
+    padding: 0.7rem 1.4rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+    color: var(--white);
+    box-shadow: 0 4px 15px -5px rgba(217, 37, 37, 0.5);
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px -5px rgba(217, 37, 37, 0.7);
+}
+
+.btn-secondary {
+    background-color: #f3f4f6;
+    color: var(--text-dark);
+    border: 1px solid #e5e7eb;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background-color: #e5e7eb;
+}
+
+/* Botones de acción moderna */
+.btn-action-modern {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--gradient-primary);
+    color: var(--white);
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-action-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.btn-action-modern.btn-edit {
+    background: var(--gradient-warning);
+}
+
+.btn-action-modern.btn-config {
+    background: var(--gradient-secondary);
+}
+
+/* Botones específicos del mapa */
+.btn-nuevo-estante-flotante {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--gradient-success);
+    color: var(--white);
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-nuevo-estante-flotante:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.btn-actualizar-foto {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-dark);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+    backdrop-filter: blur(10px);
+    z-index: 5;
+}
+
+.btn-actualizar-foto:hover {
+    background: var(--white);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+}
+
+/* Botones de control */
+.btn-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--gradient-primary);
+    color: var(--white);
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-control:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.btn-control.btn-secondary {
+    background: #f3f4f6;
+    color: var(--text-dark);
+    border: 1px solid #e5e7eb;
+    box-shadow: none;
+}
+
+.btn-control.btn-secondary:hover {
+    background: #e5e7eb;
+    transform: translateY(-1px);
+}
+
+/* Botones de exportar */
+.btn-exportar-modern,
+.btn-asignar-masivo-modern {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--gradient-primary);
+    color: var(--white);
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-exportar-modern:hover,
+.btn-asignar-masivo-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.btn-asignar-masivo-modern {
+    background: var(--gradient-success);
+}
+
+/* Botones de acción en tablas */
+.btn-accion-tabla {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border: none;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 1rem;
+}
+
+.btn-accion-tabla.ver {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1d4ed8;
+}
+
+.btn-accion-tabla.editar {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+}
+
+.btn-accion-tabla.mover {
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    color: #4338ca;
+}
+
+.btn-accion-tabla.asignar {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #15803d;
+}
+
+.btn-accion-tabla:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
+}
+
+/* Botones de slot */
+.btn-slot-accion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    border: none;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.btn-slot-accion[data-action="ver"] {
+    color: #22c55e;
+}
+
+.btn-slot-accion[data-action="editar"] {
+    color: #3b82f6;
+}
+
+.btn-slot-accion[data-action="mover"] {
+    color: #f59e0b;
+}
+
+.btn-slot-accion:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+}
+
+/* Paginación */
+.btn-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--border-color);
+    background: var(--white);
+    color: var(--text-dark);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background: var(--background-light);
+    border-color: var(--primary-red);
+}
+
+.btn-pagination.active {
+    background: var(--primary-red);
+    color: var(--white);
+    border-color: var(--primary-red);
+}
+
+.btn-pagination:disabled {
+    background: var(--background-light);
+    color: var(--text-light);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Responsive para botones */
+@media (max-width: 768px) {
+    .btn-nuevo-estante-flotante,
+    .btn-exportar-modern,
+    .btn-asignar-masivo-modern {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .btn-actualizar-foto span {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-nuevo-estante-flotante span {
+        display: none;
+    }
+    
+    .btn-nuevo-estante-flotante iconify-icon {
+        margin: 0;
+    }
+}
+
+/* --- ESTILOS DE BOTONES MODERNOS --- */
+
+/* Botón principal moderno */
+.btn-primary-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--gradient-primary);
+    color: var(--white);
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-primary-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.btn-primary-modern:active {
+    transform: translateY(0);
+}
+
+/* Botón exportar */
+.btn-exportar-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);
+    color: #0277bd;
+    border: 1px solid rgba(2, 119, 189, 0.2);
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-exportar-modern:hover {
+    background: linear-gradient(135deg, #b3e5fc 0%, #81d4fa 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+}
+
+/* Botón asignar masivo */
+.btn-asignar-masivo-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--gradient-primary);
+    color: var(--white);
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-asignar-masivo-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+/* Botón nuevo estante flotante */
+.btn-nuevo-estante-flotante {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: var(--white);
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-nuevo-estante-flotante:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+/* Botón actualizar foto */
+.btn-actualizar-foto {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    color: var(--text-dark);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 10;
+}
+
+.btn-actualizar-foto:hover {
+    background: var(--white);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+}
+
+/* Botones de acción en tabla */
+.btn-accion-tabla {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background: var(--background-light);
+    border: 1px solid var(--border-color);
+    border-radius: 0.4rem;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+}
+
+.btn-accion-tabla:hover {
+    background: var(--white);
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-accion-tabla.ver:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.btn-accion-tabla.editar:hover {
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+
+.btn-accion-tabla.mover:hover {
+    border-color: #8b5cf6;
+    color: #8b5cf6;
+}
+
+/* Botones de paginación */
+.btn-pagination {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 0.4rem;
+    color: var(--text-dark);
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background: var(--background-light);
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+}
+
+.btn-pagination.active {
+    background: var(--primary-red);
+    border-color: var(--primary-red);
+    color: var(--white);
+}
+
+.btn-pagination:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Botones secundarios */
+.btn-secondary-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--white);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-secondary-modern:hover {
+    background: var(--background-light);
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
+}
+
+/* Botones de estado/acción específicos */
+.btn-danger-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+    color: #dc2626;
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-danger-modern:hover {
+    background: linear-gradient(135deg, #fca5a5 0%, #f87171 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-success-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #15803d;
+    border: 1px solid rgba(21, 128, 61, 0.2);
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-success-modern:hover {
+    background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-warning-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border: 1px solid rgba(146, 64, 14, 0.2);
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-warning-modern:hover {
+    background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+}
+
+/* Botones de tamaño pequeño */
+.btn-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+.btn-sm iconify-icon {
+    font-size: 0.9rem;
+}
+
+/* Botones de tamaño grande */
+.btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+}
+
+.btn-lg iconify-icon {
+    font-size: 1.1rem;
+}
+
+/* Botones en modales */
+.btn-modal-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--gradient-primary);
+    color: var(--white);
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-modal-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-modal-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--white);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-modal-secondary:hover {
+    background: var(--background-light);
+    border-color: var(--text-light);
+}
+
+/* Estados de botones */
+.btn-loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn-loading::after {
+    content: '';
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 0.8s linear infinite;
+    margin-left: 0.5rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive para botones */
+@media (max-width: 768px) {
+    .btn-primary-modern,
+    .btn-secondary-modern,
+    .btn-exportar-modern,
+    .btn-asignar-masivo-modern,
+    .btn-nuevo-estante-flotante {
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .btn-actualizar-foto {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.75rem;
+    }
+    
+    .btn-accion-tabla {
+        width: 1.8rem;
+        height: 1.8rem;
+        font-size: 0.8rem;
+    }
+    
+    .btn-pagination {
+        width: 2.2rem;
+        height: 2.2rem;
+    }
+} 

@@ -1,0 +1,10 @@
+/*
+!/app
+!/config
+!/node_modules
+!/public
+!/resources
+!/routes
+!/storage
+!/vendor
+!/.gitignore
