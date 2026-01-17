@@ -1627,31 +1627,264 @@ function closeProveedorModal() {
 function openCreateProveedorModal() {
     const html = `
     <div id="proveedorModal" class="modal-profesional">
-      <div class="modal-profesional-container tema-rojo">
+      <div class="modal-profesional-container tema-rojo" style="max-width: 700px;">
         <div class="header-profesional">
           <div class="header-content">
             <div class="header-left">
               <div class="header-icon icon-normal"><iconify-icon icon="solar:add-circle-bold-duotone"></iconify-icon></div>
-              <div class="header-text"><h3>Nuevo Proveedor</h3></div>
+              <div class="header-text">
+                <h3>Agregar Proveedor</h3>
+                <p style="font-size: 0.875rem; opacity: 0.9; margin-top: 0.25rem;">Selecciona el método de registro</p>
+              </div>
             </div>
             <button type="button" class="btn-close" onclick="closeProveedorModal()"><iconify-icon icon="heroicons:x-mark"></iconify-icon></button>
           </div>
         </div>
-        <div class="modal-content-profesional">
-          <div class="seccion-form seccion-azul">
-            <div class="grid-campos columnas-2">
-              <div class="campo-grupo campo-completo"><label class="campo-label"><iconify-icon icon="solar:id-card-bold-duotone" class="label-icon"></iconify-icon> RUC</label><div class="ruc-row"><input type="text" id="prov_ruc" maxlength="11" class="campo-input"><button type="button" id="btnConsultarRuc" class="btn-guardar btn-buscar-ruc">Buscar</button></div><div id="prov_ruc_error" class="input-error" style="display:none"></div></div>
-              <div class="campo-grupo campo-completo"><label class="campo-label"><iconify-icon icon="solar:buildings-bold-duotone" class="label-icon"></iconify-icon> Razón Social *</label><input type="text" id="prov_razon_social" class="campo-input" readonly></div>
-              <div class="campo-grupo campo-completo"><label class="campo-label"><iconify-icon icon="solar:store-2-bold-duotone" class="label-icon"></iconify-icon> Nombre Comercial</label><input type="text" id="prov_nombre_comercial" class="campo-input" readonly></div>
-              <div class="campo-grupo"><label class="campo-label"><iconify-icon icon="solar:phone-bold-duotone" class="label-icon"></iconify-icon> Teléfono</label><input type="text" id="prov_telefono" class="campo-input" placeholder="987654321" maxlength="9"></div>
-              <div class="campo-grupo"><label class="campo-label"><iconify-icon icon="solar:letter-bold-duotone" class="label-icon"></iconify-icon> Email</label><input type="email" id="prov_email" class="campo-input" placeholder="correo@dominio.com"></div>
-              <div class="campo-grupo campo-completo"><label class="campo-label"><iconify-icon icon="solar:map-point-bold-duotone" class="label-icon"></iconify-icon> Dirección</label><textarea id="prov_direccion" rows="3" class="campo-input" style="min-height: 80px;"></textarea></div>
+        
+        <div class="modal-content-profesional" style="padding: 2rem;">
+          <!-- Botones de selección de método -->
+          <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+            <button type="button" id="btnMetodoBusqueda" class="btn-metodo-registro active" onclick="cambiarMetodoRegistro('busqueda')">
+              <iconify-icon icon="solar:magnifer-bold-duotone" style="font-size: 1.5rem;"></iconify-icon>
+              <span>Búsqueda RUC</span>
+            </button>
+            <button type="button" id="btnMetodoManual" class="btn-metodo-registro" onclick="cambiarMetodoRegistro('manual')">
+              <iconify-icon icon="solar:pen-bold-duotone" style="font-size: 1.5rem;"></iconify-icon>
+              <span>Manual</span>
+            </button>
+          </div>
+
+          <!-- Formulario de Búsqueda por RUC -->
+          <div id="formBusquedaRuc" class="metodo-form">
+            <div class="campo-grupo-moderno">
+              <label class="label-moderno">
+                <iconify-icon icon="solar:id-card-bold-duotone"></iconify-icon>
+                Número de RUC
+              </label>
+              <div style="display: flex; gap: 0.75rem;">
+                <input type="text" id="prov_ruc" maxlength="11" class="input-moderno" placeholder="Ej: 20123456789" style="flex: 1;">
+                <button type="button" id="btnConsultarRuc" class="btn-buscar-moderno">
+                  <iconify-icon icon="solar:magnifer-bold"></iconify-icon>
+                  Buscar
+                </button>
+              </div>
+              <p class="hint-text">
+                <iconify-icon icon="solar:info-circle-bold"></iconify-icon>
+                Ingresa el RUC para autocompletar los datos
+              </p>
+              <div id="prov_ruc_error" class="input-error" style="display:none"></div>
+            </div>
+
+            <div class="campo-grupo-moderno">
+              <label class="label-moderno">
+                <iconify-icon icon="solar:buildings-bold-duotone"></iconify-icon>
+                Razón Social
+              </label>
+              <input type="text" id="prov_razon_social" class="input-moderno" placeholder="Se completará automáticamente" readonly>
+              <p class="hint-text-auto">Se completará automáticamente</p>
+            </div>
+          </div>
+
+          <!-- Formulario Manual (oculto por defecto) -->
+          <div id="formManual" class="metodo-form" style="display: none;">
+            <div class="campo-grupo-moderno">
+              <label class="label-moderno">
+                <iconify-icon icon="solar:buildings-bold-duotone"></iconify-icon>
+                Razón Social *
+              </label>
+              <input type="text" id="prov_razon_social_manual" class="input-moderno" placeholder="Nombre de la empresa">
+            </div>
+
+            <div class="campo-grupo-moderno">
+              <label class="label-moderno">
+                <iconify-icon icon="solar:id-card-bold-duotone"></iconify-icon>
+                RUC
+              </label>
+              <input type="text" id="prov_ruc_manual" maxlength="11" class="input-moderno" placeholder="20123456789">
+            </div>
+          </div>
+
+          <!-- Campos comunes -->
+          <div class="campos-comunes">
+            <div class="grid-campos-moderno">
+              <div class="campo-grupo-moderno">
+                <label class="label-moderno">
+                  <iconify-icon icon="solar:map-point-bold-duotone"></iconify-icon>
+                  Dirección Fiscal
+                </label>
+                <input type="text" id="prov_direccion" class="input-moderno" placeholder="Av. Principal 123, Distrito">
+              </div>
+            </div>
+
+            <div class="grid-campos-moderno columnas-2">
+              <div class="campo-grupo-moderno">
+                <label class="label-moderno">
+                  <iconify-icon icon="solar:phone-bold-duotone"></iconify-icon>
+                  Teléfono / Celular
+                </label>
+                <input type="text" id="prov_telefono" class="input-moderno" placeholder="999 000 000" maxlength="9">
+              </div>
+
+              <div class="campo-grupo-moderno">
+                <label class="label-moderno">
+                  <iconify-icon icon="solar:letter-bold-duotone"></iconify-icon>
+                  Correo Electrónico
+                </label>
+                <input type="email" id="prov_email" class="input-moderno" placeholder="contacto@empresa.com">
+              </div>
             </div>
           </div>
         </div>
-        <div class="footer-profesional"><div class="footer-botones"><button type="button" class="btn-cancelar" onclick="closeProveedorModal()">Cancelar</button><button type="button" class="btn-guardar" id="btnGuardarProveedor" disabled><iconify-icon icon="solar:disk-bold-duotone"></iconify-icon> Guardar Proveedor</button></div></div>
+        
+        <div class="footer-profesional">
+          <div class="footer-botones">
+            <button type="button" class="btn-cancelar" onclick="closeProveedorModal()">Cancelar</button>
+            <button type="button" class="btn-guardar" id="btnGuardarProveedor">
+              <iconify-icon icon="solar:check-circle-bold"></iconify-icon>
+              Guardar Proveedor
+            </button>
+          </div>
+        </div>
       </div>
-    </div>`;
+    </div>
+    
+    <style>
+    .btn-metodo-registro {
+      flex: 1;
+      padding: 0.625rem 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: #6b7280;
+      font-weight: 600;
+      font-size: 0.9375rem;
+    }
+    
+    .btn-metodo-registro iconify-icon {
+      font-size: 1.25rem !important;
+    }
+    
+    .btn-metodo-registro:hover {
+      border-color: #f87171;
+      background: #fef2f2;
+      color: #f87171;
+    }
+    
+    .btn-metodo-registro.active {
+      border-color: #f87171;
+      background: linear-gradient(135deg, #fca5a5 0%, #f87171 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(248, 113, 113, 0.3);
+    }
+    
+    .campo-grupo-moderno {
+      margin-bottom: 1.25rem;
+    }
+    
+    .label-moderno {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    .label-moderno iconify-icon {
+      color: #dc2626;
+      font-size: 1.25rem;
+    }
+    
+    .input-moderno {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 0.9375rem;
+      transition: all 0.2s ease;
+      background: #f9fafb;
+    }
+    
+    .input-moderno:focus {
+      outline: none;
+      border-color: #dc2626;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+    
+    .input-moderno:read-only {
+      background: #f3f4f6;
+      color: #9ca3af;
+      cursor: not-allowed;
+    }
+    
+    .btn-buscar-moderno {
+      padding: 0.875rem 1.5rem;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-buscar-moderno:hover {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
+    }
+    
+    .hint-text {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.8125rem;
+      color: #6b7280;
+      margin-top: 0.5rem;
+    }
+    
+    .hint-text iconify-icon {
+      color: #3b82f6;
+    }
+    
+    .hint-text-auto {
+      font-size: 0.8125rem;
+      color: #9ca3af;
+      font-style: italic;
+      margin-top: 0.375rem;
+    }
+    
+    .grid-campos-moderno {
+      display: grid;
+      gap: 1.5rem;
+    }
+    
+    .grid-campos-moderno.columnas-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .metodo-form {
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    </style>`;
     document.body.insertAdjacentHTML('beforeend', html);
     document.body.style.overflow = 'hidden';
     // Restricción numérica y autocompletar por RUC
@@ -1710,28 +1943,120 @@ function openCreateProveedorModal() {
         if (!proveedoresManager) proveedoresManager = new ProveedoresManager();
         proveedoresManager.guardarProveedor();
     });
+    
+    // Agregar función global para cambiar método de registro
+    window.cambiarMetodoRegistro = function(metodo) {
+        const btnBusqueda = document.getElementById('btnMetodoBusqueda');
+        const btnManual = document.getElementById('btnMetodoManual');
+        const formBusqueda = document.getElementById('formBusquedaRuc');
+        const formManual = document.getElementById('formManual');
+        
+        if (metodo === 'busqueda') {
+            btnBusqueda.classList.add('active');
+            btnManual.classList.remove('active');
+            formBusqueda.style.display = 'block';
+            formManual.style.display = 'none';
+        } else {
+            btnManual.classList.add('active');
+            btnBusqueda.classList.remove('active');
+            formManual.style.display = 'block';
+            formBusqueda.style.display = 'none';
+        }
+    };
+    
     updateGuardarButtonState();
 }
 
 function openEditProveedorModal(p) {
     const html = `
     <div id="proveedorModal" class="modal-profesional">
-      <div class="modal-profesional-container tema-verde">
-        <div class="header-profesional"><div class="header-content"><div class="header-left"><div class="header-icon icon-normal"><iconify-icon icon="solar:pen-bold-duotone"></iconify-icon></div><div class="header-text"><h3>Editar Proveedor</h3></div></div><button type="button" class="btn-close" onclick="closeProveedorModal()"><iconify-icon icon="heroicons:x-mark"></iconify-icon></button></div></div>
-        <div class="modal-content-profesional">
-          <div class="seccion-form seccion-azul">
-            <div class="grid-campos columnas-2">
-              <input type="hidden" id="prov_id" value="${p.id}">
-              <div class="campo-grupo campo-completo"><label class="campo-label">RUC</label><div class="ruc-row"><input type="text" id="prov_ruc" maxlength="11" class="campo-input" value="${p.ruc||''}"><button type="button" class="btn-guardar btn-buscar-ruc" id="btnConsultarRucEdit">Buscar</button></div><div id="prov_ruc_error" class="input-error" style="display:none"></div></div>
-              <div class="campo-grupo campo-completo"><label class="campo-label">Razón Social *</label><input type="text" id="prov_razon_social" class="campo-input" value="${p.razon_social||''}" readonly></div>
-              <div class="campo-grupo campo-completo"><label class="campo-label">Nombre Comercial</label><input type="text" id="prov_nombre_comercial" class="campo-input" value="${p.nombre_comercial||''}" readonly></div>
-              <div class="campo-grupo"><label class="campo-label">Teléfono</label><input type="text" id="prov_telefono" class="campo-input" value="${p.telefono||''}"></div>
-              <div class="campo-grupo"><label class="campo-label">Email</label><input type="email" id="prov_email" class="campo-input" value="${p.email||''}"></div>
-              <div class="campo-grupo campo-completo"><label class="campo-label">Dirección</label><textarea id="prov_direccion" rows="3" class="campo-input" style="min-height: 80px;">${p.direccion||''}</textarea></div>
+      <div class="modal-profesional-container tema-verde" style="max-width: 700px;">
+        <div class="header-profesional">
+          <div class="header-content">
+            <div class="header-left">
+              <div class="header-icon icon-normal"><iconify-icon icon="solar:pen-bold-duotone"></iconify-icon></div>
+              <div class="header-text">
+                <h3>Editar Proveedor</h3>
+                <p style="font-size: 0.875rem; opacity: 0.9; margin-top: 0.25rem;">Actualiza la información del proveedor</p>
+              </div>
+            </div>
+            <button type="button" class="btn-close" onclick="closeProveedorModal()"><iconify-icon icon="heroicons:x-mark"></iconify-icon></button>
+          </div>
+        </div>
+        
+        <div class="modal-content-profesional" style="padding: 2rem;">
+          <input type="hidden" id="prov_id" value="${p.id}">
+          
+          <!-- Campo RUC con botón buscar -->
+          <div class="campo-grupo-moderno">
+            <label class="label-moderno">
+              <iconify-icon icon="solar:id-card-bold-duotone"></iconify-icon>
+              Número de RUC
+            </label>
+            <div style="display: flex; gap: 0.75rem;">
+              <input type="text" id="prov_ruc" maxlength="11" class="input-moderno" placeholder="Ej: 20123456789" value="${p.ruc||''}" style="flex: 1;">
+              <button type="button" id="btnConsultarRucEdit" class="btn-buscar-moderno">
+                <iconify-icon icon="solar:magnifer-bold"></iconify-icon>
+                Buscar
+              </button>
+            </div>
+            <p class="hint-text">
+              <iconify-icon icon="solar:info-circle-bold"></iconify-icon>
+              Ingresa el RUC para autocompletar los datos
+            </p>
+            <div id="prov_ruc_error" class="input-error" style="display:none"></div>
+          </div>
+
+          <div class="campo-grupo-moderno">
+            <label class="label-moderno">
+              <iconify-icon icon="solar:buildings-bold-duotone"></iconify-icon>
+              Razón Social
+            </label>
+            <input type="text" id="prov_razon_social" class="input-moderno" placeholder="Se completará automáticamente" value="${p.razon_social||''}" readonly>
+            <p class="hint-text-auto">Se completará automáticamente</p>
+          </div>
+
+          <!-- Campos comunes -->
+          <div class="campos-comunes">
+            <div class="grid-campos-moderno">
+              <div class="campo-grupo-moderno">
+                <label class="label-moderno">
+                  <iconify-icon icon="solar:map-point-bold-duotone"></iconify-icon>
+                  Dirección Fiscal
+                </label>
+                <input type="text" id="prov_direccion" class="input-moderno" placeholder="Av. Principal 123, Distrito" value="${p.direccion||''}">
+              </div>
+            </div>
+
+            <div class="grid-campos-moderno columnas-2">
+              <div class="campo-grupo-moderno">
+                <label class="label-moderno">
+                  <iconify-icon icon="solar:phone-bold-duotone"></iconify-icon>
+                  Teléfono / Celular
+                </label>
+                <input type="text" id="prov_telefono" class="input-moderno" placeholder="999 000 000" maxlength="9" value="${p.telefono||''}">
+              </div>
+
+              <div class="campo-grupo-moderno">
+                <label class="label-moderno">
+                  <iconify-icon icon="solar:letter-bold-duotone"></iconify-icon>
+                  Correo Electrónico
+                </label>
+                <input type="email" id="prov_email" class="input-moderno" placeholder="contacto@empresa.com" value="${p.email||''}">
+              </div>
             </div>
           </div>
         </div>
-        <div class="footer-profesional"><div class="footer-botones"><button type="button" class="btn-cancelar" onclick="closeProveedorModal()">Cancelar</button><button type="button" class="btn-guardar" id="btnActualizarProveedor" disabled><iconify-icon icon="solar:disk-bold-duotone"></iconify-icon> Actualizar Proveedor</button></div></div>
+        
+        <div class="footer-profesional">
+          <div class="footer-botones">
+            <button type="button" class="btn-cancelar" onclick="closeProveedorModal()">Cancelar</button>
+            <button type="button" class="btn-guardar" id="btnActualizarProveedor">
+              <iconify-icon icon="solar:check-circle-bold"></iconify-icon>
+              Actualizar Proveedor
+            </button>
+          </div>
+        </div>
       </div>
     </div>`;
     document.body.insertAdjacentHTML('beforeend', html);

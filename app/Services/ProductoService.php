@@ -175,7 +175,7 @@ class ProductoService
         
         if ($fechaVencimiento->isPast()) {
             $producto->estado = 'Vencido';
-        } elseif ($fechaVencimiento->diffInDays($ahora) <= 30) {
+        } elseif ($fechaVencimiento->diffInDays($ahora) <= 90) {
             $producto->estado = 'Por vencer';
         } elseif ($producto->stock_actual <= $producto->stock_minimo) {
             $producto->estado = 'Bajo stock';

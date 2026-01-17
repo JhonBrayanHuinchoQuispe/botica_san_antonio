@@ -1,13 +1,13 @@
-    <?php
+<?php
 
-    namespace App\Http\Controllers\IA;
+namespace App\Http\Controllers\IA;
 
-    use Illuminate\Http\Request;
-    use Illuminate\Routing\Controller;
-    use Illuminate\Support\Facades\Http;
-    use Illuminate\Support\Facades\Log;
-    use App\Models\Producto;
-    use App\Models\PuntoVenta\VentaDetalle;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use App\Models\Producto;
+use App\Models\PuntoVenta\VentaDetalle;
     use Illuminate\Support\Facades\DB;
     use Carbon\Carbon;
 

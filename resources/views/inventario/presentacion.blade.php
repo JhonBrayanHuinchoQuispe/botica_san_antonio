@@ -76,7 +76,7 @@
                                     <tr data-id="{{ $presentacion->id }}">
                                         <td data-label="ID">{{ $presentacion->id }}</td>
                                         <td data-label="Nombre">{{ $presentacion->nombre }}</td>
-                                        <td data-label="Descripción"><span class="desc-with-icon">{{ $presentacion->descripcion ? \Illuminate\Support\Str::limit($presentacion->descripcion, 36, '...') : '' }}</span></td>
+                                        <td data-label="Descripción"><span class="desc-with-icon">{{ $presentacion->descripcion ?? '' }}</span></td>
                                         
                                         <td data-label="Estado" class="estado-cell">
                                             @if($presentacion->estado === 'activo')

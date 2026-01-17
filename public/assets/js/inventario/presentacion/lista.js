@@ -64,20 +64,17 @@ function renderPresentacionesTabla() {
       : '<span class="estado-badge estado-badge-inactivo"><span class="dot"></span>Inactivo</span>';
   };
 
-  const truncateDesc = (txt) => {
-    if (!txt) return '';
-    const max = 120;
-    return txt.length > max ? txt.slice(0, max).trim() + '...' : txt;
-  };
-
   paginados.forEach(item => {
     const tr = document.createElement('tr');
     tr.dataset.id = item.id;
     
+    // Mostrar descripción completa sin truncar
+    const descripcionCompleta = item.descripcion || '';
+    
     tr.innerHTML = `
       <td data-label="ID">${item.id}</td>
       <td data-label="Nombre">${item.nombre}</td>
-      <td data-label="Descripción"><span class="desc-with-icon">${item.descripcion ? '<iconify-icon icon="mdi:comment-text-outline" class="desc-icon"></iconify-icon>' : ''}${item.descripcion ? truncateDesc(item.descripcion) : ''}</span></td>
+      <td data-label="Descripción"><span class="desc-with-icon">${item.descripcion ? '<iconify-icon icon="mdi:comment-text-outline" class="desc-icon"></iconify-icon>' : ''}${descripcionCompleta}</span></td>
       <td data-label="Estado" class="estado-cell">${getEstadoBadgeHtml(!!item.activo)}</td>
       <td data-label="Acciones">
         <button class="tabla-btn edit" data-id="${item.id}" title="Editar"><iconify-icon icon="lucide:edit"></iconify-icon></button>

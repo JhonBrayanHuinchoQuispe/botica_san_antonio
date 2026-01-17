@@ -97,6 +97,25 @@ Route::prefix('mobile')->group(function () {
     });
 
     // Top ventas por período
+    Route::get('/presentaciones', function (Request $request) {
+        try {
+            if (Schema::hasTable('presentaciones')) {
+                $items = DB::table('presentaciones')
+                    ->select('id', 'nombre')
+                    ->where('estado', 'activo')
+                    ->orWhere('activo', 1)
+                    ->orderBy('nombre')
+                    ->get();
+                return response()->json(['success' => true, 'data' => $items]);
+            }
+            return response()->json(['success' => true, 'data' => []]);
+        } catch (\Throwable $e) {
+            Log::error('mobile presentaciones error: '.$e->getMessage());
+            return response()->json(['success' => true, 'data' => []]);
+        }
+    });
+
+    // Top ventas por período
     Route::get('/ventas/top', function (Request $request) {
         try {
             $periodo = intval($request->query('periodo', 30));
@@ -1084,9 +1103,20 @@ Route::prefix('mobile')->group(function () {
             if (Schema::hasTable('presentaciones')) {
                 $presCandidates = ['nombre', 'nombre_presentacion', 'presentacion', 'descripcion'];
                 $presCols = array_filter($presCandidates, function ($c) { return Schema::hasColumn('presentaciones', $c); });
+                
+                // Detectar columna de estado/condición
+                $statusCondition = "";
+                if (Schema::hasColumn('presentaciones', 'condicion')) {
+                    $statusCondition = "AND condicion = 1";
+                } elseif (Schema::hasColumn('presentaciones', 'estado')) {
+                    $statusCondition = "AND (estado = 'activo' OR estado = 1)";
+                } elseif (Schema::hasColumn('presentaciones', 'active')) {
+                    $statusCondition = "AND active = 1";
+                }
+
                 if (!empty($presCols)) {
                     $coalesce = implode(', ', $presCols);
-                    $items = DB::select("SELECT id, TRIM(COALESCE($coalesce)) AS nombre FROM presentaciones WHERE COALESCE($coalesce) IS NOT NULL AND TRIM(COALESCE($coalesce)) <> '' ORDER BY nombre ASC LIMIT 500");
+                    $items = DB::select("SELECT id, TRIM(COALESCE($coalesce)) AS nombre FROM presentaciones WHERE COALESCE($coalesce) IS NOT NULL AND TRIM(COALESCE($coalesce)) <> '' $statusCondition ORDER BY nombre ASC LIMIT 500");
                 } else {
                     $items = [];
                 }
@@ -1222,6 +1252,7 @@ Route::middleware('auth:sanctum')->prefix('mobile')->group(function () {
     // Rutas de productos
     Route::prefix('products')->group(function () {
         Route::get('/', [ProductoApiController::class, 'index']);
+        Route::post('/', [ProductoApiController::class, 'store']); // Crear producto nuevo
         Route::get('/search', [ProductoApiController::class, 'searchByName']);
         Route::get('/critical', [ProductoApiController::class, 'getCriticalProducts']);
         Route::get('/low-stock', [ProductoApiController::class, 'lowStock']);
@@ -1232,6 +1263,9 @@ Route::middleware('auth:sanctum')->prefix('mobile')->group(function () {
         Route::post('/{id}/add-stock', [ProductoApiController::class, 'addStock']);
         Route::post('/{id}/adjust-stock', [ProductoApiController::class, 'adjustStock']);
     });
+
+    // Rutas de Lotes (Mobile)
+    Route::post('/lotes/{id}/baja', [ProductoApiController::class, 'darBajaLote']);
     
     // Rutas de notificaciones
     Route::prefix('notifications')->group(function () {
@@ -1252,6 +1286,8 @@ Route::prefix('compras')->group(function () {
 
 // Rutas públicas de productos (para interfaz web)
 Route::get('/productos/{id}/detalles', [ProductoApiController::class, 'getDetallesConLotes']);
+Route::get('/productos/{id}/lotes', [ProductoApiController::class, 'getLotes']);
+Route::post('/productos/{id}/actualizar-stock', [ProductoApiController::class, 'actualizarStock']);
 
 // Rutas públicas de notificaciones (para interfaz web)
 Route::prefix('notifications')->group(function () {

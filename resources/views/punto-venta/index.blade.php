@@ -239,6 +239,43 @@
     </div>
 </div>
 
+<!-- Modal Selector de Lotes para POS -->
+<div id="modalSelectorLotesPOS" class="modal-overlay fixed inset-0 hidden items-center justify-center z-[60]" style="display:none; background: rgba(0,0,0,0.5);">
+    <div class="modal-container bg-white mx-auto rounded-2xl shadow-2xl z-[60] overflow-hidden w-full max-w-2xl">
+        <div class="modal-header px-6 py-5 border-b flex justify-between items-center" style="background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);">
+            <div class="flex items-center gap-3">
+                <iconify-icon icon="lucide:package" class="text-red-800 text-2xl"></iconify-icon>
+                <div>
+                    <h3 class="text-xl font-bold text-red-900">Seleccionar Lote</h3>
+                </div>
+            </div>
+            <button class="text-red-800 hover:text-red-900 transition-colors text-3xl leading-none" id="cerrarModalSelectorLotesPOS">&times;</button>
+        </div>
+        
+        <div class="p-6">
+            <div class="mb-4">
+                <p class="text-sm text-gray-600">PRODUCTO SELECCIONADO</p>
+                <h4 class="text-lg font-bold text-gray-800" id="selectorProductoNombrePOS">-</h4>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gradient-to-r from-red-50 to-pink-50 border-b-2 border-red-200">
+                        <tr>
+                            <th class="px-4 py-3 text-left font-semibold text-gray-700">LOTE</th>
+                            <th class="px-4 py-3 text-left font-semibold text-gray-700">VENCIMIENTO</th>
+                            <th class="px-4 py-3 text-center font-semibold text-gray-700">CANT.</th>
+                            <th class="px-4 py-3 text-center font-semibold text-gray-700">P.V</th>
+                        </tr>
+                    </thead>
+                    <tbody id="selectorLotesBodyPOS" class="divide-y divide-gray-100">
+                        <!-- Lotes se cargan aquí dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
 @endsection
 

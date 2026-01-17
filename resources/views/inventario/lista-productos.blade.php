@@ -27,7 +27,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <!-- Reusar lógica existente de eliminar y validaciones -->
-    <script src="{{ asset('assets/js/inventario/eliminar.js') }}" defer></script>
+    <script src="{{ asset('assets/js/inventario/eliminar.js') }}?v={{ time() }}" defer></script>
+    <!-- Script principal de productos -->
+    <script src="{{ asset('assets/js/inventario/productos_botica.js') }}?v={{ time() }}" defer></script>
 <!-- removed legacy realtime validation script to prevent duplicate messages -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
@@ -224,26 +226,92 @@ document.addEventListener('DOMContentLoaded', function() {
     const fields = form.querySelectorAll('input[required], select[required], textarea[required]');
 
     fields.forEach(field => {
-      const message = field.getAttribute('data-error-message') || 'Este campo es obligatorio';
-      // Insertar contenedor si no existe
-      let error = field.nextElementSibling && field.nextElementSibling.classList && field.nextElementSibling.classList.contains('field-error')
-        ? field.nextElementSibling
-        : null;
+      const fieldName = field.getAttribute('name');
+      let error = field.parentNode.querySelector('.field-error');
+      
       if (!error) {
-        error = createErrorElement(message);
-        field.parentNode.insertBefore(error, field.nextSibling);
+        error = createErrorElement('Este campo es obligatorio');
+        field.parentNode.appendChild(error);
       }
 
-      const hideError = () => { error.classList.remove('visible'); field.classList.remove('is-invalid'); };
-      const showErrorIfEmpty = () => {
-        const empty = (field.tagName.toLowerCase() === 'select') ? !field.value : !field.value.trim();
-        error.classList.toggle('visible', empty);
-        field.classList.toggle('is-invalid', empty);
+      // Validación en tiempo real según tipo de campo
+      const validateField = () => {
+        let isValid = true;
+        let errorMsg = '';
+        const value = field.value.trim();
+
+        // Validar campos vacíos
+        if (field.hasAttribute('required')) {
+          const isEmpty = field.tagName.toLowerCase() === 'select' ? !field.value : !value;
+          if (isEmpty) {
+            isValid = false;
+            errorMsg = field.tagName.toLowerCase() === 'select' ? 'Selecciona una opción' : 'Este campo es obligatorio';
+          }
+        }
+
+        // Validaciones específicas por campo
+        if (value && isValid) {
+          // Código de barras: solo números, 13 dígitos
+          if (fieldName === 'codigo_barras') {
+            if (!/^\d+$/.test(value)) {
+              isValid = false;
+              errorMsg = 'Solo se permiten números';
+            } else if (value.length !== 13) {
+              isValid = false;
+              errorMsg = 'Debe tener exactamente 13 dígitos';
+            }
+          }
+          
+          // Stock: solo números enteros positivos
+          if (fieldName === 'stock_actual' || fieldName === 'stock_minimo') {
+            if (!/^\d+$/.test(value)) {
+              isValid = false;
+              errorMsg = 'Solo se permiten números enteros';
+            } else if (parseInt(value) < 0) {
+              isValid = false;
+              errorMsg = 'Debe ser mayor o igual a 0';
+            }
+          }
+          
+          // Precios: números con hasta 2 decimales
+          if (fieldName === 'precio_compra' || fieldName === 'precio_venta') {
+            if (!/^\d+(\.\d{1,2})?$/.test(value)) {
+              isValid = false;
+              errorMsg = 'Formato: 0.00 (máximo 2 decimales)';
+            } else if (parseFloat(value) < 0) {
+              isValid = false;
+              errorMsg = 'Debe ser mayor o igual a 0';
+            }
+          }
+          
+          // Validar precio venta > precio compra
+          if (fieldName === 'precio_venta' && form.querySelector('[name="precio_compra"]')) {
+            const precioCompra = parseFloat(form.querySelector('[name="precio_compra"]').value || 0);
+            const precioVenta = parseFloat(value || 0);
+            if (precioVenta > 0 && precioCompra > 0 && precioVenta <= precioCompra) {
+              isValid = false;
+              errorMsg = 'Debe ser mayor al precio de compra';
+            }
+          }
+        }
+
+        // Mostrar/ocultar error
+        if (!isValid) {
+          error.querySelector('span').textContent = errorMsg;
+          error.classList.add('visible');
+          field.classList.add('is-invalid');
+        } else {
+          error.classList.remove('visible');
+          field.classList.remove('is-invalid');
+        }
+        
+        return isValid;
       };
 
-      field.addEventListener('input', hideError);
-      field.addEventListener('change', hideError);
-      field.addEventListener('blur', showErrorIfEmpty);
+      // Eventos de validación en tiempo real
+      field.addEventListener('input', validateField);
+      field.addEventListener('change', validateField);
+      field.addEventListener('blur', validateField);
     });
 
     form.addEventListener('submit', (e) => {
@@ -343,20 +411,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 <!-- Columna derecha: resto de información -->
                 <div class="lg:col-span-8">
                     <!-- Lote, Código, Proveedor -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Lote</label>
-                            <input type="text" id="det-lote" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" readonly>
-                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Código de Barras</label>
                             <input type="text" id="det-codigo_barras" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" readonly>
                             <p class="text-xs text-gray-500 mt-1">Ingrese 13 dígitos (EAN13).</p>
                         </div>
+                        <!--
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
                             <input type="text" id="det-proveedor" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" readonly>
                         </div>
+                        -->
                     </div>
 
                     <!-- Stock y Precios -->
@@ -380,14 +446,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
 
                     <!-- Fechas -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fabricación</label>
                             <input type="text" id="det-fecha_fabricacion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" readonly>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Vencimiento</label>
-                            <input type="text" id="det-fecha_vencimiento" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" readonly>
                         </div>
                     </div>
 
@@ -406,6 +468,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
             
+        </div>
+    </div>
+</div>
+
+<!-- Modal Selector de Lotes -->
+<div id="modalSelectorLotes" class="modal-overlay fixed inset-0 hidden items-center justify-center z-[60]" style="display:none; background: rgba(0,0,0,0.5);">
+    <div class="modal-container bg-white mx-auto rounded-2xl shadow-2xl z-[60] overflow-hidden w-full max-w-2xl">
+        <div class="modal-header px-6 py-5 border-b flex justify-between items-center" style="background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);">
+            <div class="flex items-center gap-3">
+                <iconify-icon icon="lucide:package" class="text-red-800 text-2xl"></iconify-icon>
+                <div>
+                    <h3 class="text-xl font-bold text-red-900" id="modalSelectorLotesTitle">Ver Detalles - Seleccionar Lote</h3>
+                </div>
+            </div>
+            <button class="text-red-800 hover:text-red-900 transition-colors text-3xl leading-none" id="cerrarModalSelectorLotes">&times;</button>
+        </div>
+        
+        <div class="p-6">
+            <div class="mb-4">
+                <p class="text-sm text-gray-600">PRODUCTO SELECCIONADO</p>
+                <h4 class="text-lg font-bold text-gray-800" id="selectorProductoNombre">-</h4>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gradient-to-r from-red-50 to-pink-50 border-b-2 border-red-200">
+                        <tr>
+                            <th class="px-4 py-3 text-left font-semibold text-gray-700">LOTE</th>
+                            <th class="px-4 py-3 text-left font-semibold text-gray-700">VENCIMIENTO</th>
+                            <th class="px-4 py-3 text-center font-semibold text-gray-700">CANT.</th>
+                            <th class="px-4 py-3 text-center font-semibold text-gray-700">PRECIO</th>
+                            <th class="px-4 py-3 text-center font-semibold text-gray-700">ESTADO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="selectorLotesBody" class="divide-y divide-gray-100">
+                        <!-- Lotes se cargan aquí dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -601,6 +702,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Variables globales necesarias para el JavaScript
 window.APP_PRODUCTS_AJAX = '{{ route('inventario.productos.ajax') }}';
 window.APP_DEFAULT_IMAGE = '{{ asset('assets/images/default-product.svg') }}';
+
 </script>
 <script src="{{ asset('assets/js/inventario/agregar.js') }}?v={{ time() }}" defer></script>
 <script src="{{ asset('assets/js/inventario/productos_botica.js') }}?v={{ time() }}"></script>
@@ -839,6 +941,7 @@ body.modal-open { overflow: hidden; }
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Marca <span class="text-red-500">*</span></label>
                         <input type="text" name="marca" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Ej: Genfar" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Este campo es obligatorio</span></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Categoría <span class="text-red-500">*</span></label>
@@ -847,6 +950,7 @@ body.modal-open { overflow: hidden; }
                                 <option value="">Seleccionar</option>
                             </select>
                         </div>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Selecciona una categoría</span></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Presentación <span class="text-red-500">*</span></label>
@@ -855,10 +959,12 @@ body.modal-open { overflow: hidden; }
                                 <option value="">Seleccionar</option>
                             </select>
                         </div>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Selecciona una presentación</span></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Concentración <span class="text-red-500">*</span></label>
                         <input type="text" name="concentracion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Ej: 500mg" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Este campo es obligatorio</span></div>
                     </div>
                 </div>
 
@@ -867,10 +973,12 @@ body.modal-open { overflow: hidden; }
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Lote <span class="text-red-500">*</span></label>
                         <input type="text" name="lote" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Este campo es obligatorio</span></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Código de Barras <span class="text-red-500">*</span></label>
                         <input type="text" name="codigo_barras" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" maxlength="13" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe tener 13 dígitos</span></div>
                         <p class="text-xs text-gray-500 mt-1">Ingrese 13 dígitos (EAN13).</p>
                     </div>
                     <div>
@@ -880,6 +988,7 @@ body.modal-open { overflow: hidden; }
                                 <option value="">Seleccionar</option>
                             </select>
                         </div>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Selecciona un proveedor</span></div>
                     </div>
                 </div>
 
@@ -888,30 +997,35 @@ body.modal-open { overflow: hidden; }
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Stock Actual <span class="text-red-500">*</span></label>
                         <input type="number" name="stock_actual" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe ser un número ≥ 0</span></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Stock Mínimo <span class="text-red-500">*</span></label>
                         <input type="number" name="stock_minimo" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe ser un número ≥ 0</span></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Precio Compra <span class="text-red-500">*</span></label>
-                        <input type="number" name="precio_compra" min="0" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <input type="text" name="precio_compra" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="0.00" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe ser un número ≥ 0</span></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Precio Venta <span class="text-red-500">*</span></label>
-                        <input type="number" name="precio_venta" min="0" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <input type="text" name="precio_venta" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="0.00" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe ser mayor al precio de compra</span></div>
                     </div>
                 </div>
 
-                <!-- Fila 5: Fecha Fabricación, Fecha Vencimiento -->
+                <!-- Fila 5: Fecha Fabricación y Fecha Vencimiento -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fabricación <span class="text-red-500">*</span></label>
                         <input type="date" name="fecha_fabricacion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Este campo es obligatorio</span></div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Vencimiento <span class="text-red-500">*</span></label>
-                        <input type="date" name="fecha_vencimiento" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Vencimiento</label>
+                        <input type="date" name="fecha_vencimiento" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                     </div>
                 </div>
 
@@ -956,7 +1070,7 @@ body.modal-open { overflow: hidden; }
                 <div class="grid grid-cols-1 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto <span class="text-red-500">*</span></label>
-                        <input type="text" name="nombre" id="edit-nombre" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Ej: Paracetamol 500mg" required>
+                        <input type="text" name="nombre" id="edit-nombre" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Ej: Paracetamol 500mg" required autocomplete="off">
                         <div id="error-nombre-edit" class="field-error">
                             <iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon>
                             <span>El nombre del producto es obligatorio</span>
@@ -969,22 +1083,26 @@ body.modal-open { overflow: hidden; }
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Marca <span class="text-red-500">*</span></label>
                         <input type="text" name="marca" id="edit-marca" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Ej: Genfar" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Este campo es obligatorio</span></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Categoría <span class="text-red-500">*</span></label>
                         <div class="select-wrapper mt-1">
                             <select name="categoria" id="edit-categoria" class="block w-full rounded-md border-gray-300 shadow-sm" required></select>
                         </div>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Selecciona una categoría</span></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Presentación <span class="text-red-500">*</span></label>
                         <div class="select-wrapper mt-1">
                             <select name="presentacion" id="edit-presentacion" class="block w-full rounded-md border-gray-300 shadow-sm" required></select>
                         </div>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Selecciona una presentación</span></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Concentración <span class="text-red-500">*</span></label>
                         <input type="text" name="concentracion" id="edit-concentracion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Ej: 500mg" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Este campo es obligatorio</span></div>
                     </div>
                 </div>
 
@@ -993,19 +1111,22 @@ body.modal-open { overflow: hidden; }
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Lote <span class="text-red-500">*</span></label>
                         <input type="text" name="lote" id="edit-lote" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Este campo es obligatorio</span></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Código de Barras <span class="text-red-500">*</span></label>
                         <input type="text" name="codigo_barras" id="edit-codigo_barras" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" maxlength="13" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe tener 13 dígitos</span></div>
                         <p class="text-xs text-gray-500 mt-1">Ingrese 13 dígitos (EAN13).</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor <span class="text-red-500">*</span></label>
                         <div class="select-wrapper mt-1">
-                            <select name="proveedor_id" id="edit-proveedor" class="block w-full rounded-md border-gray-300 shadow-sm" required disabled>
-                                <option value="">Cargando proveedores...</option>
+                            <select name="proveedor_id" id="edit-proveedor" class="block w-full rounded-md border-gray-300 shadow-sm" required>
+                                <option value="">Seleccionar</option>
                             </select>
                         </div>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Selecciona un proveedor</span></div>
                     </div>
                 </div>
 
@@ -1014,30 +1135,34 @@ body.modal-open { overflow: hidden; }
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Stock Actual <span class="text-red-500">*</span></label>
                         <input type="number" name="stock_actual" id="edit-stock_actual" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe ser un número ≥ 0</span></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Stock Mínimo <span class="text-red-500">*</span></label>
                         <input type="number" name="stock_minimo" id="edit-stock_minimo" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe ser un número ≥ 0</span></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Precio Compra <span class="text-red-500">*</span></label>
-                        <input type="number" name="precio_compra" id="edit-precio_compra" min="0" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <input type="text" name="precio_compra" id="edit-precio_compra" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="0.00" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe ser un número ≥ 0</span></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Precio Venta <span class="text-red-500">*</span></label>
-                        <input type="number" name="precio_venta" id="edit-precio_venta" min="0" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <input type="text" name="precio_venta" id="edit-precio_venta" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="0.00" required>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe ser mayor al precio de compra</span></div>
                     </div>
                 </div>
 
-                <!-- Fila 5: Fecha Fabricación, Fecha Vencimiento -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Fila 5: Fecha Fabricación y Fecha Vencimiento (ocultos) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" style="display: none;">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fabricación <span class="text-red-500">*</span></label>
-                        <input type="date" name="fecha_fabricacion" id="edit-fecha_fabricacion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fabricación</label>
+                        <input type="date" name="fecha_fabricacion" id="edit-fecha_fabricacion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Vencimiento <span class="text-red-500">*</span></label>
-                        <input type="date" name="fecha_vencimiento" id="edit-fecha_vencimiento" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Vencimiento</label>
+                        <input type="date" name="fecha_vencimiento" id="edit-fecha_vencimiento" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                     </div>
                 </div>
 

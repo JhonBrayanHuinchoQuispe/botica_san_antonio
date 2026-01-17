@@ -847,6 +847,12 @@ class POSProfesional {
                         <iconify-icon icon="solar:medical-kit-bold-duotone"></iconify-icon>
                         <span>${producto.stock_actual}</span>
                     </div>
+                    ${producto.lotes_disponibles && producto.lotes_disponibles.length > 1 
+                      ? `<div class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold border border-gray-200 flex items-center gap-1">
+                           <iconify-icon icon="solar:layers-minimalistic-bold-duotone"></iconify-icon>
+                           ${producto.lotes_disponibles.length} LOTES
+                         </div>` 
+                      : ''}
                     ${infoUbicacion.badge}
                 </div>
                 
@@ -879,123 +885,6 @@ class POSProfesional {
     }
 
     determinarInfoUbicacion(producto) {
-        // Verificar si tiene ubicaciones detalladas
-        const tieneUbicaciones = producto.ubicaciones_detalle && producto.ubicaciones_detalle.length > 0;
-        const ubicacionAlmacen = producto.ubicacion_almacen;
-        const stockTotal = producto.stock_actual || 0;
-
-        // Si no hay stock, mostrar explícitamente "Sin ubicar" y no detallar ubicaciones
-        if (stockTotal <= 0) {
-            return {
-                badge: `<div class="producto-ubicacion-badge sin-ubicacion">
-                    <iconify-icon icon="solar:map-point-remove-bold"></iconify-icon>
-                    <span>Sin ubicar</span>
-                </div>`,
-                expandible: ''
-            };
-        }
-        
-        if (!tieneUbicaciones && (!ubicacionAlmacen || ubicacionAlmacen === 'Sin ubicar' || ubicacionAlmacen.trim() === '')) {
-            // Sin ubicación
-            return {
-                badge: `<div class="producto-ubicacion-badge sin-ubicacion">
-                    <iconify-icon icon="solar:map-point-remove-bold"></iconify-icon>
-                    <span>Sin ubicar</span>
-                </div>`,
-                expandible: ''
-            };
-        }
-        
-        if (tieneUbicaciones && producto.ubicaciones_detalle.length > 1) {
-            // Múltiples ubicaciones
-            const totalUbicado = producto.ubicaciones_detalle.reduce((sum, ub) => sum + (ub.cantidad || 0), 0);
-            const ubicacionesItems = producto.ubicaciones_detalle
-                .map(ubicacion => `<div class="ubicacion-item-expandible">
-                    <iconify-icon icon="solar:map-point-bold"></iconify-icon>
-                    <span>${ubicacion.ubicacion_completa}: ${ubicacion.cantidad} und.</span>
-                </div>`)
-                .join('');
-            
-            // Obtener el estante principal (el que tiene más stock)
-            const ubicacionPrincipal = producto.ubicaciones_detalle.reduce((prev, current) => 
-                (current.cantidad > prev.cantidad) ? current : prev
-            );
-            const estantePrincipal = ubicacionPrincipal.ubicacion_completa.split(' - ')[0];
-                
-            return {
-                badge: `<div class="producto-ubicacion-badge multiples-ubicaciones">
-                    <iconify-icon icon="solar:map-point-bold"></iconify-icon>
-                    <span>${estantePrincipal} +${producto.ubicaciones_detalle.length - 1}</span>
-                </div>`,
-                expandible: `<div class="producto-ubicaciones-expandible">
-                    <div class="ubicaciones-header">
-                        <iconify-icon icon="solar:map-point-bold"></iconify-icon>
-                        <span>Ubicaciones:</span>
-                    </div>
-                    ${ubicacionesItems}
-                </div>`
-            };
-        }
-        
-        if (tieneUbicaciones && producto.ubicaciones_detalle.length === 1) {
-            // Una ubicación - verificar si es parcial
-            const ubicacion = producto.ubicaciones_detalle[0];
-            const cantidadUbicada = ubicacion.cantidad || 0;
-            const esParcial = cantidadUbicada < stockTotal;
-            
-            if (esParcial) {
-                // Ubicación parcial
-                const estante = ubicacion.ubicacion_completa.split(' - ')[0];
-                return {
-                    badge: `<div class="producto-ubicacion-badge ubicacion-parcial">
-                        <iconify-icon icon="solar:map-point-wave-bold"></iconify-icon>
-                        <span>${estante} (Parcial)</span>
-                    </div>`,
-                    expandible: `<div class="producto-ubicaciones-expandible">
-                        <div class="ubicacion-item-expandible parcial">
-                            <iconify-icon icon="solar:map-point-bold"></iconify-icon>
-                            <span>${cantidadUbicada} unidades en ${ubicacion.ubicacion_completa}</span>
-                        </div>
-                        <div class="ubicacion-item-expandible sin-ubicar">
-                            <iconify-icon icon="solar:map-point-remove-bold"></iconify-icon>
-                            <span>${stockTotal - cantidadUbicada} sin ubicar</span>
-                        </div>
-                    </div>`
-                };
-            } else {
-                // Totalmente ubicado
-                const estante = ubicacion.ubicacion_completa.split(' - ')[0];
-                return {
-                    badge: `<div class="producto-ubicacion-badge con-ubicacion">
-                        <iconify-icon icon="solar:map-point-bold"></iconify-icon>
-                        <span>${estante}</span>
-                    </div>`,
-                    expandible: `<div class="producto-ubicaciones-expandible">
-                        <div class="ubicacion-item-expandible completa">
-                            <iconify-icon icon="solar:map-point-bold"></iconify-icon>
-                            <span>${ubicacion.ubicacion_completa} - ${cantidadUbicada} unidades</span>
-                        </div>
-                    </div>`
-                };
-            }
-        }
-        
-        // Fallback para ubicación simple del almacén
-        if (ubicacionAlmacen) {
-            return {
-                badge: `<div class="producto-ubicacion-badge con-ubicacion">
-                    <iconify-icon icon="solar:map-point-bold"></iconify-icon>
-                    <span>${ubicacionAlmacen}</span>
-                </div>`,
-                expandible: `<div class="producto-ubicaciones-expandible">
-                    <div class="ubicacion-item-expandible completa">
-                        <iconify-icon icon="solar:map-point-bold"></iconify-icon>
-                        <span>${ubicacionAlmacen}</span>
-                    </div>
-                </div>`
-            };
-        }
-        
         return {
             badge: '',
             expandible: ''
@@ -1363,76 +1252,8 @@ class POSProfesional {
         // Lógica de selección de lotes
         if (producto.lotes_disponibles && producto.lotes_disponibles.length > 1) {
             // Preparar opciones para el modal
-            const opcionesLotes = producto.lotes_disponibles.map(lote => {
-                const vencimiento = lote.fecha_vencimiento || 'Sin fecha';
-                const dias = lote.dias_para_vencer !== null ? `(${Math.round(lote.dias_para_vencer)} días)` : '';
-                const claseVencimiento = lote.dias_para_vencer !== null && lote.dias_para_vencer < 30 ? 'text-red-600 font-bold' : '';
-                
-                return `<div class="lote-opcion p-2 border-b hover:bg-gray-50 cursor-pointer flex justify-between items-center">
-                    <label class="flex items-center w-full cursor-pointer">
-                        <input type="radio" name="lote_seleccion" value="${lote.id}" class="mr-2" 
-                               data-codigo="${lote.lote}" 
-                               data-vencimiento="${vencimiento}"
-                               data-precio="${lote.precio_venta || producto.precio_venta}">
-                        <div class="flex-1">
-                            <div class="font-medium">Lote: ${lote.lote}</div>
-                            <div class="text-xs text-gray-500">Vence: <span class="${claseVencimiento}">${vencimiento} ${dias}</span></div>
-                        </div>
-                        <div class="font-bold text-blue-600">${lote.cantidad} und.</div>
-                    </label>
-                </div>`;
-            }).join('');
-
-            // Opción automática (FEFO)
-            const opcionAuto = `<div class="lote-opcion p-2 border-b bg-blue-50 hover:bg-blue-100 cursor-pointer flex justify-between items-center">
-                <label class="flex items-center w-full cursor-pointer">
-                    <input type="radio" name="lote_seleccion" value="auto" checked class="mr-2">
-                    <div class="flex-1">
-                        <div class="font-bold text-blue-800">Selección Automática (FEFO)</div>
-                        <div class="text-xs text-blue-600">Prioriza lotes por vencer</div>
-                    </div>
-                </label>
-            </div>`;
-
-            const { value: loteId } = await Swal.fire({
-                title: 'Seleccionar Lote',
-                html: `<div class="text-left max-h-60 overflow-y-auto border rounded">
-                        ${opcionAuto}
-                        ${opcionesLotes}
-                       </div>`,
-                showCancelButton: false,
-                confirmButtonText: 'Agregar',
-                cancelButtonText: 'Cancelar',
-                focusConfirm: false,
-                customClass: {
-                    confirmButton: 'swal2-confirm-visible' // Clase personalizada para forzar visibilidad
-                },
-                didOpen: () => {
-                     // Asegurar que el botón de confirmar sea visible siempre
-                     const btn = Swal.getConfirmButton();
-                     if(btn) {
-                         btn.style.cssText = `
-                             display: inline-block !important;
-                             opacity: 1 !important;
-                             visibility: visible !important;
-                             background-color: #3085d6 !important;
-                             color: white !important;
-                             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
-                         `;
-                     }
-                },
-                preConfirm: () => {
-                    const selected = document.querySelector('input[name="lote_seleccion"]:checked');
-                    if (!selected) return null;
-                    if (selected.value === 'auto') return 'auto';
-                    return {
-                        id: selected.value,
-                        codigo: selected.dataset.codigo,
-                        vencimiento: selected.dataset.vencimiento,
-                        precio: selected.dataset.precio
-                    };
-                }
-            });
+            // Mostrar modal personalizado en lugar de SweetAlert
+            const loteId = await this.mostrarModalSelectorLotes(producto);
 
             if (!loteId) return; // Cancelado
 
@@ -3345,6 +3166,111 @@ class POSProfesional {
             clearTimeout(timeoutId);
             timeoutId = setTimeout(() => func.apply(this, args), delay);
         };
+    }
+
+    mostrarModalSelectorLotes(producto) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('modalSelectorLotesPOS');
+            const productoNombre = document.getElementById('selectorProductoNombrePOS');
+            const tbody = document.getElementById('selectorLotesBodyPOS');
+            const btnCerrar = document.getElementById('cerrarModalSelectorLotesPOS');
+
+            if (!modal || !tbody) {
+                console.error('Modal de lotes no encontrado');
+                resolve(null);
+                return;
+            }
+
+            // Configurar nombre del producto
+            productoNombre.textContent = producto.nombre;
+
+            // Limpiar tbody
+            tbody.innerHTML = '';
+
+            // Agregar opción automática FEFO
+            const rowAuto = document.createElement('tr');
+            rowAuto.className = 'hover:bg-blue-50 cursor-pointer transition-colors border-b border-gray-100 bg-blue-50';
+            rowAuto.innerHTML = `
+                <td class="px-4 py-3" colspan="4">
+                    <div class="font-bold text-blue-800">Selección Automática (FEFO)</div>
+                    <div class="text-xs text-blue-600">Prioriza lotes por vencer</div>
+                </td>
+            `;
+            rowAuto.addEventListener('click', () => {
+                modal.style.display = 'none';
+                resolve('auto');
+            });
+            tbody.appendChild(rowAuto);
+
+            // Crear filas para cada lote
+            producto.lotes_disponibles.forEach((lote) => {
+                const dias = Math.round(lote.dias_para_vencer || 0);
+                const diasText = dias >= 0 ? `Vence en ${dias} días` : `Venció hace ${Math.abs(dias)} días`;
+                const precioVenta = lote.precio_venta || producto.precio_venta || 0;
+                const vencimiento = lote.fecha_vencimiento ? new Date(lote.fecha_vencimiento).toLocaleDateString('es-PE') : 'Sin fecha';
+
+                // Determinar color de fondo según vencimiento (Inline styles para asegurar visualización)
+                let rowStyle = 'background-color: #ffffff;';
+                let rowClass = 'hover:bg-gray-50';
+                
+                if (dias < 0) {
+                    rowStyle = 'background-color: #fef2f2;'; // Rojo muy suave
+                    rowClass = 'hover:bg-red-50'; 
+                } else if (dias <= 90) {
+                    rowStyle = 'background-color: #fff7ed;'; // Naranja muy suave (Orange-50)
+                    rowClass = 'hover:bg-orange-50';
+                }
+
+                const row = document.createElement('tr');
+                row.className = `${rowClass} cursor-pointer transition-colors border-b border-gray-100`;
+                row.style.cssText = rowStyle; // Aplicar estilo forzado
+                
+                row.innerHTML = `
+                    <td class="px-4 py-3">
+                        <div class="font-semibold text-gray-800">${lote.lote || 'Sin código'}</div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="font-medium text-gray-700">${vencimiento}</div>
+                        <div class="text-xs text-gray-500" style="${dias <= 90 ? 'color:#c2410c; font-weight:600;' : ''}">${diasText}</div>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="font-bold text-lg text-gray-800">${lote.cantidad}</span>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <div class="font-semibold text-gray-800">S/ ${Number(precioVenta).toFixed(2)}</div>
+                    </td>
+                `;
+
+                row.addEventListener('click', () => {
+                    modal.style.display = 'none';
+                    resolve({
+                        id: lote.id,
+                        codigo: lote.lote,
+                        vencimiento: lote.fecha_vencimiento,
+                        precio: precioVenta
+                    });
+                });
+
+                tbody.appendChild(row);
+            });
+
+            // Evento para cerrar modal
+            btnCerrar.addEventListener('click', () => {
+                modal.style.display = 'none';
+                resolve(null);
+            });
+
+            // Cerrar al hacer clic fuera del modal
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                    resolve(null);
+                }
+            });
+
+            // Mostrar modal
+            modal.style.display = 'flex';
+        });
     }
 }
 

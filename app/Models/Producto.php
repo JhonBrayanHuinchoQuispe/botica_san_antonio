@@ -451,10 +451,10 @@ class Producto extends Model implements Auditable
         elseif ($this->stock_actual <= 0) {
             $estado = 'Agotado';
         }
-        // 3. Verificar si está próximo a vencer (30 días) - tiene prioridad sobre stock bajo
+        // 3. Verificar si está próximo a vencer (90 días) - tiene prioridad sobre stock bajo
         elseif ($this->fecha_vencimiento) {
             $diasParaVencer = $ahora->diffInDays($this->fecha_vencimiento, false);
-            if ($diasParaVencer <= 30 && $diasParaVencer > 0) {
+            if ($diasParaVencer <= 90 && $diasParaVencer > 0) {
                 $estado = 'Por vencer';
             }
             // 4. Verificar si tiene stock bajo

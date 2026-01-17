@@ -63,8 +63,12 @@ class ProductoRequest extends FormRequest
             'concentracion' => [
                 'required',
                 'string',
-                'max:100',
-                'regex:/^[0-9]+(\.[0-9]+)?\s*(mg|g|ml|l|mcg|µg|UI|%|mEq|mmol)$/i' // Formato: número + unidad
+                'max:100'
+            ],
+            'proveedor_id' => [
+                'nullable',
+                'integer',
+                'exists:proveedores,id'
             ],
             'stock_actual' => [
                 'required',
@@ -89,7 +93,7 @@ class ProductoRequest extends FormRequest
                 'before_or_equal:today'
             ],
             'fecha_vencimiento' => [
-                'required',
+                'nullable',
                 'date',
                 'after:fecha_fabricacion',
                 'after:today'
@@ -225,7 +229,10 @@ class ProductoRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             $this->validateProductoDuplicado($validator);
-            $this->validateFechas($validator);
+            // Solo validar fechas si fecha_vencimiento está presente
+            if ($this->input('fecha_vencimiento')) {
+                $this->validateFechas($validator);
+            }
             $this->validatePrecios($validator);
         });
     }
@@ -267,6 +274,7 @@ class ProductoRequest extends FormRequest
         $fechaFabricacion = $this->input('fecha_fabricacion');
         $fechaVencimiento = $this->input('fecha_vencimiento');
 
+        // Solo validar si ambas fechas están presentes
         if ($fechaFabricacion && $fechaVencimiento) {
             $fabricacion = \Carbon\Carbon::parse($fechaFabricacion);
             $vencimiento = \Carbon\Carbon::parse($fechaVencimiento);

@@ -760,3 +760,14 @@ Route::fallback(function () {
 Route::post('/push/subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'subscribe'])
     ->middleware('auth')
     ->name('push.subscribe');
+
+// Ruta de prueba para notificaciones Firebase
+Route::get('/test-firebase', function () {
+    try {
+        $firebase = new \App\Services\FirebaseNotificationService();
+        $firebase->sendStockAlert('Producto de Prueba', 5, 10);
+        return 'Notificación enviada al tema "inventario". Verifica tu celular.';
+    } catch (\Throwable $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});

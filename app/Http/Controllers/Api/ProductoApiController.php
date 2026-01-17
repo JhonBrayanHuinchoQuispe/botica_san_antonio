@@ -16,7 +16,7 @@ class ProductoApiController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Producto::query();
+            $query = Producto::with('ubicaciones'); // Eager load batches for accurate status
             
             // Búsqueda por nombre o código de barras
             if ($request->has('search') && $request->search) {
@@ -43,15 +43,42 @@ class ProductoApiController extends Controller
             
             // Agregar campos calculados a cada producto
             $productsWithStatus = $allProducts->map(function ($producto) {
+                // Determine effective expiration date based on batches (FEFO)
+                // If there's an active batch expiring sooner than the product master date, use that.
+                $minBatchDate = null;
+                if ($producto->ubicaciones && $producto->ubicaciones->count() > 0) {
+                    $activeBatches = $producto->ubicaciones->where('cantidad', '>', 0)->whereNotNull('fecha_vencimiento');
+                    if ($activeBatches->count() > 0) {
+                        $minBatchDate = $activeBatches->sortBy('fecha_vencimiento')->first()->fecha_vencimiento;
+                    }
+                }
+                
+                $effectiveDate = $producto->fecha_vencimiento;
+                if ($minBatchDate) {
+                    $batchDate = Carbon::parse($minBatchDate);
+                    $masterDate = $producto->fecha_vencimiento ? Carbon::parse($producto->fecha_vencimiento) : null;
+                    
+                    // If batch date is earlier (or master is null), use batch date
+                    if (!$masterDate || $batchDate->lt($masterDate)) {
+                        $effectiveDate = $minBatchDate;
+                    }
+                }
+                
+                // Override the product's date for the JSON response so the app sees the worst case
+                if ($effectiveDate) {
+                    $producto->fecha_vencimiento = Carbon::parse($effectiveDate)->format('Y-m-d');
+                }
+
                 // Calcular días hasta vencimiento
                 $diasParaVencer = null;
-                if ($producto->fecha_vencimiento) {
-                    $diasParaVencer = Carbon::now()->diffInDays(Carbon::parse($producto->fecha_vencimiento), false);
+                if ($effectiveDate) {
+                    $diasParaVencer = Carbon::now()->diffInDays(Carbon::parse($effectiveDate), false);
                 }
                 
                 // Calcular estados
                 $isLowStock = $producto->stock_actual <= $producto->stock_minimo;
-                $isExpiringSoon = $diasParaVencer !== null && $diasParaVencer <= 30 && $diasParaVencer > 0;
+                // Use 90 days to match Web System QueryOptimizationService logic
+                $isExpiringSoon = $diasParaVencer !== null && $diasParaVencer <= 90 && $diasParaVencer >= 0;
                 $isExpired = $diasParaVencer !== null && $diasParaVencer < 0;
                 $isOutOfStock = $producto->stock_actual <= 0;
                 
@@ -68,14 +95,14 @@ class ProductoApiController extends Controller
                     $status = 'out_of_stock';
                     $statusText = 'Agotado';
                     $statusColor = '#6b7280'; // Gris
-                } elseif ($isLowStock) {
-                    $status = 'low_stock';
-                    $statusText = 'Stock Bajo';
-                    $statusColor = '#ea580c'; // Naranja
                 } elseif ($isExpiringSoon) {
                     $status = 'expiring_soon';
                     $statusText = 'Por Vencer';
                     $statusColor = '#d97706'; // Amarillo/Naranja
+                } elseif ($isLowStock) {
+                    $status = 'low_stock';
+                    $statusText = 'Stock Bajo';
+                    $statusColor = '#ea580c'; // Naranja
                 }
                 
                 // Agregar campos calculados al producto
@@ -87,12 +114,53 @@ class ProductoApiController extends Controller
                 $producto->status = $status;
                 $producto->status_text = $statusText;
                 $producto->status_color = $statusColor;
+                $producto->dias_para_vencer = $diasParaVencer;
                 
-                return $producto;
+                // Count active batches and their statuses
+                $producto->batches_count = 0;
+                $producto->batches_expiring_count = 0;
+                $producto->batches_expired_count = 0;
+
+                if ($producto->relationLoaded('ubicaciones')) {
+                    $activeBatches = $producto->ubicaciones->where('cantidad', '>', 0);
+                    $producto->batches_count = $activeBatches->count();
+
+                    foreach ($activeBatches as $batch) {
+                        if ($batch->fecha_vencimiento) {
+                            $days = Carbon::now()->diffInDays(Carbon::parse($batch->fecha_vencimiento), false);
+                            if ($days < 0) {
+                                $producto->batches_expired_count++;
+                            } elseif ($days <= 90) {
+                                $producto->batches_expiring_count++;
+                            }
+                        }
+                    }
+                }
+                
+                // Convertir a array y mezclar para asegurar que los campos dinámicos estén en el JSON
+                $productoArray = $producto->toArray();
+                $productoArray['batches_count'] = $producto->batches_count;
+                $productoArray['batches_expiring_count'] = $producto->batches_expiring_count;
+                $productoArray['batches_expired_count'] = $producto->batches_expired_count;
+                
+                // Asegurar que los campos calculados anteriores también estén
+                $productoArray['status'] = $status;
+                $productoArray['status_text'] = $statusText;
+                $productoArray['status_color'] = $statusColor;
+                $productoArray['is_low_stock'] = $isLowStock;
+                $productoArray['is_expiring_soon'] = $isExpiringSoon;
+                $productoArray['is_expired'] = $isExpired;
+                $productoArray['is_out_of_stock'] = $isOutOfStock;
+                $productoArray['dias_para_vencer'] = $diasParaVencer;
+                $productoArray['imagen_url'] = $producto->imagen_url; // Append accessors
+
+                return $productoArray;
             });
             
             // Aplicar paginación manual
-            $perPage = min($request->get('per_page', 20), 100);
+            // Aumentamos el límite máximo a 2000 para permitir que la app móvil descargue todo el catálogo
+            // y realice la búsqueda local correctamente.
+            $perPage = min($request->get('per_page', 20), 2000);
             $currentPage = $request->get('page', 1);
             $total = $productsWithStatus->count();
             $offset = ($currentPage - 1) * $perPage;
@@ -211,17 +279,21 @@ class ProductoApiController extends Controller
     public function store(Request $request)
     {
         try {
+            // Log para depuración
+            \Log::info('Mobile: Creando producto', ['data' => $request->except(['imagen'])]);
+            
             $validator = Validator::make($request->all(), [
                 'nombre' => 'required|string|max:255',
-                'marca' => 'required|string|max:255',
+                'marca' => 'nullable|string|max:255',
                 'precio_venta' => 'required|numeric|min:0',
-                'stock_actual' => 'required|integer|min:0',
-                'stock_minimo' => 'required|integer|min:0',
-                'fecha_vencimiento' => 'required|date|after:today',
-                'codigo_barras' => 'nullable|string|unique:productos,codigo_barras',
+                'stock_actual' => 'nullable|integer|min:0',
+                'stock_minimo' => 'nullable|integer|min:0',
+                'fecha_vencimiento' => 'nullable|date',
+                'codigo_barras' => 'nullable|string',
             ]);
             
             if ($validator->fails()) {
+                \Log::warning('Mobile: Validación fallida al crear producto', ['errors' => $validator->errors()->toArray()]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Datos inválidos',
@@ -229,7 +301,95 @@ class ProductoApiController extends Controller
                 ], 422);
             }
             
-            $product = Producto::create($request->all());
+            // Verificar si el código de barras ya existe (solo si se proporciona)
+            if ($request->codigo_barras) {
+                $existente = Producto::where('codigo_barras', $request->codigo_barras)->first();
+                if ($existente) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'El código de barras ya está registrado',
+                        'errors' => ['codigo_barras' => ['El código de barras ya existe']]
+                    ], 422);
+                }
+            }
+            
+            // Valores por defecto
+            $request->merge([
+                'stock_actual' => $request->stock_actual ?? 0,
+                'stock_minimo' => $request->stock_minimo ?? 5,
+                'marca' => $request->marca ?? 'Sin marca',
+            ]);
+
+            // Manejar subida de imagen
+            $imagenUrl = null;
+            if ($request->hasFile('imagen')) {
+                $file = $request->file('imagen');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('public/productos', $filename);
+                // Generar URL accesible
+                $imagenUrl = url('storage/productos/' . $filename);
+            }
+
+            // Crear el producto con los datos básicos
+            $data = $request->all();
+            if ($imagenUrl) {
+                $data['imagen_url'] = $imagenUrl;
+                // Si tienes columna 'imagen' para el path relativo:
+                $data['imagen'] = 'productos/' . $filename; 
+            }
+
+            $product = Producto::create($data);
+
+            // --- CREACIÓN AUTOMÁTICA DE LOTE INICIAL ---
+            // Si el producto se crea con stock > 0, debemos registrar el lote físico
+            if ($product->stock_actual > 0) {
+                // Obtener o crear ubicación por defecto
+                $ubicacionDefault = \App\Models\Ubicacion::first();
+                if (!$ubicacionDefault) {
+                    // Crear estante por defecto si no existe (esto crea ubicaciones automáticamente)
+                    $estanteDefault = \App\Models\Estante::firstOrCreate(
+                        ['nombre' => 'Estante Principal'],
+                        ['descripcion' => 'Estante creado automáticamente', 'numero_niveles' => 1, 'numero_posiciones' => 1, 'activo' => true]
+                    );
+                    // Obtener la ubicación creada automáticamente por el estante
+                    $ubicacionDefault = \App\Models\Ubicacion::where('estante_id', $estanteDefault->id)->first();
+                }
+                $ubicacionId = $ubicacionDefault ? $ubicacionDefault->id : null;
+
+                if ($ubicacionId) {
+                    $loteCodigo = $request->lote ?? 'LOTE-INI-' . $product->id;
+                    
+                    \App\Models\ProductoUbicacion::create([
+                        'producto_id' => $product->id,
+                        'ubicacion_id' => $ubicacionId,
+                        'cantidad' => $product->stock_actual,
+                        'cantidad_inicial' => $product->stock_actual,
+                        'lote' => $loteCodigo,
+                        'fecha_vencimiento' => $product->fecha_vencimiento,
+                        'fecha_ingreso' => now(),
+                        'proveedor_id' => $request->proveedor_id ?? null,
+                        'precio_compra_lote' => $request->precio_compra ?? $product->precio_compra,
+                        'precio_venta_lote' => $request->precio_venta ?? $product->precio_venta,
+                        'estado_lote' => 'activo',
+                    ]);
+
+                    // Registrar movimiento inicial
+                    try {
+                        \App\Models\MovimientoStock::create([
+                            'producto_id' => $product->id,
+                            'tipo_movimiento' => 'entrada',
+                            'cantidad' => $product->stock_actual,
+                            'cantidad_anterior' => 0,
+                            'cantidad_nueva' => $product->stock_actual,
+                            'motivo' => 'Inventario Inicial (App Móvil) - Lote: ' . $loteCodigo,
+                            'usuario_id' => auth()->id() ?? 1,
+                        ]);
+                    } catch (\Exception $e) {
+                        // Ignorar error de historial
+                    }
+                }
+            }
+            // ---------------------------------------------
             
             return response()->json([
                 'success' => true,
@@ -238,9 +398,14 @@ class ProductoApiController extends Controller
             ], 201);
             
         } catch (\Exception $e) {
+            \Log::error('Mobile: Error al crear producto', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data' => $request->except(['imagen'])
+            ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear producto',
+                'message' => 'Error al crear producto: ' . $e->getMessage(),
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -532,6 +697,64 @@ class ProductoApiController extends Controller
                 $product->fecha_vencimiento = $validated['fecha_vencimiento'];
             }
             
+            // --- CREACIÓN DE LOTE (ProductoUbicacion) ---
+            // Obtener o crear ubicación por defecto
+            $ubicacionDefault = \App\Models\Ubicacion::first();
+            if (!$ubicacionDefault) {
+                // Crear estante por defecto si no existe (esto crea ubicaciones automáticamente)
+                $estanteDefault = \App\Models\Estante::firstOrCreate(
+                    ['nombre' => 'Estante Principal'],
+                    ['descripcion' => 'Estante creado automáticamente', 'numero_niveles' => 1, 'numero_posiciones' => 1, 'activo' => true]
+                );
+                // Obtener la ubicación creada automáticamente por el estante
+                $ubicacionDefault = \App\Models\Ubicacion::where('estante_id', $estanteDefault->id)->first();
+            }
+            $ubicacionId = $ubicacionDefault ? $ubicacionDefault->id : null;
+            
+            // Si hay lote y ubicación, registrar en ProductoUbicacion
+            if ($ubicacionId) {
+                // Usar lote proporcionado o intentar obtener del producto
+                $loteCodigo = $validated['lote'] ?? $product->lote ?? 'LOTE-GRAL';
+                $fechaVenc = $validated['fecha_vencimiento'] ?? $product->fecha_vencimiento ?? null;
+                
+                if ($loteCodigo) {
+                    $loteQuery = \App\Models\ProductoUbicacion::where('producto_id', $product->id)
+                        ->where('lote', $loteCodigo)
+                        ->where('ubicacion_id', $ubicacionId);
+                        
+                    if ($fechaVenc) {
+                        $loteQuery->where('fecha_vencimiento', $fechaVenc);
+                    }
+                    
+                    $loteExistente = $loteQuery->first();
+
+                    if ($loteExistente) {
+                        $loteExistente->cantidad += (int) $validated['quantity'];
+                        if (isset($validated['precio_compra'])) $loteExistente->precio_compra_lote = $validated['precio_compra'];
+                        if (isset($validated['precio_venta'])) $loteExistente->precio_venta_lote = $validated['precio_venta'];
+                        $loteExistente->save();
+                    } else {
+                        \App\Models\ProductoUbicacion::create([
+                            'producto_id' => $product->id,
+                            'ubicacion_id' => $ubicacionId,
+                            'cantidad' => (int) $validated['quantity'],
+                            'cantidad_inicial' => (int) $validated['quantity'],
+                            'lote' => $loteCodigo,
+                            'fecha_vencimiento' => $fechaVenc,
+                            'fecha_ingreso' => now(),
+                            'proveedor_id' => $validated['proveedor_id'] ?? null,
+                            'precio_compra_lote' => $validated['precio_compra'] ?? $product->precio_compra,
+                            'precio_venta_lote' => $validated['precio_venta'] ?? $product->precio_venta,
+                            'estado_lote' => 'activo',
+                        ]);
+                    }
+                    
+                    // Recalcular stock total real basado en lotes
+                    $product->stock_actual = \App\Models\ProductoUbicacion::where('producto_id', $product->id)->sum('cantidad');
+                }
+            }
+            // ---------------------------------------------
+            
             $product->save();
             
             // Registrar historial de entrada de mercadería
@@ -690,35 +913,42 @@ class ProductoApiController extends Controller
     public function getCriticalProducts(Request $request)
     {
         try {
-            $criticalProducts = [];
+            // Instantiate the service directly to ensure logic consistency with Web Dashboard
+            $optimizationService = new \App\Services\QueryOptimizationService();
             
-            // Función auxiliar para agregar campos calculados
-            $addCalculatedFields = function ($product) {
-                // Calcular días hasta vencimiento
+            // Helper to add calculated fields for mobile app compatibility
+            $formatProduct = function ($product, $alertType, $priority) {
+                // Determine effective expiration date based on batches (FEFO)
+                $minBatchDate = null;
+                if ($product->relationLoaded('ubicaciones') && $product->ubicaciones->count() > 0) {
+                     $activeBatches = $product->ubicaciones->where('cantidad', '>', 0)->whereNotNull('fecha_vencimiento');
+                     if ($activeBatches->count() > 0) {
+                         $minBatchDate = $activeBatches->sortBy('fecha_vencimiento')->first()->fecha_vencimiento;
+                     }
+                }
+                
+                $effectiveDate = $product->fecha_vencimiento;
+                if ($minBatchDate) {
+                    $batchDate = Carbon::parse($minBatchDate);
+                    $masterDate = $product->fecha_vencimiento ? Carbon::parse($product->fecha_vencimiento) : null;
+                    
+                    if (!$masterDate || $batchDate->lt($masterDate)) {
+                        $effectiveDate = $minBatchDate;
+                    }
+                }
+                
+                // Override the product's date for the JSON response
+                if ($effectiveDate) {
+                    $product->fecha_vencimiento = Carbon::parse($effectiveDate)->format('Y-m-d');
+                }
+
+                // Calculate days until expiry
                 $diasParaVencer = null;
-                if ($product->fecha_vencimiento) {
-                    $diasParaVencer = Carbon::now()->diffInDays(Carbon::parse($product->fecha_vencimiento), false);
+                if ($effectiveDate) {
+                    $diasParaVencer = Carbon::now()->diffInDays(Carbon::parse($effectiveDate), false);
                 }
                 
-                // Calcular estados
-                $isLowStock = $product->stock_actual <= $product->stock_minimo;
-                $isExpiringSoon = $diasParaVencer !== null && $diasParaVencer <= 30 && $diasParaVencer > 0;
-                $isExpired = $diasParaVencer !== null && $diasParaVencer < 0;
-                $isOutOfStock = $product->stock_actual <= 0;
-                
-                // Determinar estado específico
-                $estadoEspecifico = 'normal';
-                if ($isOutOfStock) {
-                    $estadoEspecifico = 'agotado';
-                } elseif ($isExpired) {
-                    $estadoEspecifico = 'vencido';
-                } elseif ($isExpiringSoon) {
-                    $estadoEspecifico = 'por_vencer';
-                } elseif ($isLowStock) {
-                    $estadoEspecifico = 'bajo_stock';
-                }
-                
-                // Agregar todos los campos necesarios para la app móvil
+                // Add fields required by mobile app
                 $product->id = $product->id;
                 $product->name = $product->nombre;
                 $product->brand = $product->marca ?? 'Sin marca';
@@ -726,90 +956,139 @@ class ProductoApiController extends Controller
                 $product->stock = $product->stock_actual;
                 $product->minStock = $product->stock_minimo;
                 $product->price = (float) $product->precio_venta;
-                $product->expiryDate = $product->fecha_vencimiento ? $product->fecha_vencimiento->format('Y-m-d') : null;
+                $product->expiryDate = $product->fecha_vencimiento;
                 $product->diasParaVencer = $diasParaVencer;
-                $product->estado = $estadoEspecifico;
-                $product->estadoTexto = $product->estado;
+                
+                $product->alert_type = $alertType;
+                $product->alert_message = match($alertType) {
+                    'low_stock' => 'Stock bajo',
+                    'expiring' => 'Próximo a vencer',
+                    'expired' => 'Vencido',
+                    'out_of_stock' => 'Agotado',
+                    default => 'Alerta'
+                };
+                $product->priority = $priority;
+                
+                // Status flags
+                $product->isLowStock = $alertType === 'low_stock';
+                $product->isExpiringSoon = $alertType === 'expiring';
+                $product->isExpired = $alertType === 'expired';
+                $product->isOutOfStock = $alertType === 'out_of_stock';
+                
+                // Legacy fields compatibility
+                $product->is_low_stock = $product->isLowStock;
+                $product->is_expiring_soon = $product->isExpiringSoon;
+                $product->is_expired = $product->isExpired;
+                $product->is_out_of_stock = $product->isOutOfStock;
+                
+                // Additional fields
                 $product->barcode = $product->codigo_barras;
                 $product->image = $product->imagen_url;
-                $product->ubicacion = $product->ubicacion_almacen; // Campo de ubicación
+                $product->ubicacion = $product->ubicacion_almacen;
                 $product->presentacion = $product->presentacion;
                 $product->concentracion = $product->concentracion;
                 $product->lote = $product->lote;
-                $product->isLowStock = $isLowStock;
-                $product->isExpiringSoon = $isExpiringSoon;
-                $product->isExpired = $isExpired;
-                $product->isOutOfStock = $isOutOfStock;
-                $product->is_low_stock = $isLowStock;
-                $product->is_expiring_soon = $isExpiringSoon;
-                $product->is_expired = $isExpired;
-                $product->is_out_of_stock = $isOutOfStock;
-                $product->dias_para_vencer = $diasParaVencer;
                 
-                return $product;
+                // Count active batches and their statuses for alerts
+                $product->batches_count = 0;
+                $product->batches_expiring_count = 0;
+                $product->batches_expired_count = 0;
+
+                if ($product->relationLoaded('ubicaciones')) {
+                    $activeBatches = $product->ubicaciones->where('cantidad', '>', 0);
+                    $product->batches_count = $activeBatches->count();
+
+                    foreach ($activeBatches as $batch) {
+                        if ($batch->fecha_vencimiento) {
+                            $days = Carbon::now()->diffInDays(Carbon::parse($batch->fecha_vencimiento), false);
+                            if ($days < 0) {
+                                $product->batches_expired_count++;
+                            } elseif ($days <= 90) {
+                                $product->batches_expiring_count++;
+                            }
+                        }
+                    }
+                }
+
+                // Convert to array to ensure dynamic properties are included
+                $productArray = $product->toArray();
+                $productArray['batches_count'] = $product->batches_count;
+                $productArray['batches_expiring_count'] = $product->batches_expiring_count;
+                $productArray['batches_expired_count'] = $product->batches_expired_count;
+                
+                // Ensure other dynamic fields are present
+                $productArray['alert_type'] = $alertType;
+                $productArray['alert_message'] = $product->alert_message;
+                $productArray['priority'] = $priority;
+                $productArray['diasParaVencer'] = $diasParaVencer;
+                $productArray['expiryDate'] = $effectiveDate; // Send effective date
+                $productArray['fecha_vencimiento'] = $effectiveDate; // Standard field
+                
+                // Add status flags
+                $productArray['is_low_stock'] = $product->isLowStock;
+                $productArray['is_expiring_soon'] = $product->isExpiringSoon;
+                $productArray['is_expired'] = $product->isExpired;
+                $productArray['is_out_of_stock'] = $product->isOutOfStock;
+                
+                return $productArray;
             };
-            
-            // Productos con stock bajo
-            $lowStockProducts = Producto::whereRaw('stock_actual <= stock_minimo')
-                ->get()
-                ->map(function ($product) use ($addCalculatedFields) {
-                    $product = $addCalculatedFields($product);
-                    $product->alert_type = 'low_stock';
-                    $product->alert_message = 'Stock bajo';
-                    $product->priority = 'medium';
-                    return $product;
-                });
-            
-            // Productos próximos a vencer (30 días)
-            $expiringProducts = Producto::where('fecha_vencimiento', '<=', Carbon::now()->addDays(30))
-                ->where('fecha_vencimiento', '>', Carbon::now())
-                ->get()
-                ->map(function ($product) use ($addCalculatedFields) {
-                    $product = $addCalculatedFields($product);
-                    $product->alert_type = 'expiring';
-                    $product->alert_message = 'Próximo a vencer';
-                    $product->priority = 'high';
-                    return $product;
-                });
-            
-            // Productos vencidos
-            $expiredProducts = Producto::where('fecha_vencimiento', '<', Carbon::now())
-                ->get()
-                ->map(function ($product) use ($addCalculatedFields) {
-                    $product = $addCalculatedFields($product);
-                    $product->alert_type = 'expired';
-                    $product->alert_message = 'Vencido';
-                    $product->priority = 'critical';
-                    return $product;
-                });
-            
-            // Productos agotados (stock = 0)
-            $outOfStockProducts = Producto::where('stock_actual', 0)
-                ->get()
-                ->map(function ($product) use ($addCalculatedFields) {
-                    $product = $addCalculatedFields($product);
-                    $product->alert_type = 'out_of_stock';
-                    $product->alert_message = 'Agotado';
-                    $product->priority = 'high';
-                    return $product;
-                });
-            
-            // Combinar todos los productos críticos
-            $criticalProducts = $lowStockProducts
-                ->concat($expiringProducts)
-                ->concat($expiredProducts)
-                ->concat($outOfStockProducts)
-                ->unique('id'); // Evitar duplicados
-            
-            // Filtros opcionales
-            if ($request->has('type')) {
-                $criticalProducts = $criticalProducts->where('alert_type', $request->type);
+
+            $criticalProducts = collect();
+
+            // 1. Stock Bajo
+            if (!$request->has('type') || $request->type === 'low_stock') {
+                $lowStock = $optimizationService->getProductosOptimizados(['estado' => 'bajo_stock'])
+                    ->with('ubicaciones')
+                    ->get()
+                    ->map(fn($p) => $formatProduct($p, 'low_stock', 'medium'));
+                $criticalProducts = $criticalProducts->concat($lowStock);
             }
+
+            // 2. Por Vencer (expiring)
+            if (!$request->has('type') || $request->type === 'expiring') {
+                $expiring = $optimizationService->getProductosOptimizados(['estado' => 'por_vencer'])
+                    ->with('ubicaciones')
+                    ->get()
+                    ->map(fn($p) => $formatProduct($p, 'expiring', 'high'));
+                $criticalProducts = $criticalProducts->concat($expiring);
+            }
+
+            // 3. Vencidos (expired)
+            if (!$request->has('type') || $request->type === 'expired') {
+                $expired = $optimizationService->getProductosOptimizados(['estado' => 'vencido'])
+                    ->with('ubicaciones')
+                    ->get()
+                    ->map(fn($p) => $formatProduct($p, 'expired', 'critical'));
+                $criticalProducts = $criticalProducts->concat($expired);
+            }
+
+            // 4. Agotados (out_of_stock)
+            if (!$request->has('type') || $request->type === 'out_of_stock') {
+                $outOfStock = $optimizationService->getProductosOptimizados(['estado' => 'agotado'])
+                    ->with('ubicaciones')
+                    ->get()
+                    ->map(fn($p) => $formatProduct($p, 'out_of_stock', 'high'));
+                $criticalProducts = $criticalProducts->concat($outOfStock);
+            }
+
+            // Remove duplicates ensuring highest priority status is kept
+            // Order of severity: Vencido (expired) > Agotado (out_of_stock) > Por Vencer (expiring) > Stock Bajo (low_stock)
+            // Since we concatenated in specific order, we can use unique('id') if we order them by severity first
+            
+            $criticalProducts = $criticalProducts->sortByDesc(function ($product) {
+                return match($product->alert_type) {
+                    'expired' => 4,
+                    'out_of_stock' => 3,
+                    'expiring' => 2,
+                    'low_stock' => 1,
+                    default => 0
+                };
+            })->unique('id')->values();
             
             return response()->json([
                 'success' => true,
                 'message' => 'Productos críticos obtenidos exitosamente',
-                'data' => $criticalProducts->values(),
+                'data' => $criticalProducts,
                 'total' => $criticalProducts->count()
             ]);
             
@@ -924,6 +1203,186 @@ class ProductoApiController extends Controller
     }
 
     /**
+     * Obtener lotes de un producto específico
+     */
+    public function getLotes($id)
+    {
+        try {
+            $producto = Producto::findOrFail($id);
+            
+            // Obtener todos los lotes del producto desde producto_ubicaciones
+            $lotes = \App\Models\ProductoUbicacion::where('producto_id', $id)
+                ->where('cantidad', '>', 0)
+                ->with(['ubicacion', 'proveedor'])
+                ->get()
+                ->map(function($ubicacion) {
+                    $diasParaVencer = null;
+                    if ($ubicacion->fecha_vencimiento) {
+                        $diasParaVencer = Carbon::now()->diffInDays(Carbon::parse($ubicacion->fecha_vencimiento), false);
+                    }
+                    
+                    return [
+                        'id' => $ubicacion->id,
+                        'numero_lote' => $ubicacion->lote ?? 'Sin lote',
+                        'fecha_vencimiento' => $ubicacion->fecha_vencimiento ? $ubicacion->fecha_vencimiento->format('Y-m-d') : null,
+                        'cantidad' => $ubicacion->cantidad,
+                        'precio_compra' => $ubicacion->precio_compra_lote,
+                        'precio_venta' => $ubicacion->precio_venta_lote,
+                        'proveedor' => $ubicacion->proveedor ? $ubicacion->proveedor->nombre : null,
+                        'ubicacion' => $ubicacion->ubicacion ? $ubicacion->ubicacion->nombre : null,
+                        'dias_para_vencer' => $diasParaVencer,
+                        'estado' => $this->determinarEstadoLote($ubicacion, $diasParaVencer),
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'lotes' => $lotes,
+                'total_lotes' => $lotes->count(),
+                'producto' => [
+                    'id' => $producto->id,
+                    'nombre' => $producto->nombre,
+                        'concentracion' => $producto->concentracion,
+                    'presentacion' => $producto->presentacion,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener lotes del producto',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Actualizar stock de un producto (crear entrada con lote)
+     */
+    public function actualizarStock(Request $request, $id)
+    {
+        try {
+            $producto = Producto::findOrFail($id);
+            
+            $validator = Validator::make($request->all(), [
+                'cantidad' => 'required|integer|min:1',
+                'lote' => 'required|string',
+                'fecha_vencimiento' => 'required|date',
+                'proveedor_id' => 'required|integer|exists:proveedores,id',
+                'precio_compra' => 'nullable|numeric|min:0',
+                'precio_venta' => 'nullable|numeric|min:0',
+                'ubicacion_id' => 'nullable|integer|exists:ubicaciones,id',
+            ]);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Datos inválidos',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Obtener ubicación por defecto si no se especifica
+            $ubicacionId = $request->ubicacion_id;
+            if (!$ubicacionId) {
+                $ubicacionDefault = \App\Models\Ubicacion::first();
+                
+                // Si no hay ubicación por defecto, retornar error
+                if (!$ubicacionDefault) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No hay ubicaciones registradas en el sistema. Por favor registre una ubicación en el sistema web antes de continuar.'
+                    ], 404);
+                }
+                
+                $ubicacionId = $ubicacionDefault->id;
+            }
+
+            // Verificar si ya existe un lote con el mismo código y fecha de vencimiento
+            $loteExistente = \App\Models\ProductoUbicacion::where('producto_id', $id)
+                ->where('lote', $request->lote)
+                ->where('fecha_vencimiento', $request->fecha_vencimiento)
+                ->where('ubicacion_id', $ubicacionId)
+                ->first();
+
+            if ($loteExistente) {
+                // Actualizar lote existente
+                $loteExistente->cantidad += $request->cantidad;
+                if ($request->precio_compra) {
+                    $loteExistente->precio_compra_lote = $request->precio_compra;
+                }
+                if ($request->precio_venta) {
+                    $loteExistente->precio_venta_lote = $request->precio_venta;
+                }
+                $loteExistente->save();
+            } else {
+                // Crear nuevo lote
+                \App\Models\ProductoUbicacion::create([
+                    'producto_id' => $id,
+                    'ubicacion_id' => $ubicacionId,
+                    'cantidad' => $request->cantidad,
+                    'cantidad_inicial' => $request->cantidad,
+                    'lote' => $request->lote,
+                    'fecha_vencimiento' => $request->fecha_vencimiento,
+                    'fecha_ingreso' => now(),
+                    'proveedor_id' => $request->proveedor_id,
+                    'precio_compra_lote' => $request->precio_compra,
+                    'precio_venta_lote' => $request->precio_venta,
+                    'estado_lote' => 'activo',
+                ]);
+            }
+
+            // Actualizar stock total del producto
+            $stockTotal = \App\Models\ProductoUbicacion::where('producto_id', $id)->sum('cantidad');
+            $producto->stock_actual = $stockTotal;
+            
+            // Actualizar precios si se proporcionaron
+            if ($request->precio_compra) {
+                $producto->precio_compra = $request->precio_compra;
+            }
+            if ($request->precio_venta) {
+                $producto->precio_venta = $request->precio_venta;
+            }
+            
+            $producto->save();
+
+            // Registrar movimiento de stock
+            try {
+                \App\Models\MovimientoStock::create([
+                    'producto_id' => $id,
+                    'tipo_movimiento' => 'entrada',
+                    'cantidad' => $request->cantidad,
+                    'cantidad_anterior' => $stockTotal - $request->cantidad,
+                    'cantidad_nueva' => $stockTotal,
+                    'motivo' => 'Entrada desde app móvil - Lote: ' . $request->lote,
+                    'usuario_id' => auth()->id() ?? 1,
+                ]);
+            } catch (\Exception $e) {
+                // Si falla el registro del movimiento, no bloqueamos la respuesta exitosa
+                // pero podríamos loguearlo internamente
+                \Log::error('Error al registrar movimiento de stock: ' . $e->getMessage());
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Stock actualizado exitosamente',
+                'data' => [
+                    'producto' => $producto->fresh(),
+                    'stock_total' => $stockTotal,
+                    'cantidad_agregada' => $request->cantidad,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar stock',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Determinar el estado de un lote específico
      */
     private function determinarEstadoLote($ubicacion, $diasParaVencer)
@@ -936,6 +1395,74 @@ class ProductoApiController extends Controller
             return 'bajo_stock';
         } else {
             return 'normal';
+        }
+    }
+
+    /**
+     * Dar de baja un lote (Write-off)
+     */
+    public function darBajaLote(Request $request, $id)
+    {
+        try {
+            $lote = \App\Models\ProductoUbicacion::find($id);
+            
+            if (!$lote) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lote no encontrado'
+                ], 404);
+            }
+
+            $cantidadAnterior = $lote->cantidad;
+            $motivo = $request->input('reason', 'Baja solicitada desde móvil');
+
+            // 1. Actualizar el lote: stock a 0 y estado 'baja'
+            $lote->cantidad = 0;
+            $lote->estado_lote = 'baja';
+            // Concatenar motivo a observaciones existentes si las hay
+            $obs = $lote->observaciones ? $lote->observaciones . " | " : "";
+            $lote->observaciones = $obs . "Baja: " . $motivo;
+            $lote->save();
+
+            // 2. Actualizar stock del producto principal
+            $producto = Producto::find($lote->producto_id);
+            if ($producto) {
+                // Recalcular stock total sumando solo lotes activos (o todos si cantidad es la fuente de verdad)
+                // Usamos sum('cantidad') porque el lote dado de baja ya tiene 0
+                $stockTotal = \App\Models\ProductoUbicacion::where('producto_id', $producto->id)->sum('cantidad');
+                
+                $stockAnteriorProducto = $producto->stock_actual;
+                $producto->stock_actual = $stockTotal;
+                $producto->save();
+
+                // 3. Registrar movimiento de stock (Salida)
+                try {
+                    \App\Models\MovimientoStock::create([
+                        'producto_id' => $producto->id,
+                        'tipo_movimiento' => 'salida', // Salida por baja
+                        'cantidad' => $cantidadAnterior, // Cantidad que se redujo (lo que había en el lote)
+                        'cantidad_anterior' => $stockAnteriorProducto,
+                        'cantidad_nueva' => $stockTotal,
+                        'motivo' => "Baja de Lote {$lote->lote} (Móvil): {$motivo}",
+                        'usuario_id' => auth()->id() ?? 1,
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error('Error registrando movimiento de baja: ' . $e->getMessage());
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lote dado de baja exitosamente',
+                'data' => $lote
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al dar de baja el lote',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }

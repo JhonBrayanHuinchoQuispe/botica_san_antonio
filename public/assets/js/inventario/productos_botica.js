@@ -58,54 +58,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const lotes = prod.lotes || [];
     const total = lotes.length;
     
-    // 1. Determinar el estado más crítico basado en lotes
-    let worstState = 'Normal';
-    let worstPriority = 0; // 0: Normal, 1: Bajo Stock (prod level), 2: Por Vencer, 3: Vencido
+    // Count states from lots
+    let expiredCount = 0;
+    let expiringCount = 0;
     
-    // Check product level stock first
-    const stockState = (prod.stock_actual <= prod.stock_minimo) ? 'Bajo stock' : 'Normal';
-    if (stockState === 'Bajo stock') {
-        worstState = 'Bajo stock';
-        worstPriority = 1;
-    }
-    
-    // Check lots expiration
     lotes.forEach(l => {
-        const dias = l.dias_para_vencer; // Backend sends this
-        let state = 'Normal';
-        let priority = 0;
-        
-        if (dias < 0) {
-            state = 'Vencido';
-            priority = 3;
-        } else if (dias <= 90) { // 90 days warning
-            state = 'Por vencer';
-            priority = 2;
-        }
-        
-        if (priority > worstPriority) {
-            worstPriority = priority;
-            worstState = state;
-        }
+        const dias = l.dias_para_vencer; 
+        if (dias < 0) expiredCount++;
+        else if (dias <= 90) expiringCount++;
     });
     
-    // Fallback to backend state if no lots or ambiguous
-    if (total === 0 && prod.estado) {
-        worstState = prod.estado;
-    }
-    
-    const map = {
-      'Normal': 'estado-normal',
-      'Bajo stock': 'estado-bajo-stock',
-      'Por vencer': 'estado-por-vencer',
-      'Por Vencer': 'estado-por-vencer',
-      'Vencido': 'estado-vencido',
-      'Agotado': 'estado-agotado'
-    };
-    
-    const cls = map[worstState] || 'estado-normal';
-    
-    // 2. Build Tooltip
+    // 1. Tooltip logic
     let tooltip = '';
     if (total > 0) {
         tooltip = lotes.map(l => {
@@ -120,17 +83,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const tooltipAttr = tooltip ? ` data-tooltip="${tooltip}"` : '';
 
-    // 3. Render Badge with Counter if > 1
-    let counterHtml = '';
-    if (total > 1) {
-        // Counter logic: how many *additional* lots? Or total?
-        // User said: "COMO MAS UNO O DEPENDEINDO CUANTOS LOTES MAS HAAY"
-        // Let's show total if > 1? Or +X?
-        // Common pattern: Badge says "State", bubble says "+2".
-        counterHtml = `<span class="absolute -top-1.5 -right-1.5 flex items-center justify-center w-4 h-4 text-[9px] font-bold text-white bg-gray-600 rounded-full shadow-sm border border-white" title="${total} lotes total">+${total - 1}</span>`;
+    // 2. Smart Label Logic
+    let badgeHtml = '';
+    
+    if (total === 0) {
+        // Fallback to product state
+        const map = {
+            'Normal': 'estado-normal',
+            'Bajo stock': 'estado-bajo-stock',
+            'Por vencer': 'estado-por-vencer',
+            'Por Vencer': 'estado-por-vencer',
+            'Vencido': 'estado-vencido',
+            'Agotado': 'estado-agotado'
+        };
+        const st = prod.estado || 'Normal';
+        const cls = map[st] || 'estado-normal';
+        badgeHtml = `<span class="estado-badge ${cls}"${tooltipAttr}>${st}</span>`;
+    } else {
+        // Has lots
+        const loteLabel = total === 1 ? 'Lote' : 'Lotes';
+        
+        if (expiredCount > 0 && expiringCount > 0) {
+            // Mixed: Expired + Expiring
+            const totalAlerts = expiredCount + expiringCount;
+            // Prioritize Red for mixed alerts containing expired items
+            badgeHtml = `<span class="estado-badge estado-vencido"${tooltipAttr}>${total} ${loteLabel} (${totalAlerts} Alertas)</span>`;
+        } else if (expiredCount > 0) {
+             badgeHtml = `<span class="estado-badge estado-vencido"${tooltipAttr}>${total} ${loteLabel} (${expiredCount} Vencido${expiredCount>1?'s':''})</span>`;
+        } else if (expiringCount > 0) {
+             badgeHtml = `<span class="estado-badge estado-por-vencer"${tooltipAttr}>${total} ${loteLabel} (${expiringCount} Por Vencer)</span>`;
+        } else {
+             // Si todo está normal, mostrar solo "Normal"
+             badgeHtml = `<span class="estado-badge estado-normal"${tooltipAttr}>Normal</span>`;
+        }
     }
 
-    return `<div class="relative inline-block"><span class="estado-badge ${cls}"${tooltipAttr}>${worstState}</span>${counterHtml}</div>`;
+    return `<div class="relative inline-block">${badgeHtml}</div>`;
   }
 
   function formatFecha(str) {
@@ -283,12 +271,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div style="font-weight:600; color:#374151;">${formatFecha(l.vencimiento)}</div>
                     <div style="font-size:0.75rem; color:${diasColor}; margin-top:2px;">${diasText}</div>
                 </td>
-                <td style="padding:12px 16px;">
-                    ${ubicacionBadge}
-                </td>
                 <td style="padding:12px 16px; text-align:right; font-family:monospace; font-weight:600; color:#374151; font-size:0.95rem;">${l.cantidad}</td>
                 <td style="padding:12px 16px; text-align:center;">
                     <span style="display:inline-block; padding:4px 10px; border-radius:9999px; font-size:0.75rem; font-weight:600; ${badgeStyle}">${badgeText}</span>
+                </td>
+                <td style="padding:12px 16px; text-align:center;">
+                    <button class="btn-eliminar-lote-swal" data-id="${l.id}" style="border:none; background:transparent; cursor:pointer; color:#ef4444; padding:4px; border-radius:4px; transition:all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'" title="Dar de baja">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                    </button>
                 </td>
             </tr>
           `;
@@ -333,9 +323,9 @@ document.addEventListener('DOMContentLoaded', () => {
                               <tr style="background:#f9fafb;">
                                   <th style="text-align:left; padding:12px 16px; color:#6b7280; font-weight:600; font-size:0.85rem; border-bottom:1px solid #e5e7eb;">Lote</th>
                                   <th style="text-align:left; padding:12px 16px; color:#6b7280; font-weight:600; font-size:0.85rem; border-bottom:1px solid #e5e7eb;">Vencimiento</th>
-                                  <th style="text-align:left; padding:12px 16px; color:#6b7280; font-weight:600; font-size:0.85rem; border-bottom:1px solid #e5e7eb;">Ubicación</th>
                                   <th style="text-align:right; padding:12px 16px; color:#6b7280; font-weight:600; font-size:0.85rem; border-bottom:1px solid #e5e7eb;">Cant.</th>
                                   <th style="text-align:center; padding:12px 16px; color:#6b7280; font-weight:600; font-size:0.85rem; border-bottom:1px solid #e5e7eb;">Estado</th>
+                                  <th style="text-align:center; padding:12px 16px; color:#6b7280; font-weight:600; font-size:0.85rem; border-bottom:1px solid #e5e7eb;">Acciones</th>
                               </tr>
                           </thead>
                           <tbody style="background:white;">
@@ -350,6 +340,15 @@ document.addEventListener('DOMContentLoaded', () => {
           showConfirmButton: false,
           showCloseButton: false,
           padding: 0,
+          didOpen: () => {
+              const popup = Swal.getPopup();
+              popup.querySelectorAll('.btn-eliminar-lote-swal').forEach(btn => {
+                  btn.addEventListener('click', () => {
+                      const id = btn.dataset.id;
+                      eliminarLote(id);
+                  });
+              });
+          },
           customClass: {
               popup: 'swal-popup-detail'
           }
@@ -567,8 +566,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Variable global para el producto actual
   let currentProductId = null;
+  let currentSelectedLote = null;
 
-  async function abrirDetalles(id) {
+  async function abrirDetalles(id, loteSeleccionado = null) {
     try {
       resetModals();
       showLoading('Cargando datos...');
@@ -578,30 +578,60 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!data.success) throw new Error('No se pudo obtener detalles');
       const p = data.data;
       
-      console.log('Detalles del producto:', p); // Debug para ver si llegan los lotes
+      console.log('Detalles del producto:', p);
+      
+      // Si hay múltiples lotes y no se ha seleccionado uno, mostrar selector
+      const lotes = p.lotes_detalle || [];
+      if (lotes.length > 1 && !loteSeleccionado) {
+        hideLoading();
+        mostrarSelectorLotes(lotes, p.nombre, (lote) => {
+          if (lote) {
+            window.abrirDetalles(id, lote);
+          }
+        }, 'Ver Detalles - Seleccionar Lote');
+        return;
+      }
+      
+      // Si se seleccionó un lote específico, usar sus datos
+      currentSelectedLote = loteSeleccionado;
+      let datosLote = loteSeleccionado || (lotes.length === 1 ? lotes[0] : null);
       
       // Resolver proveedor: si no viene nombre, intentar obtenerlo por ID
       let proveedorNombre = p.proveedor || '';
-      if (!proveedorNombre && p.proveedor_id) {
+      let proveedorIdActual = p.proveedor_id;
+      
+      // Si hay un lote seleccionado con proveedor, usar ese
+      if (datosLote && datosLote.proveedor_id) {
+        proveedorIdActual = datosLote.proveedor_id;
+        proveedorNombre = datosLote.proveedor || '';
+      }
+      
+      if (!proveedorNombre && proveedorIdActual) {
         try {
-          // Intentar endpoint de proveedor por ID
-          let rp = await fetch(`/compras/proveedores/api/${p.proveedor_id}`);
+          let rp = await fetch(`/api/compras/proveedor/${proveedorIdActual}`);
           let dp = await rp.json();
-          if (!(dp && dp.success && dp.data)) {
-            // Fallback: obtener listado y buscar por ID
+          if (dp && dp.success && dp.data) {
+            proveedorNombre = dp.data.razon_social || dp.data.nombre || '';
+          } else {
+            // Fallback: buscar en lista completa
             rp = await fetch('/compras/proveedores/api');
             dp = await rp.json();
             if (dp && dp.success && Array.isArray(dp.data)) {
-              const found = dp.data.find(x => String(x.id) === String(p.proveedor_id));
-              if (found) {
-                proveedorNombre = found.razon_social || found.nombre_comercial || found.ruc || '';
-              }
+              const found = dp.data.find(x => String(x.id) === String(proveedorIdActual));
+              if (found) proveedorNombre = found.razon_social || found.nombre || '';
             }
-          } else {
-            proveedorNombre = dp.data.razon_social || dp.data.nombre_comercial || dp.data.ruc || '';
           }
-        } catch (_) {}
+        } catch(e) { console.error('Error cargando proveedor:', e); }
       }
+      
+      // Usar datos del lote seleccionado si existe
+      // IMPORTANTE: Solo usar cantidad del lote si fue EXPLÍCITAMENTE seleccionado por el usuario
+      const stockActual = loteSeleccionado ? loteSeleccionado.cantidad : p.stock_actual;
+      const loteCode = datosLote ? datosLote.lote : p.lote;
+      const fechaVenc = datosLote ? datosLote.fecha_vencimiento : p.fecha_vencimiento;
+      const precioCompra = datosLote && datosLote.precio_compra_lote ? datosLote.precio_compra_lote : p.precio_compra;
+      const precioVenta = datosLote && datosLote.precio_venta_lote ? datosLote.precio_venta_lote : p.precio_venta;
+      
       // Poblar campos del modal detalles (lectura)
       const map = {
         'det-id': p.id,
@@ -610,15 +640,15 @@ document.addEventListener('DOMContentLoaded', () => {
         'det-categoria': p.categoria,
         'det-presentacion': p.presentacion,
         'det-concentracion': p.concentracion,
-        'det-lote': p.lote,
+        'det-lote': loteCode,
         'det-codigo_barras': p.codigo_barras,
         'det-proveedor': proveedorNombre,
-        'det-stock_actual': p.stock_actual,
+        'det-stock_actual': stockActual,
         'det-stock_minimo': p.stock_minimo,
-        'det-precio_compra': typeof p.precio_compra === 'number' ? p.precio_compra.toFixed(2) : p.precio_compra,
-        'det-precio_venta': typeof p.precio_venta === 'number' ? p.precio_venta.toFixed(2) : p.precio_venta,
+        'det-precio_compra': typeof precioCompra === 'number' ? precioCompra.toFixed(2) : precioCompra,
+        'det-precio_venta': typeof precioVenta === 'number' ? precioVenta.toFixed(2) : precioVenta,
         'det-fecha_fabricacion': formatFecha(p.fecha_fabricacion),
-        'det-fecha_vencimiento': formatFecha(p.fecha_vencimiento)
+        'det-fecha_vencimiento': formatFecha(fechaVenc)
       };
       Object.entries(map).forEach(([id,val])=>{ const el=document.getElementById(id); if (el) el.value = val || ''; });
       
@@ -627,8 +657,12 @@ document.addEventListener('DOMContentLoaded', () => {
         window.verificarHistorialProducto(p.id);
       }
 
-      // Renderizar lista de lotes FEFO
-      renderLotesList(p.lotes_detalle || []);
+      // Renderizar lista de lotes FEFO - solo mostrar el lote seleccionado si hay uno
+      if (datosLote && lotes.length > 1) {
+        renderLotesList([datosLote]);
+      } else {
+        renderLotesList(lotes);
+      }
 
       const prev = document.getElementById('det-preview-container');
       const img = document.getElementById('det-preview-image');
@@ -639,6 +673,9 @@ document.addEventListener('DOMContentLoaded', () => {
       Swal.fire('Error', 'No se pudo cargar el producto', 'error');
     } finally { hideLoading(); }
   }
+
+  // Exponer abrirDetalles globalmente
+  window.abrirDetalles = abrirDetalles;
 
   function renderLotesList(lotes) {
       const lotesList = document.getElementById('det-lotes-list');
@@ -724,14 +761,19 @@ document.addEventListener('DOMContentLoaded', () => {
                           <button class="flex items-center justify-center w-9 h-9 rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-all btn-edit-lote" type="button" title="Editar Lote">
                               <iconify-icon icon="lucide:edit" width="20" height="20"></iconify-icon>
                           </button>
+                          <button class="flex items-center justify-center w-9 h-9 rounded-lg text-white bg-red-500 hover:bg-red-600 shadow-sm transition-all btn-delete-lote" type="button" title="Dar de baja">
+                              <iconify-icon icon="solar:trash-bin-trash-bold-duotone" width="20" height="20"></iconify-icon>
+                          </button>
                       </div>
                   </td>
               `;
               
               // Bind events directly to avoid delegation complexity
               const btnEdit = row.querySelector('.btn-edit-lote');
+              const btnDelete = row.querySelector('.btn-delete-lote');
               
               btnEdit.onclick = (e) => { e.preventDefault(); e.stopPropagation(); abrirModalLote(l); };
+              if(btnDelete) btnDelete.onclick = (e) => { e.preventDefault(); e.stopPropagation(); eliminarLote(l.id); };
               
               tbody.appendChild(row);
           });
@@ -1369,6 +1411,155 @@ function cerrarModal() {
   cargarProveedores();
 });
 
+// === Variables globales para selector de lotes ===
+let selectorLotesCallback = null;
+
+// === Funciones auxiliares globales ===
+function formatFecha(str) {
+  if (!str) return 'N/A';
+  const d = new Date(str);
+  if (isNaN(d.getTime())) return 'N/A';
+  return d.toLocaleDateString('es-PE');
+}
+
+// === Funciones globales para selector de lotes ===
+function mostrarSelectorLotes(lotes, productoNombre, callback, titulo = 'Detalle de Lotes') {
+  console.log('mostrarSelectorLotes llamado con:', { lotes, productoNombre, titulo });
+  
+  if (!lotes || lotes.length === 0) {
+    console.log('No hay lotes, ejecutando callback con null');
+    callback(null);
+    return;
+  }
+  
+  if (lotes.length === 1) {
+    console.log('Solo hay 1 lote, ejecutando callback directamente');
+    callback(lotes[0]);
+    return;
+  }
+
+  // Guardar callback para cuando se seleccione un lote
+  selectorLotesCallback = callback;
+  console.log('Callback guardado, mostrando modal con', lotes.length, 'lotes');
+
+  // Obtener modal y elementos
+  const modal = document.getElementById('modalSelectorLotes');
+  const modalTitle = document.getElementById('modalSelectorLotesTitle');
+  const productoNombreEl = document.getElementById('selectorProductoNombre');
+  const tbody = document.getElementById('selectorLotesBody');
+
+  if (!modal || !tbody) {
+    console.error('Modal o tbody no encontrado!');
+    return;
+  }
+
+  // Configurar título y nombre del producto
+  modalTitle.textContent = titulo;
+  productoNombreEl.textContent = productoNombre;
+
+  // Limpiar tbody
+  tbody.innerHTML = '';
+
+  // Crear filas para cada lote
+  lotes.forEach((l, idx) => {
+    console.log('Lote completo:', l);
+    const dias = Math.round(l.dias_para_vencer || 0);
+    let estadoClass = 'bg-green-100 text-green-800';
+    let estadoText = 'Normal';
+    
+    if (dias < 0) {
+      estadoClass = 'bg-red-100 text-red-800';
+      estadoText = 'Vencido';
+    } else if (dias <= 90) {
+      estadoClass = 'bg-yellow-100 text-yellow-800';
+      estadoText = 'Por Vencer';
+    }
+
+    // Intentar obtener ubicación de diferentes campos posibles
+    const ubicacion = l.ubicacion || l.ubicacion_nombre || l.ubicacion_almacen || 'Sin asignar';
+    console.log('Ubicación para lote', l.lote, ':', ubicacion);
+    const diasText = dias >= 0 ? `Vence en ${dias} días` : `Venció hace ${Math.abs(dias)} días`;
+    
+    // Obtener precios del lote
+    const precioVenta = l.precio_venta_lote || l.precio_venta || 0;
+    const precioCompra = l.precio_compra_lote || l.precio_compra || 0;
+
+    const row = document.createElement('tr');
+    row.className = 'hover:bg-red-50 cursor-pointer transition-colors border-b border-gray-100';
+    row.dataset.loteIdx = idx;
+    row.innerHTML = `
+      <td class="px-4 py-3">
+        <div class="font-semibold text-gray-800">${l.lote || 'Sin código'}</div>
+      </td>
+      <td class="px-4 py-3">
+        <div class="font-medium text-gray-700">${formatFecha(l.fecha_vencimiento)}</div>
+        <div class="text-xs text-gray-500">${diasText}</div>
+      </td>
+      <td class="px-4 py-3 text-center">
+        <span class="font-bold text-lg text-gray-800">${l.cantidad}</span>
+      </td>
+      <td class="px-4 py-3 text-center">
+        <div class="font-semibold text-gray-800">P.V: S/ ${Number(precioVenta).toFixed(2)}</div>
+        <div class="text-sm text-gray-600 mt-1">P.C: S/ ${Number(precioCompra).toFixed(2)}</div>
+      </td>
+      <td class="px-4 py-3 text-center">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-medium ${estadoClass}">${estadoText}</span>
+      </td>
+    `;
+
+    // Agregar evento de clic
+    row.addEventListener('click', function(e) {
+      console.log('¡Clic en fila detectado!', 'Lote:', lotes[idx]);
+      e.stopPropagation();
+      
+      // IMPORTANTE: Guardar el callback ANTES de cerrar el modal (que lo pone a null)
+      const callbackToExecute = selectorLotesCallback;
+      
+      // Cerrar el modal
+      cerrarModalSelectorLotes();
+      
+      // Ejecutar el callback guardado
+      if (callbackToExecute) {
+        console.log('Ejecutando callback con lote:', lotes[idx]);
+        callbackToExecute(lotes[idx]);
+      } else {
+        console.error('No hay callback guardado!');
+      }
+    });
+
+    tbody.appendChild(row);
+    console.log('Fila agregada para lote:', l.lote);
+  });
+
+  console.log('Total de filas agregadas:', lotes.length);
+  console.log('Mostrando modal...');
+
+  // Mostrar modal
+  modal.style.display = 'flex';
+  modal.classList.remove('hidden');
+  
+  console.log('Modal mostrado. Display:', modal.style.display);
+}
+
+function cerrarModalSelectorLotes() {
+  const modal = document.getElementById('modalSelectorLotes');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+  }
+  selectorLotesCallback = null;
+}
+
+// Event listeners para cerrar modal selector de lotes
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('cerrarModalSelectorLotes')?.addEventListener('click', cerrarModalSelectorLotes);
+  document.getElementById('modalSelectorLotes')?.addEventListener('click', (e) => {
+    if (e.target.id === 'modalSelectorLotes') {
+      cerrarModalSelectorLotes();
+    }
+  });
+});
+
 // === Global loading helpers (usable outside DOMContentLoaded scope) ===
 function showLoading(label = 'Cargando datos...') {
   const overlay = document.getElementById('loadingOverlay');
@@ -1456,7 +1647,7 @@ async function cargarProveedores(provSel=null) {
   } catch(e) { console.error(e); }
 }
 
-async function abrirModalEdicion(productId) {
+async function abrirModalEdicion(productId, loteSeleccionado = null) {
   try {
     resetModals();
     showLoading('Cargando datos para editar...');
@@ -1464,35 +1655,94 @@ async function abrirModalEdicion(productId) {
     const data = await res.json();
     if (!data.success || !data.data) throw new Error('No se pudo cargar producto');
     const p = data.data;
+    
+    // Si hay múltiples lotes y no se ha seleccionado uno, mostrar selector
+    const lotes = p.lotes_detalle || [];
+    if (lotes.length > 1 && !loteSeleccionado) {
+      hideLoading();
+      mostrarSelectorLotes(lotes, p.nombre, (lote) => {
+        if (lote) {
+          window.abrirModalEdicion(productId, lote);
+        }
+      }, 'Editar Producto - Seleccionar Lote');
+      return;
+    }
+    
+    // Usar datos del lote seleccionado si existe
+    let datosLote = loteSeleccionado || (lotes.length === 1 ? lotes[0] : null);
+    
+    // Datos a usar (del lote si existe, sino del producto)
+    // IMPORTANTE: Solo usar cantidad del lote si fue EXPLÍCITAMENTE seleccionado por el usuario
+    const stockActual = loteSeleccionado ? loteSeleccionado.cantidad : p.stock_actual;
+    const loteCode = datosLote ? datosLote.lote : p.lote;
+    const fechaVenc = datosLote ? datosLote.fecha_vencimiento : p.fecha_vencimiento;
+    const precioCompra = datosLote && datosLote.precio_compra_lote ? datosLote.precio_compra_lote : p.precio_compra;
+    const precioVenta = datosLote && datosLote.precio_venta_lote ? datosLote.precio_venta_lote : p.precio_venta;
+    const proveedorId = datosLote && datosLote.proveedor_id ? datosLote.proveedor_id : p.proveedor_id;
+    const proveedorNombre = datosLote && datosLote.proveedor ? datosLote.proveedor : p.proveedor;
+    
+    // Guardar ID del lote para la edición
+    window.currentEditLoteId = datosLote ? datosLote.id : null;
+
+    // --- GUARDAR VALORES ORIGINALES PARA DETECCIÓN DE CAMBIOS ---
+    window.originalEditValues = {
+        nombre: p.nombre || '',
+        categoria: p.categoria || '',
+        marca: p.marca || '',
+        presentacion: p.presentacion || '',
+        lote: loteCode || '',
+        codigo_barras: p.codigo_barras || '',
+        stock_actual: Number(stockActual || 0),
+        stock_minimo: Number(p.stock_minimo || 0),
+        precio_compra: Number(precioCompra || 0),
+        precio_venta: Number(precioVenta || 0),
+        fecha_fabricacion: p.fecha_fabricacion || '',
+        proveedor_id: String(proveedorId || '')
+    };
+    // -------------------------------------------------------------
+    
   if (typeof window.abrirModalEditarProducto === 'function') {
     await window.abrirModalEditarProducto({
         id: p.id,
         nombre: p.nombre,
         categoria: p.categoria,
         marca: p.marca,
-        proveedor_id: p.proveedor_id,
-        proveedor: p.proveedor,
+        proveedor_id: proveedorId,
+        proveedor: proveedorNombre,
         presentacion: p.presentacion,
         concentracion: p.concentracion,
-        lote: p.lote,
+        lote: loteCode,
         codigo_barras: p.codigo_barras,
-        stock_actual: p.stock_actual,
+        stock_actual: stockActual,
         stock_minimo: p.stock_minimo,
-        precio_compra: p.precio_compra,
-        precio_venta: p.precio_venta,
+        precio_compra: precioCompra,
+        precio_venta: precioVenta,
         fecha_fabricacion: p.fecha_fabricacion || '',
-      fecha_vencimiento: p.fecha_vencimiento || '',
-      imagen_url: p.imagen_url || ''
+      fecha_vencimiento: fechaVenc || '',
+      imagen_url: p.imagen_url || '',
+      lote_id: datosLote ? datosLote.id : null
     });
   } else {
       document.getElementById('edit-producto-id').value = p.id;
-      const ids = ['edit-nombre','edit-concentracion','edit-marca','edit-lote','edit-codigo_barras','edit-stock_actual','edit-stock_minimo','edit-precio_compra','edit-precio_venta','edit-fecha_fabricacion','edit-fecha_vencimiento'];
-      const vals = [p.nombre,p.concentracion,p.marca,p.lote,p.codigo_barras,p.stock_actual,p.stock_minimo,p.precio_compra,p.precio_venta,p.fecha_fabricacion||'',p.fecha_vencimiento||''];
+      
+      // Guardar ID del lote en un campo oculto si existe
+      let loteIdField = document.getElementById('edit-lote-id');
+      if (!loteIdField) {
+        loteIdField = document.createElement('input');
+        loteIdField.type = 'hidden';
+        loteIdField.id = 'edit-lote-id';
+        loteIdField.name = 'lote_id';
+        document.getElementById('formEditarProducto')?.appendChild(loteIdField);
+      }
+      loteIdField.value = datosLote ? datosLote.id : '';
+      
+      const ids = ['edit-nombre','edit-concentracion','edit-marca','edit-lote','edit-codigo_barras','edit-stock_actual','edit-stock_minimo','edit-precio_compra','edit-precio_venta','edit-fecha_fabricacion'];
+      const vals = [p.nombre,p.concentracion,p.marca,loteCode,p.codigo_barras,stockActual,p.stock_minimo,precioCompra,precioVenta,p.fecha_fabricacion||''];
       ids.forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.value = vals[i]??''; });
+      
     cargarCategoriasYPresentaciones(p.categoria, p.presentacion);
-    // Guardar nombre para fallback de selección por nombre si el ID está vacío
-    window.currentEditProveedorName = p.proveedor || '';
-    cargarProveedores(p.proveedor_id);
+    window.currentEditProveedorName = proveedorNombre || '';
+    cargarProveedores(proveedorId);
       const prev = document.getElementById('edit-preview-container');
       const img = document.getElementById('edit-preview-image');
       if (prev && img) { prev.style.display='block'; img.src = p.imagen_url || '/assets/images/default-product.svg'; }
@@ -1505,8 +1755,25 @@ async function abrirModalEdicion(productId) {
   finally { hideLoading(); }
 }
 
+// Exponer abrirModalEdicion globalmente
+window.abrirModalEdicion = abrirModalEdicion;
+
 async function guardarNuevoProducto() {
   try {
+    // Verificar duplicados antes de procesar
+    if (typeof window.verificarDuplicado === 'function') {
+        const isDuplicate = await window.verificarDuplicado(true); // true para silent check si se quisiera, pero aquí queremos que marque el input
+        if (isDuplicate) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Producto Duplicado',
+                text: 'Ya existe un producto con el mismo nombre y concentración. Verifica los campos marcados.',
+                confirmButtonColor: '#f59e0b'
+            });
+            return; // Detener guardado
+        }
+    }
+
     const form = document.getElementById('formAgregarProducto');
     if (window.validacionesTiempoReal) {
       const ok = await window.validacionesTiempoReal.validateForm('formAgregarProducto');
@@ -1526,6 +1793,38 @@ async function guardarNuevoProducto() {
     if (resp.status === 422) {
       const data = await resp.json();
       const errs = data.errors || {};
+      
+      // Verificar si hay error de duplicado en los mensajes de validación
+      const errorValues = Object.values(errs).flat().map(e => e.toLowerCase());
+      const isDuplicate = errorValues.some(e => e.includes('ya ha sido registrado') || e.includes('duplicado') || e.includes('ya existe'));
+      
+      if (isDuplicate) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Producto Duplicado',
+            html: `
+                <div class="flex flex-col items-center gap-3">
+                    <iconify-icon icon="solar:danger-circle-bold-duotone" class="text-6xl text-red-500"></iconify-icon>
+                    <div class="text-center">
+                        <p class="text-gray-800 font-bold text-lg mb-1">¡Ya existe este producto!</p>
+                        <p class="text-gray-600">No es posible registrar dos productos con el mismo <b>Nombre</b> y <b>Concentración</b>.</p>
+                        <div class="mt-3 p-3 bg-red-50 rounded-lg border border-red-100 text-sm text-red-700 text-left">
+                           <ul class="list-disc pl-4 space-y-1">
+                               <li>Verifica si el producto ya está en el inventario.</li>
+                               <li>Si es una nueva presentación, asegúrate de diferenciar el nombre o concentración.</li>
+                           </ul>
+                        </div>
+                    </div>
+                </div>
+            `,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Entendido, revisaré'
+        });
+        // También marcamos los campos
+        Object.keys(errs).forEach(k => showFieldError(form, k, errs[k][0] || 'Campo inválido'));
+        return;
+      }
+
       Object.keys(errs).forEach(k => showFieldError(form, k, errs[k][0] || 'Campo inválido'));
       Swal.fire('Revisa los campos','Hay errores de validación','warning');
       return;
@@ -1548,7 +1847,35 @@ async function guardarNuevoProducto() {
         }
       }
     });
-  } catch(e) { console.error(e); Swal.fire('Error', e.message || 'No se pudo guardar', 'error'); }
+  } catch(e) { 
+    console.error(e); 
+    // Detectar error de duplicado (backend suele devolver 500 con SQLSTATE 23000 o mensaje custom)
+    if (e.message && (e.message.includes('Duplicate entry') || e.message.toLowerCase().includes('duplicado') || e.message.includes('SQLSTATE[23000]'))) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Producto Duplicado',
+            html: `
+                <div class="flex flex-col items-center gap-3">
+                    <iconify-icon icon="solar:danger-circle-bold-duotone" class="text-6xl text-red-500"></iconify-icon>
+                    <div class="text-center">
+                        <p class="text-gray-800 font-bold text-lg mb-1">¡Ya existe este producto!</p>
+                        <p class="text-gray-600">No es posible registrar dos productos con el mismo <b>Nombre</b> y <b>Concentración</b>.</p>
+                        <div class="mt-3 p-3 bg-red-50 rounded-lg border border-red-100 text-sm text-red-700 text-left">
+                           <ul class="list-disc pl-4 space-y-1">
+                               <li>Verifica si el producto ya está en el inventario.</li>
+                               <li>Si es una nueva presentación, asegúrate de diferenciar el nombre o concentración.</li>
+                           </ul>
+                        </div>
+                    </div>
+                </div>
+            `,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Entendido, revisaré'
+        });
+    } else {
+        Swal.fire('Error', e.message || 'No se pudo guardar', 'error'); 
+    }
+  }
 }
 
 async function guardarEdicionProducto() {
@@ -1566,7 +1893,6 @@ async function guardarEdicionProducto() {
     const precio_compra = Number(form.querySelector('[name="precio_compra"]')?.value || 0);
     const precio_venta = Number(form.querySelector('[name="precio_venta"]')?.value || 0);
     const fecha_fabricacion = form.querySelector('[name="fecha_fabricacion"]')?.value;
-    const fecha_vencimiento = form.querySelector('[name="fecha_vencimiento"]')?.value;
 
     clearFieldErrors(form);
     let hasError = false;
@@ -1578,7 +1904,6 @@ async function guardarEdicionProducto() {
     if (!Number.isFinite(precio_compra) || precio_compra < 0) { showFieldError(form,'precio_compra','Debe ser un número ≥ 0'); hasError = true; }
     if (!Number.isFinite(precio_venta) || precio_venta < 0) { showFieldError(form,'precio_venta','Debe ser un número ≥ 0'); hasError = true; }
     if (Number.isFinite(precio_compra) && Number.isFinite(precio_venta) && precio_venta <= precio_compra) { showFieldError(form,'precio_venta','Debe ser mayor al precio de compra'); hasError = true; }
-    if (fecha_fabricacion && fecha_vencimiento && new Date(fecha_vencimiento) < new Date(fecha_fabricacion)) { showFieldError(form,'fecha_vencimiento','Debe ser posterior a fabricación'); hasError = true; }
     if (hasError) { Swal.fire('Revisa los campos','Hay errores de validación','warning'); return; }
 
     if (window.validacionesTiempoReal) {
@@ -1592,13 +1917,31 @@ async function guardarEdicionProducto() {
     selProvEdit.disabled = false;
     fd.set('proveedor_id', selProvEdit.value || '');
   }
+  
+  // Agregar lote_id si existe
+  if (window.currentEditLoteId) {
+    fd.set('lote_id', window.currentEditLoteId);
+    console.log('Agregando lote_id al FormData:', window.currentEditLoteId);
+  }
+  
   const id = document.getElementById('edit-producto-id').value;
+  
+  // Log para debugging
+  console.log('=== DATOS ENVIADOS AL EDITAR ===');
+  for (let [key, value] of fd.entries()) {
+    console.log(`${key}: ${value}`);
+  }
+  
   const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
   const resp = await fetch(`/inventario/producto/actualizar/${id}`, { method:'POST', headers:{'X-CSRF-TOKEN':csrf,'X-HTTP-Method-Override':'PUT','Accept':'application/json'}, body: fd });
     if (resp.status === 422) {
       const data = await resp.json();
+      console.error('=== ERROR 422 ===', data);
       const errs = data.errors || {};
-      Object.keys(errs).forEach(k => showFieldError(form, k, errs[k][0] || 'Campo inválido'));
+      Object.keys(errs).forEach(k => {
+        console.error(`Campo ${k}: ${errs[k][0]}`);
+        showFieldError(form, k, errs[k][0] || 'Campo inválido');
+      });
       Swal.fire('Revisa los campos','Hay errores de validación','warning');
       return;
     }

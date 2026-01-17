@@ -103,6 +103,18 @@ class ProductoOptimizadoController extends Controller
             
             $data = $request->validated();
             
+            // Validar duplicados: nombre + concentración
+            $existe = Producto::where('nombre', $data['nombre'])
+                              ->where('concentracion', $data['concentracion'] ?? '')
+                              ->exists();
+            
+            if ($existe) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ya existe un producto con el mismo nombre y concentración'
+                ], 422);
+            }
+            
             // Manejar imagen si existe
             if ($request->hasFile('imagen')) {
                 $data['imagen'] = $this->guardarImagen($request->file('imagen'));
@@ -183,6 +195,20 @@ class ProductoOptimizadoController extends Controller
             DB::beginTransaction();
             
             $producto = $this->productoRepository->getAllWithRelations()->where('id', $id)->first();
+            
+            // Validar duplicados: nombre + concentración (excluyendo el producto actual)
+            $data = $request->validated();
+            $existe = Producto::where('nombre', $data['nombre'])
+                              ->where('concentracion', $data['concentracion'] ?? '')
+                              ->where('id', '!=', $id)
+                              ->exists();
+            
+            if ($existe) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ya existe otro producto con el mismo nombre y concentración'
+                ], 422);
+            }
             
             if (!$producto) {
                 return response()->json([

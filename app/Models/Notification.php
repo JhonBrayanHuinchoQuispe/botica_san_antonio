@@ -149,13 +149,13 @@ class Notification extends Model
     /**
      * Crear notificación de producto próximo a vencer
      */
-    public static function createProximoVencer($userId, $producto, $diasRestantes)
+    public static function createProximoVencer($userId, $producto, $diasRestantes, $loteId = null)
     {
         // Asegurar que los días sean un entero y formatear el mensaje correctamente
         $dias = is_numeric($diasRestantes) ? (int) round($diasRestantes) : (int) $diasRestantes;
         if ($dias < 0) {
             // En caso de que llegue negativo por alguna razón externa, delegar al flujo de vencido
-            return self::createProductoVencido($userId, $producto);
+            return self::createProductoVencido($userId, $producto, $loteId);
         }
 
         $mensajeDias = $dias === 0
@@ -170,6 +170,7 @@ class Notification extends Model
             'user_id' => $userId,
             'data' => [
                 'producto_id' => $producto->id,
+                'lote_id' => $loteId,
                 'fecha_vencimiento' => $producto->fecha_vencimiento,
                 'dias_restantes' => $dias
             ]
@@ -179,7 +180,7 @@ class Notification extends Model
     /**
      * Crear notificación de producto vencido
      */
-    public static function createProductoVencido($userId, $producto)
+    public static function createProductoVencido($userId, $producto, $loteId = null)
     {
         return self::create([
             'type' => self::TYPE_PRODUCTO_VENCIDO,
@@ -189,6 +190,7 @@ class Notification extends Model
             'user_id' => $userId,
             'data' => [
                 'producto_id' => $producto->id,
+                'lote_id' => $loteId,
                 'fecha_vencimiento' => $producto->fecha_vencimiento
             ]
         ]);

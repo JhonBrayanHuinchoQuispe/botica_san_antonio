@@ -42,15 +42,37 @@ document.addEventListener("DOMContentLoaded", function() {
             if (form) {
                 form.reset();
                 
-                // Limpiar todas las clases de validación
+                // Limpiar valores manualmente de cada input
                 const inputs = form.querySelectorAll('input, select, textarea');
                 inputs.forEach(input => {
-                    input.classList.remove('campo-invalido', 'campo-valido', 'border-red-500', 'bg-red-50', 'border-green-500', 'bg-green-50', 'border-yellow-500', 'bg-yellow-50');
+                    // Limpiar valor
+                    if (input.tagName.toLowerCase() === 'select') {
+                        input.selectedIndex = 0;
+                    } else if (input.type === 'checkbox' || input.type === 'radio') {
+                        input.checked = false;
+                    } else {
+                        input.value = '';
+                    }
+                    
+                    // Limpiar clases de validación
+                    input.classList.remove('campo-invalido', 'campo-valido', 'border-red-500', 'bg-red-50', 'border-green-500', 'bg-green-50', 'border-yellow-500', 'bg-yellow-50', 'is-invalid');
+                    
+                    // Limpiar estilos inline
+                    input.style.borderColor = '';
+                    input.style.boxShadow = '';
+                    input.style.backgroundColor = '';
                 });
                 
-                // Limpiar mensajes de validación
+                // Limpiar mensajes de validación antiguos
                 const validationMessages = form.querySelectorAll('.validation-message, .mensaje-error');
                 validationMessages.forEach(msg => msg.remove());
+                
+                // Limpiar mensajes de error de validación en tiempo real
+                const fieldErrors = form.querySelectorAll('.field-error');
+                fieldErrors.forEach(error => {
+                    error.classList.remove('visible');
+                    error.style.display = 'none';
+                });
                 
                 // Limpiar preview de imagen
                 const previewContainer = document.getElementById("preview-container");
@@ -88,6 +110,50 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
     
+    // Función para limpiar formulario al cerrar modal
+    function limpiarFormularioAgregar() {
+        console.log("🧹 Limpiando formulario de agregar producto...");
+        const form = document.getElementById("formAgregarProducto");
+        if (form) {
+            // Resetear formulario
+            form.reset();
+            
+            // Limpiar valores manualmente de cada input
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                // Limpiar valor
+                if (input.tagName.toLowerCase() === 'select') {
+                    input.selectedIndex = 0;
+                } else if (input.type === 'checkbox' || input.type === 'radio') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+                
+                // Limpiar clases de validación
+                input.classList.remove('campo-invalido', 'campo-valido', 'border-red-500', 'bg-red-50', 'border-green-500', 'bg-green-50', 'border-yellow-500', 'bg-yellow-50', 'is-invalid');
+                
+                // Limpiar estilos inline
+                input.style.borderColor = '';
+                input.style.boxShadow = '';
+                input.style.backgroundColor = '';
+            });
+            
+            // Ocultar mensajes de error
+            const fieldErrors = form.querySelectorAll('.field-error');
+            fieldErrors.forEach(error => {
+                error.classList.remove('visible');
+                error.style.display = 'none';
+            });
+            
+            // Limpiar mensajes de validación antiguos
+            const validationMessages = form.querySelectorAll('.validation-message, .mensaje-error');
+            validationMessages.forEach(msg => msg.remove());
+            
+            console.log("✅ Formulario limpiado correctamente");
+        }
+    }
+    
     // Event listeners para cerrar modal agregar
     const modalAgregar = document.getElementById("modalAgregar");
     if (modalAgregar) {
@@ -95,6 +161,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const btnClose = modalAgregar.querySelector(".modal-close");
         if (btnClose) {
             btnClose.addEventListener("click", function() {
+                limpiarFormularioAgregar();
                 modalAgregar.classList.add("hidden");
                 modalAgregar.style.display = "none";
             });
@@ -104,6 +171,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const btnCancel = modalAgregar.querySelector(".btn-cancel");
         if (btnCancel) {
             btnCancel.addEventListener("click", function() {
+                limpiarFormularioAgregar();
                 modalAgregar.classList.add("hidden");
                 modalAgregar.style.display = "none";
             });
@@ -112,6 +180,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // Click fuera del modal
         modalAgregar.addEventListener("click", function(e) {
             if (e.target === this) {
+                limpiarFormularioAgregar();
                 modalAgregar.classList.add("hidden");
                 modalAgregar.style.display = "none";
             }

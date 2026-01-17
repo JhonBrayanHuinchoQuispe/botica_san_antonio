@@ -413,12 +413,20 @@ class InventarioController extends Controller
             // Obtener lotes FEFO activos
             $lotes = ProductoUbicacion::where('producto_id', $id)
                 ->where('cantidad', '>', 0)
-                ->select('id', 'lote', 'fecha_vencimiento', 'cantidad')
+                ->select('id', 'lote', 'fecha_vencimiento', 'cantidad', 'precio_compra_lote', 'precio_venta_lote', 'proveedor_id')
                 ->orderBy('fecha_vencimiento', 'asc')
                 ->get();
 
+            // Sincronizar stock_actual con la suma de lotes
+            $stockTotal = $lotes->sum('cantidad');
+            if ($producto->stock_actual != $stockTotal) {
+                $producto->stock_actual = $stockTotal;
+                $producto->save();
+            }
+
             Log::info('InventarioController::show - Producto ID: ' . $id, [
                 'lotes_count' => $lotes->count(),
+                'stock_total' => $stockTotal,
                 'lotes_data' => $lotes->toArray()
             ]);
 
@@ -428,6 +436,9 @@ class InventarioController extends Controller
                     'lote' => $l->lote,
                     'fecha_vencimiento' => $l->fecha_vencimiento,
                     'cantidad' => $l->cantidad,
+                    'precio_compra_lote' => $l->precio_compra_lote,
+                    'precio_venta_lote' => $l->precio_venta_lote,
+                    'proveedor_id' => $l->proveedor_id,
                     'dias_para_vencer' => $l->fecha_vencimiento ? Carbon::now()->diffInDays(Carbon::parse($l->fecha_vencimiento), false) : null
                 ];
             })->values();
@@ -491,7 +502,7 @@ class InventarioController extends Controller
                 'stock_actual' => 'required|integer|min:0',
                 'stock_minimo' => 'required|integer|min:0',
                 'fecha_fabricacion' => 'required|date|before_or_equal:today',
-                'fecha_vencimiento' => 'required|date|after:fecha_fabricacion|after:today',
+                'fecha_vencimiento' => 'nullable|date|after:fecha_fabricacion|after:today',
                 'precio_compra' => 'required|numeric|gt:0',
                 'precio_venta' => 'required|numeric|gt:0|gte:precio_compra',
                 'imagen' => 'nullable|image|max:2048',
@@ -917,7 +928,7 @@ class InventarioController extends Controller
                 'precio_compra' => 'required|numeric|gt:0',
                 'precio_venta' => 'required|numeric|gt:0|gte:precio_compra',
                 'fecha_fabricacion' => 'required|date|before_or_equal:today',
-                'fecha_vencimiento' => 'required|date|after:fecha_fabricacion|after:today',
+                'fecha_vencimiento' => 'nullable|date|after:fecha_fabricacion|after:today',
                 'ubicacion' => 'nullable|string|max:255',
                 'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
             ];
@@ -989,6 +1000,28 @@ class InventarioController extends Controller
 
             // Actualizar el producto
             $producto->update($datos);
+            
+            // Si se está editando un lote específico, actualizar también el lote en producto_ubicaciones
+            if ($request->has('lote_id') && $request->lote_id) {
+                $loteId = $request->lote_id;
+                $lote = ProductoUbicacion::find($loteId);
+                
+                if ($lote && $lote->producto_id == $producto->id) {
+                    $lote->update([
+                        'lote' => $datos['lote'] ?? $lote->lote,
+                        'fecha_vencimiento' => $datos['fecha_vencimiento'] ?? $lote->fecha_vencimiento,
+                        'precio_compra_lote' => $datos['precio_compra'] ?? $lote->precio_compra_lote,
+                        'precio_venta_lote' => $datos['precio_venta'] ?? $lote->precio_venta_lote,
+                        'proveedor_id' => $datos['proveedor_id'] ?? $lote->proveedor_id,
+                    ]);
+                    
+                    Log::info('Lote actualizado', [
+                        'lote_id' => $loteId,
+                        'precio_compra' => $datos['precio_compra'],
+                        'precio_venta' => $datos['precio_venta']
+                    ]);
+                }
+            }
             
             // Recalcular el estado del producto después de actualizar
             $producto->fresh()->recalcularEstado();

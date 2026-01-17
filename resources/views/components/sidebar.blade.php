@@ -139,7 +139,8 @@
             </li>
             @endcan
 
-            {{-- Mapa Almacén --}}
+            {{-- Mapa Almacén (Oculto por solicitud) --}}
+            {{--
             @can('ubicaciones.view')
             <li>
                 <a href="{{ route('ubicaciones.mapa') }}" class="{{ request()->routeIs('ubicaciones.*') ? 'active-page' : '' }}">
@@ -148,6 +149,7 @@
                 </a>
             </li>
             @endcan
+            --}}
 
             {{-- Auditoría de Inventario --}}
             <li>

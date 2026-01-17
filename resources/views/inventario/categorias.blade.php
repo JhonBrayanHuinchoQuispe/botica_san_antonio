@@ -206,8 +206,20 @@
 .search-input { flex:1; border:none; outline:none; background:transparent; font-size:14px; padding:0; height:100%; }
 .search-input:focus { outline:none !important; box-shadow:none !important; }
 .search-clear { display:none; border:none; background:transparent; color:#9ca3af; cursor:pointer; }
-.registros-por-pagina-select { border:1px solid #E9EDF5; border-radius:12px; background:#fff; padding:.25rem .75rem; min-height:44px; box-shadow:0 1px 2px rgba(0,0,0,0.035); }
-.registros-por-pagina-select:focus { outline:none; border-color:#8b5cf6; box-shadow:0 0 0 2px rgba(139,92,246,.35); }
+.registros-por-pagina-select { 
+    border:1px solid #E9EDF5; 
+    border-radius:12px; 
+    background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24'%3E%3Cpath fill='%23666' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 0.75rem center;
+    background-size: 20px;
+    padding:.25rem 2.5rem .25rem .75rem; 
+    min-height:44px; 
+    box-shadow:0 1px 2px rgba(0,0,0,0.035);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+}
+.registros-por-pagina-select:focus { outline:none; border-color:#8b5cf6; box-shadow:0 0 0 2px rgba(139,92,246,.35); background-color:#fff; }
 .filtro-estado-group .registros-por-pagina-select { border:1px solid #E9EDF5; }
 .estado-badge { display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .6rem; border-radius:9999px; font-weight:600; font-size:.85rem; }
 .estado-badge .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }

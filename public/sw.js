@@ -1,7 +1,7 @@
 // Service Worker for Sistema de Botica PWA
-const CACHE_NAME = 'botica-sistema-v1.0.5';
-const STATIC_CACHE = 'botica-static-v1.0.5';
-const DYNAMIC_CACHE = 'botica-dynamic-v1.0.5';
+const CACHE_NAME = 'botica-sistema-v1.0.6';
+const STATIC_CACHE = 'botica-static-v1.0.6';
+const DYNAMIC_CACHE = 'botica-dynamic-v1.0.6';
 
 // Files to cache immediately
 const STATIC_FILES = [

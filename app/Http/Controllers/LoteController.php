@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Producto;
 use App\Models\ProductoUbicacion;
+use App\Models\Notification;
+use App\Models\User;
 use App\Services\LoteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -16,6 +18,56 @@ class LoteController extends Controller
     public function __construct(LoteService $loteService)
     {
         $this->loteService = $loteService;
+    }
+
+    /**
+     * Verificar y generar alertas para un lote modificado
+     */
+    private function verificarAlertasLote($lote)
+    {
+        try {
+            if (!$lote || !$lote->producto) return;
+            
+            // Solo generar alertas si el lote está activo y tiene stock
+            if ($lote->estado_lote !== 'activo' || $lote->cantidad <= 0) return;
+            
+            $producto = $lote->producto;
+            $userIds = User::pluck('id');
+            
+            // Verificar vencimiento
+            if ($lote->fecha_vencimiento) {
+                $dias = Carbon::now()->diffInDays($lote->fecha_vencimiento, false);
+                
+                foreach ($userIds as $userId) {
+                    // 1. Vencido
+                    if ($dias < 0) {
+                        $exists = Notification::where('type', Notification::TYPE_PRODUCTO_VENCIDO)
+                            ->where('user_id', $userId)
+                            ->where('data->lote_id', $lote->id)
+                            ->unread()
+                            ->exists();
+                            
+                        if (!$exists) {
+                            Notification::createProductoVencido($userId, $producto, $lote->id);
+                        }
+                    }
+                    // 2. Por vencer (<= 90 días)
+                    elseif ($dias <= 90) {
+                        $exists = Notification::where('type', Notification::TYPE_PRODUCTO_VENCIMIENTO)
+                            ->where('user_id', $userId)
+                            ->where('data->lote_id', $lote->id)
+                            ->unread()
+                            ->exists();
+                            
+                        if (!$exists) {
+                            Notification::createProximoVencer($userId, $producto, $dias, $lote->id);
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Error generando alerta inmediata lote: '.$e->getMessage());
+        }
     }
 
     /**
@@ -181,6 +233,9 @@ class LoteController extends Controller
             // Recalcular el estado del producto después de actualizar el stock
             $producto->fresh()->recalcularEstado();
 
+            // Verificar alertas inmediatas tras ajuste de stock
+            $this->verificarAlertasLote($lote);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Stock ajustado correctamente',
@@ -251,6 +306,9 @@ class LoteController extends Controller
                 // Ubicacion por defecto se maneja en servicio si es null
             ]);
 
+            // Verificar alertas inmediatas
+            $this->verificarAlertasLote($lote);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Lote creado correctamente',
@@ -287,6 +345,9 @@ class LoteController extends Controller
                 'lote' => $request->lote,
                 'fecha_vencimiento' => $request->fecha_vencimiento
             ]);
+
+            // Verificar alertas inmediatas
+            $this->verificarAlertasLote($lote);
 
             return response()->json([
                 'success' => true,

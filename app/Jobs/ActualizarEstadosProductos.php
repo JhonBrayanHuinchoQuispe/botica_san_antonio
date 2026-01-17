@@ -72,8 +72,8 @@ class ActualizarEstadosProductos implements ShouldQueue
             return 'Vencido';
         }
         
-        // Producto por vencer (30 días)
-        if ($fechaVencimiento->diffInDays($ahora) <= 30) {
+        // Producto por vencer (90 días)
+        if ($fechaVencimiento->diffInDays($ahora) <= 90) {
             return 'Por vencer';
         }
         

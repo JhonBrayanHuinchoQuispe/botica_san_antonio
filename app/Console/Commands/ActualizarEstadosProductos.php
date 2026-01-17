@@ -82,26 +82,41 @@ class ActualizarEstadosProductos extends Command
     }
     
     /**
-     * Calcular el estado de un producto
+     * Calcular el estado de un producto basándose en lotes
      */
     private function calcularEstado(Producto $producto): string
     {
         $fechaActual = Carbon::now('America/Lima');
-        
-        // 1. Verificar si está vencido
-        if ($producto->fecha_vencimiento && $fechaActual->gt($producto->fecha_vencimiento)) {
-            return 'Vencido';
-        }
         
         // 2. Verificar si está agotado (stock 0)
         if ($producto->stock_actual <= 0) {
             return 'Agotado';
         }
         
-        // 3. Verificar si está próximo a vencer (30 días) - tiene prioridad sobre stock bajo
-        if ($producto->fecha_vencimiento) {
-            $diasParaVencer = $fechaActual->diffInDays($producto->fecha_vencimiento, false);
-            if ($diasParaVencer <= 30 && $diasParaVencer > 0) {
+        // Obtener la fecha de vencimiento más próxima de los lotes con stock
+        $fechaVencimientoMasProxima = \App\Models\ProductoUbicacion::where('producto_id', $producto->id)
+            ->where('cantidad', '>', 0)
+            ->whereNotNull('fecha_vencimiento')
+            ->orderBy('fecha_vencimiento', 'asc')
+            ->value('fecha_vencimiento');
+        
+        // Si no hay lotes con fecha, usar la fecha del producto principal
+        if (!$fechaVencimientoMasProxima && $producto->fecha_vencimiento) {
+            $fechaVencimientoMasProxima = $producto->fecha_vencimiento;
+        }
+        
+        // Si hay fecha de vencimiento, calcular estado
+        if ($fechaVencimientoMasProxima) {
+            $fechaVenc = Carbon::parse($fechaVencimientoMasProxima);
+            
+            // 1. Verificar si está vencido
+            if ($fechaActual->gt($fechaVenc)) {
+                return 'Vencido';
+            }
+            
+            // 3. Verificar si está próximo a vencer (90 días) - tiene prioridad sobre stock bajo
+            $diasParaVencer = $fechaActual->diffInDays($fechaVenc, false);
+            if ($diasParaVencer <= 90 && $diasParaVencer > 0) {
                 return 'Por vencer';
             }
         }

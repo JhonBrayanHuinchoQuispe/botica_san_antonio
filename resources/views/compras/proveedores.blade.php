@@ -686,29 +686,29 @@
 }
 
 .proveedores-action-btn-view {
-    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    background: linear-gradient(135deg, #93c5fd, #60a5fa) !important;
 }
 
 .proveedores-action-btn-view:hover {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    background: linear-gradient(135deg, #60a5fa, #3b82f6) !important;
     transform: translateY(-1px) !important;
 }
 
 .proveedores-action-btn-edit {
-    background: linear-gradient(135deg, #f97316, #ea580c) !important;
+    background: linear-gradient(135deg, #fdba74, #fb923c) !important;
 }
 
 .proveedores-action-btn-edit:hover {
-    background: linear-gradient(135deg, #ea580c, #dc2626) !important;
+    background: linear-gradient(135deg, #fb923c, #f97316) !important;
     transform: translateY(-1px) !important;
 }
 
 .proveedores-action-btn-delete {
-    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    background: linear-gradient(135deg, #fca5a5, #f87171) !important;
 }
 
 .proveedores-action-btn-delete:hover {
-    background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+    background: linear-gradient(135deg, #f87171, #ef4444) !important;
     transform: translateY(-1px) !important;
 }
 
@@ -1004,6 +1004,143 @@
         height: 32px !important;
         font-size: 14px !important;
     }
+}
+
+/* Estilos para modales modernos de proveedores */
+.btn-metodo-registro {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.btn-metodo-registro iconify-icon {
+  font-size: 1.25rem !important;
+}
+
+.btn-metodo-registro:hover {
+  border-color: #f87171;
+  background: #fef2f2;
+  color: #f87171;
+}
+
+.btn-metodo-registro.active {
+  border-color: #f87171;
+  background: linear-gradient(135deg, #fca5a5 0%, #f87171 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(248, 113, 113, 0.3);
+}
+
+.campo-grupo-moderno {
+  margin-bottom: 1.25rem;
+}
+
+.label-moderno {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.label-moderno iconify-icon {
+  color: #f87171;
+  font-size: 1.25rem;
+}
+
+.input-moderno {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+  background: #f9fafb;
+}
+
+.input-moderno:focus {
+  outline: none;
+  border-color: #f87171;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.1);
+}
+
+.input-moderno:read-only {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.btn-buscar-moderno {
+  padding: 0.875rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btn-buscar-moderno:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
+}
+
+.hint-text {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+.hint-text iconify-icon {
+  color: #3b82f6;
+}
+
+.hint-text-auto {
+  font-size: 0.8125rem;
+  color: #9ca3af;
+  font-style: italic;
+  margin-top: 0.375rem;
+}
+
+.grid-campos-moderno {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.grid-campos-moderno.columnas-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.metodo-form {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
 

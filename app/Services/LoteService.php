@@ -21,17 +21,8 @@ class LoteService
     public function crearLote(array $datos): ProductoUbicacion
     {
         return DB::transaction(function () use ($datos) {
-            // Validación de fecha de vencimiento (Regla de 3 meses)
-            if (isset($datos['fecha_vencimiento']) && !isset($datos['ignorar_vencimiento_cercano'])) {
-                $fechaVencimiento = Carbon::parse($datos['fecha_vencimiento']);
-                $mesesParaVencer = now()->diffInMonths($fechaVencimiento, false);
-                
-                if ($mesesParaVencer < 3) {
-                    throw ValidationException::withMessages([
-                        'fecha_vencimiento' => "El lote tiene una fecha de vencimiento muy próxima ({$mesesParaVencer} meses). Se requiere autorización para ingresar productos con menos de 3 meses de vida útil."
-                    ]);
-                }
-            }
+            // Nota: Se permite crear lotes con cualquier fecha de vencimiento
+            // El sistema alertará sobre productos próximos a vencer, pero no impedirá su registro
 
             // Fallback: si no existe la tabla de lotes, devolver instancia en memoria
             if (!Schema::hasTable('producto_ubicaciones')) {
@@ -91,6 +82,9 @@ class LoteService
 
             // Actualizar stock total del producto
             $this->actualizarStockProducto($datos['producto_id']);
+
+            // Crear notificación si el lote está próximo a vencer
+            $this->verificarYCrearNotificacionVencimiento($lote);
 
             Log::info("Nuevo lote creado", [
                 'lote_id' => $lote->id,
@@ -646,5 +640,70 @@ class LoteService
             'precio_promedio' => $cantidad > 0 ? $precioTotal / $cantidad : 0,
             'cantidad_faltante' => $cantidadRestante
         ];
+    }
+
+    /**
+     * Verificar y crear notificación si el lote está próximo a vencer
+     */
+    private function verificarYCrearNotificacionVencimiento(ProductoUbicacion $lote): void
+    {
+        if (!$lote->fecha_vencimiento) {
+            return;
+        }
+
+        $fechaVencimiento = Carbon::parse($lote->fecha_vencimiento);
+        $diasRestantes = now()->diffInDays($fechaVencimiento, false);
+
+        // Crear notificación si está próximo a vencer (0-90 días)
+        if ($diasRestantes >= 0 && $diasRestantes <= 90) {
+            $producto = $lote->producto;
+            if (!$producto) {
+                return;
+            }
+
+            // Verificar si ya existe una notificación reciente para este producto
+            $existeNotificacion = \App\Models\Notification::where('type', \App\Models\Notification::TYPE_PRODUCTO_VENCIMIENTO)
+                ->where('data->producto_id', $producto->id)
+                ->where('created_at', '>=', now()->subDay())
+                ->exists();
+
+            if (!$existeNotificacion) {
+                \App\Models\Notification::createProximoVencer(
+                    \Illuminate\Support\Facades\Auth::id() ?? 1,
+                    $producto,
+                    $diasRestantes
+                );
+
+                Log::info("Notificación de vencimiento creada", [
+                    'producto_id' => $producto->id,
+                    'lote_id' => $lote->id,
+                    'dias_restantes' => $diasRestantes
+                ]);
+            }
+        }
+        // Crear notificación si ya está vencido
+        elseif ($diasRestantes < 0) {
+            $producto = $lote->producto;
+            if (!$producto) {
+                return;
+            }
+
+            $existeNotificacion = \App\Models\Notification::where('type', \App\Models\Notification::TYPE_PRODUCTO_VENCIDO)
+                ->where('data->producto_id', $producto->id)
+                ->where('created_at', '>=', now()->subDay())
+                ->exists();
+
+            if (!$existeNotificacion) {
+                \App\Models\Notification::createProductoVencido(
+                    \Illuminate\Support\Facades\Auth::id() ?? 1,
+                    $producto
+                );
+
+                Log::info("Notificación de producto vencido creada", [
+                    'producto_id' => $producto->id,
+                    'lote_id' => $lote->id
+                ]);
+            }
+        }
     }
 }

@@ -776,6 +776,29 @@ class VentaController extends Controller
         // Comparativo (solo si no es personalizado complejo, simplificamos para no complicar lógica)
         $comparativo = ($periodo !== 'personalizado') ? $this->obtenerComparativoPeriodo($periodo) : null;
 
+        // Detalle de productos vendidos para exportación Excel
+        $detalleProductosVendidos = VentaDetalle::select(
+                'venta_detalles.producto_id',
+                'productos.nombre',
+                'productos.marca',
+                'productos.concentracion',
+                'productos.presentacion',
+                'productos.categoria',
+                DB::raw('SUM(venta_detalles.cantidad) as cantidad_total'),
+                DB::raw('SUM(venta_detalles.subtotal) as total_vendido'),
+                DB::raw('AVG(venta_detalles.precio_unitario) as precio_promedio')
+            )
+            ->join('productos', 'venta_detalles.producto_id', '=', 'productos.id')
+            ->whereHas('venta', function($q) use ($fechaInicio, $fechaFin, $usuarioId) {
+                $q->activas()->whereBetween('fecha_venta', [$fechaInicio, $fechaFin]);
+                if ($usuarioId) {
+                    $q->where('usuario_id', $usuarioId);
+                }
+            })
+            ->groupBy('venta_detalles.producto_id', 'productos.nombre', 'productos.marca', 'productos.concentracion', 'productos.presentacion', 'productos.categoria')
+            ->orderByDesc('cantidad_total')
+            ->get();
+
         return [
             'total_ventas' => $ventas->count(),
             'total_ingresos' => $totalIngresos,
@@ -788,7 +811,8 @@ class VentaController extends Controller
             'fecha_fin' => $fechaFin,
             'promedio' => $promedioSerie,
             'tituloPeriodo' => $tituloPeriodo,
-            'comparativo' => $comparativo
+            'comparativo' => $comparativo,
+            'detalle_productos_vendidos' => $detalleProductosVendidos
         ];
     }
 

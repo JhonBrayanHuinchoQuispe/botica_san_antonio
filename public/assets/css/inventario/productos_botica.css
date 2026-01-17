@@ -5,7 +5,19 @@
 .botica-search .search-icon { color:#64748b; font-size:18px; }
 .botica-search .search-input { flex:1; border:none; outline:none; background:transparent; font-size:14px; }
 .search-clear { display:none; border:none; background:transparent; color:#9ca3af; cursor:pointer; }
-.registros-select { border:1px solid #E9EDF5; border-radius:12px; background:#fff; padding:.25rem .75rem; min-height:44px; box-shadow:0 1px 2px rgba(0,0,0,0.035); }
+.registros-select { 
+    border:1px solid #E9EDF5; 
+    border-radius:12px; 
+    background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24'%3E%3Cpath fill='%23666' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 0.75rem center;
+    background-size: 20px;
+    padding:.25rem 2.5rem .25rem .75rem; 
+    min-height:44px; 
+    box-shadow:0 1px 2px rgba(0,0,0,0.035);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+}
 .btn-ir-agregar { background:#3b82f6 !important; color:#fff !important; border-radius:10px; padding:.65rem 1rem; font-weight:600; box-shadow:0 6px 14px rgba(59,130,246,.18); opacity:1 !important; visibility:visible !important; transition:background .2s ease, transform .15s ease; }
 .btn-ir-agregar:hover { background:#2563eb !important; transform:translateY(-1px); }
 /* Botones de acción en la tabla */

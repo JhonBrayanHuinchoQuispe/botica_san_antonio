@@ -48,6 +48,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (formAgregarProducto) {
         // Nombre: permitir letras, números, espacios y caracteres especiales comunes
         const nombreInput = formAgregarProducto.querySelector('input[name="nombre"]');
+        // Definir input de concentración aquí para que esté disponible en todo el ámbito
+        const concentracionInput = formAgregarProducto.querySelector('input[name="concentracion"]');
+
         if (nombreInput) {
             nombreInput.addEventListener('keypress', function(e) {
                 // Permitir letras, números, espacios y caracteres especiales comunes para medicamentos
@@ -74,9 +77,65 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
+        // Función para verificar duplicados (Nombre + Concentración)
+        window.verificarDuplicado = async (silent = false) => {
+            const nombre = nombreInput.value.trim();
+            // Usar 'N/A' si no hay concentración para normalizar búsqueda
+            const concentracion = concentracionInput ? concentracionInput.value.trim() : '';
+            
+            if (nombre.length > 2) {
+                try {
+                    // Buscar si existe - Usar endpoint de búsqueda global
+                    const params = new URLSearchParams({ search: nombre });
+                    params.append('per_page', 50); 
+                    
+                    const res = await fetch(`/inventario/productos/ajax?${params}`);
+                    const data = await res.json();
+                    
+                    if (data && data.data && Array.isArray(data.data)) {
+                        // Filtrar coincidencia exacta de nombre y concentración
+                        const norm = (s) => (s || '').toLowerCase().trim().replace(/\s+/g, ' ');
+                        
+                        const duplicado = data.data.find(p => {
+                            const pNombre = norm(p.nombre);
+                            const pConc = norm(p.concentracion);
+                            const inNombre = norm(nombre);
+                            const inConc = norm(concentracion);
+                            
+                            // Coincidencia exacta de nombre Y concentración
+                            return pNombre === inNombre && pConc === inConc;
+                        });
+                        
+                        const parent = nombreInput.parentElement;
+                        let alert = parent.querySelector('.duplicado-alert');
+                        
+                        if (duplicado) {
+                            if (!alert) {
+                                alert = document.createElement('div');
+                                alert.className = 'duplicado-alert text-xs text-amber-600 mt-1 font-medium bg-amber-50 p-2 rounded border border-amber-200 flex items-center gap-1';
+                                alert.innerHTML = '<iconify-icon icon="solar:danger-circle-bold"></iconify-icon> Este producto (Nombre + Concentración) ya existe.';
+                                nombreInput.insertAdjacentElement('afterend', alert);
+                            }
+                            nombreInput.classList.add('border-amber-500');
+                            if(concentracionInput) concentracionInput.classList.add('border-amber-500');
+                            return true; // Duplicado encontrado
+                        } else {
+                            if (alert) alert.remove();
+                            nombreInput.classList.remove('border-amber-500');
+                            if(concentracionInput) concentracionInput.classList.remove('border-amber-500');
+                            return false; // No hay duplicado
+                        }
+                    }
+                } catch (e) { console.error('Error verificando duplicados', e); }
+            }
+            return false;
+        };
+
         // Concentración: permitir letras, números y caracteres comunes para concentraciones
-        const concentracionInput = formAgregarProducto.querySelector('input[name="concentracion"]');
+        // const concentracionInput = formAgregarProducto.querySelector('input[name="concentracion"]'); // Ya definido arriba
         if (concentracionInput) {
+            concentracionInput.addEventListener('blur', () => window.verificarDuplicado()); // Verificar también al cambiar concentración
+            
             concentracionInput.addEventListener('keypress', function(e) {
                 // Permitir letras, números, espacios y caracteres para concentraciones (mg, ml, %, etc.)
                 if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s\-\.\%\/]$/.test(e.key)) {
@@ -200,25 +259,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- VALIDACIONES BÁSICAS EN TIEMPO REAL PARA MODAL DE EDICIÓN ---
     const formEditarProducto = document.getElementById('formEditarProducto');
     if (formEditarProducto) {
-        // Nombre: bloquear escritura completamente
+        // Nombre: permitir edición con validaciones básicas
         const nombreEditInput = formEditarProducto.querySelector('input[name="nombre"]');
         if (nombreEditInput) {
             nombreEditInput.addEventListener('keypress', function(e) {
-                e.preventDefault();
-            });
-            nombreEditInput.addEventListener('input', function(e) {
-                e.preventDefault();
+                if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s\-\.\(\)\+\/]$/.test(e.key)) {
+                    e.preventDefault();
+                }
             });
         }
 
-        // Concentración: bloquear escritura completamente
+        // Concentración: permitir edición
         const concentracionEditInput = formEditarProducto.querySelector('#edit-concentracion');
         if (concentracionEditInput) {
             concentracionEditInput.addEventListener('keypress', function(e) {
-                e.preventDefault();
-            });
-            concentracionEditInput.addEventListener('input', function(e) {
-                e.preventDefault();
+                if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s\-\.\%\/]$/.test(e.key)) {
+                    e.preventDefault();
+                }
             });
         }
 

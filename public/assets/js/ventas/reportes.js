@@ -40,11 +40,6 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             inicializarGraficos();
             console.log('✅ Gráficos inicializados correctamente');
-            
-            // Cargar gráfico comparativo automáticamente
-            setTimeout(() => {
-                cargarGraficoComparativo(periodoChart, compararSelectInit?.value || 'mes_anterior', vistaSelectInit?.value || 'auto');
-            }, 200);
         } catch(e) {
             console.error('Error inicializando gráficos:', e);
         }
@@ -348,7 +343,42 @@ async function exportarExcel(periodo) {
         wsMarcas['!cols'] = [{wch: 10}, {wch: 30}, {wch: 15}, {wch: 15}];
         XLSX.utils.book_append_sheet(wb, wsMarcas, 'Marcas');
         
-        // === HOJA 4: INGRESOS DETALLADOS ===
+        // === HOJA 4: DETALLE PRODUCTOS VENDIDOS ===
+        const detalleData = [
+            ['DETALLE DE PRODUCTOS VENDIDOS'],
+            ['Período: ' + obtenerNombrePeriodo(periodo)],
+            [''],
+            ['#', 'Producto', 'Marca', 'Concentración', 'Presentación', 'Categoría', 'Cantidad', 'Precio Prom.', 'Total Vendido']
+        ];
+        
+        let totalCantidad = 0;
+        let totalVendido = 0;
+        (datos.detalle_productos_vendidos || []).forEach((p, idx) => {
+            const cantidad = parseInt(p.cantidad_total) || 0;
+            const precioPromedio = parseFloat(p.precio_promedio) || 0;
+            const total = parseFloat(p.total_vendido) || 0;
+            totalCantidad += cantidad;
+            totalVendido += total;
+            detalleData.push([
+                idx + 1,
+                p.nombre || 'Sin nombre',
+                p.marca || 'Sin marca',
+                p.concentracion || '-',
+                p.presentacion || '-',
+                p.categoria || '-',
+                cantidad,
+                'S/ ' + precioPromedio.toFixed(2),
+                'S/ ' + total.toFixed(2)
+            ]);
+        });
+        
+        detalleData.push(['', '', '', '', '', 'TOTALES:', totalCantidad, '', 'S/ ' + totalVendido.toFixed(2)]);
+        
+        const wsDetalle = XLSX.utils.aoa_to_sheet(detalleData);
+        wsDetalle['!cols'] = [{wch: 5}, {wch: 30}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 10}, {wch: 12}, {wch: 14}];
+        XLSX.utils.book_append_sheet(wb, wsDetalle, 'Detalle Productos');
+        
+        // === HOJA 5: INGRESOS DETALLADOS ===
         const ingresosData = [
             ['INGRESOS DEL PERÍODO'],
             ['Período: ' + obtenerNombrePeriodo(periodo)],
@@ -379,7 +409,7 @@ async function exportarExcel(periodo) {
         
         Swal.fire({
             title: '✅ Excel Generado',
-            html: `<div style="text-align: center;"><p style="font-size: 1.1rem; margin-bottom: 0.5rem;">Archivo descargado exitosamente</p><p style="color: #6b7280; font-size: 0.9rem;">${nombreArchivo}</p><p style="color: #10b981; font-size: 0.85rem; margin-top: 1rem;">✓ 4 hojas incluidas: Resumen, Productos, Marcas e Ingresos</p></div>`,
+            html: `<div style="text-align: center;"><p style="font-size: 1.1rem; margin-bottom: 0.5rem;">Archivo descargado exitosamente</p><p style="color: #6b7280; font-size: 0.9rem;">${nombreArchivo}</p><p style="color: #10b981; font-size: 0.85rem; margin-top: 1rem;">✓ 5 hojas incluidas: Resumen, Top Productos, Marcas, Detalle Productos e Ingresos</p></div>`,
             icon: 'success',
             confirmButtonText: 'Entendido',
             confirmButtonColor: '#10b981'
@@ -1131,7 +1161,8 @@ async function obtenerDatosReporte(periodo) {
             productos_mas_vendidos: data.productos_mas_vendidos || [],
             marcas_mas_compradas: data.marcas_mas_compradas || [],
             comparativo: data.comparativo || null,
-            tituloPeriodo: data.tituloPeriodo || ''
+            tituloPeriodo: data.tituloPeriodo || '',
+            detalle_productos_vendidos: data.detalle_productos_vendidos || []
         };
         
         return datosFormateados;

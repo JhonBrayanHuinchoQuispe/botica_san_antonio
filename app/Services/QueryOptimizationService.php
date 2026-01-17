@@ -50,19 +50,42 @@ class QueryOptimizationService
                     $q->where('stock_actual', '<=', 0);
                     break;
                 case 'por_vencer':
-                    if (Schema::hasColumn('productos', 'fecha_vencimiento')) {
-                        $q->whereDate('fecha_vencimiento', '>', $hoy)
-                          ->whereDate('fecha_vencimiento', '<=', Carbon::now('America/Lima')->addDays(90));
-                    } else {
-                        $q->whereRaw('1=0');
-                    }
+                    $q->where(function($sub) use ($hoy) {
+                        // Verificar fecha del producto
+                        if (Schema::hasColumn('productos', 'fecha_vencimiento')) {
+                            $sub->where(function($p) use ($hoy) {
+                                $p->whereDate('fecha_vencimiento', '>', $hoy)
+                                  ->whereDate('fecha_vencimiento', '<=', Carbon::now('America/Lima')->addDays(90));
+                            });
+                        }
+                        
+                        // O verificar si tiene algún lote por vencer
+                        if (Schema::hasTable('producto_ubicaciones')) {
+                            $sub->orWhereHas('ubicaciones', function($uq) use ($hoy) {
+                                $uq->where('cantidad', '>', 0)
+                                   ->whereNotNull('fecha_vencimiento')
+                                   ->whereDate('fecha_vencimiento', '>', $hoy)
+                                   ->whereDate('fecha_vencimiento', '<=', Carbon::now('America/Lima')->addDays(90));
+                            });
+                        }
+                    });
                     break;
                 case 'vencido':
-                    if (Schema::hasColumn('productos', 'fecha_vencimiento')) {
-                        $q->whereDate('fecha_vencimiento', '<', $hoy);
-                    } else {
-                        $q->whereRaw('1=0');
-                    }
+                    $q->where(function($sub) use ($hoy) {
+                        // Verificar fecha del producto
+                        if (Schema::hasColumn('productos', 'fecha_vencimiento')) {
+                            $sub->whereDate('fecha_vencimiento', '<', $hoy);
+                        }
+                        
+                        // O verificar si tiene algún lote vencido
+                        if (Schema::hasTable('producto_ubicaciones')) {
+                            $sub->orWhereHas('ubicaciones', function($uq) use ($hoy) {
+                                $uq->where('cantidad', '>', 0)
+                                   ->whereNotNull('fecha_vencimiento')
+                                   ->whereDate('fecha_vencimiento', '<', $hoy);
+                            });
+                        }
+                    });
                     break;
                 case 'normal':
                     // Excluir estados críticos
@@ -70,10 +93,21 @@ class QueryOptimizationService
                     if (Schema::hasColumn('productos', 'stock_minimo')) {
                         $q->whereColumn('stock_actual', '>', 'stock_minimo');
                     }
+                    
+                    // Excluir productos con fecha de vencimiento crítica
                     if (Schema::hasColumn('productos', 'fecha_vencimiento')) {
                         $q->where(function($qq) use ($hoy) {
                             $qq->whereNull('fecha_vencimiento')
                                ->orWhereDate('fecha_vencimiento', '>=', $hoy->copy()->addDays(91));
+                        });
+                    }
+                    
+                    // Y ADEMÁS, Excluir productos que tengan lotes críticos (vencidos o por vencer)
+                    if (Schema::hasTable('producto_ubicaciones')) {
+                        $q->whereDoesntHave('ubicaciones', function($uq) use ($hoy) {
+                            $uq->where('cantidad', '>', 0)
+                               ->whereNotNull('fecha_vencimiento')
+                               ->whereDate('fecha_vencimiento', '<=', Carbon::now('America/Lima')->addDays(90));
                         });
                     }
                     break;
