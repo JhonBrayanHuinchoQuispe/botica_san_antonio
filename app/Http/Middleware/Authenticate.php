@@ -12,6 +12,22 @@ class Authenticate extends Middleware
      */
     protected function redirectTo(Request $request): ?string
     {
-        return $request->expectsJson() ? null : route('login');
+        if ($request->expectsJson()) {
+            return null;
+        }
+        
+        // Verificar si la sesión expiró por timeout de inactividad
+        if (session()->has('session_expired')) {
+            return route('session.timeout');
+        }
+        
+        // Verificar si fue por inactividad prolongada (>30 minutos)
+        $lastActivity = session()->get('last_activity_time');
+        if ($lastActivity && (time() - $lastActivity) > 1800) { // 1800 segundos = 30 minutos
+            session()->put('session_expired', true);
+            return route('session.timeout');
+        }
+        
+        return route('login');
     }
 }

@@ -18,346 +18,453 @@
     <meta name="usuario-nombre" content="{{ auth()->user()->name ?? '' }}">
     <link rel="stylesheet" href="{{ asset('assets/css/ventas/ventas.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/ventas/reportes-modern.css') }}?v={{ time() }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('assets/css/ventas/reportes-modern-badges.css') }}?v={{ time() }}">
 </head>
 
 @section('content')
 
-<div class="grid grid-cols-12">
-    <div class="col-span-12">
+<div class="reportes-professional-container">
+    
+    <style>
+        .reportes-table-modern thead th {
+            background-color: #f3f0ff !important;
+            color: #6b21a8 !important;
+            border-bottom: 2px solid #e9d5ff !important;
+        }
+
         
-        <!-- Filtro de Período -->
-        <div class="historial-table-container-improved" style="margin-bottom: 2rem;">
-            <div class="historial-table-header-improved">
-                <div class="historial-filters-layout-improved">
-                    <div class="historial-filters-left-improved">
-                        <form method="GET" action="{{ route('ventas.reportes') }}" id="filtroReporteForm">
-                            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <span style="font-weight: 600; color: #374151;">📊 Período:</span>
-                                    <select name="periodo" id="periodoSelect" class="historial-input-clean" style="min-width: 150px;">
-                                        <option value="hoy" {{ $periodo == 'hoy' ? 'selected' : '' }}>Hoy</option>
-                                        <option value="ultimos7" {{ $periodo == 'ultimos7' ? 'selected' : '' }}>Últimos 7 días</option>
-                                        <option value="mes" {{ $periodo == 'mes' ? 'selected' : '' }}>Este mes</option>
-                                        <option value="anual" {{ $periodo == 'anual' ? 'selected' : '' }}>Este año</option>
-                                        <option value="personalizado" {{ $periodo == 'personalizado' ? 'selected' : '' }}>Personalizado</option>
-                                    </select>
-                                </div>
+        #modalExportarReporte .modal-content {
+            border: none;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        #modalExportarReporte .bg-gradient-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+        }
 
-                                <div id="fechasPersonalizadas" style="display: none; align-items: center; gap: 0.5rem;">
-                                    <input type="date" name="fecha_inicio" id="fechaInicio" class="historial-input-clean">
-                                    <span style="color: #6b7280;">-</span>
-                                    <input type="date" name="fecha_fin" id="fechaFin" class="historial-input-clean">
-                                </div>
+        .btn-check:checked + .btn-outline-primary {
+            background-color: #eef2ff;
+            border-color: #6366f1;
+            color: #4f46e5;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
 
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <span style="font-weight: 600; color: #374151;">👤 Vendedor:</span>
-                                    <select name="usuario_id" id="usuarioSelect" class="historial-input-clean" style="min-width: 150px;">
-                                        <option value="">Todos</option>
-                                        @foreach($usuarios as $usuario)
-                                            <option value="{{ $usuario->id }}">{{ $usuario->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                
-                                <button type="button" id="btnAplicarFiltros" class="historial-btn-filtrar" style="padding: 0.5rem 1rem; background-color: #3b82f6; color: white; border-radius: 0.375rem; border: none; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.25rem;">
-                                    <iconify-icon icon="solar:filter-bold"></iconify-icon> Aplicar
-                                </button>
-                                
-                                <div id="rangoFechasTexto" style="color: #6b7280; font-size: 0.875rem; margin-left: 0.5rem;">
-                                    <iconify-icon icon="solar:calendar-bold-duotone"></iconify-icon>
-                                    <span id="textoFechas">{{ $datos['fecha_inicio']->format('d/m/Y') }} - {{ $datos['fecha_fin']->format('d/m/Y') }}</span>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div class="historial-filters-right">
-                        <button onclick="exportarReporte()" class="historial-btn-nueva-entrada">
-                            <iconify-icon icon="solar:download-bold-duotone"></iconify-icon>
-                            Exportar
-                        </button>
-                    </div>
+        .btn-check:checked + .btn-outline-success {
+            background-color: #f0fdf4;
+            border-color: #22c55e;
+            color: #16a34a;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+        }
+
+        .btn-outline-primary, .btn-outline-success {
+            transition: all 0.2s ease;
+            border-width: 2px;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #f8fafc;
+            color: #6366f1;
+            border-color: #6366f1;
+        }
+
+        .btn-outline-success:hover {
+            background-color: #f8fafc;
+            color: #22c55e;
+            border-color: #22c55e;
+        }
+
+        .modal-backdrop.show {
+            opacity: 0.7;
+            backdrop-filter: blur(4px);
+        }
+    </style>
+    
+    
+    <div class="reportes-quick-filters-section">
+        <div class="reportes-quick-filters-header">
+            <div class="reportes-filters-title">
+                <iconify-icon icon="solar:filter-bold-duotone" style="font-size: 1.5rem; color: #3b82f6;"></iconify-icon>
+                <span>Filtros Rápidos</span>
+            </div>
+            <button onclick="exportarReporte()" class="reportes-export-btn-modern">
+                <iconify-icon icon="solar:download-minimalistic-bold"></iconify-icon>
+                Exportar Reporte
+            </button>
+        </div>
+        
+        
+        <div class="reportes-pills-container">
+            <button class="reportes-pill {{ $periodo == 'hoy' ? 'active' : '' }}" data-periodo="hoy">
+                <iconify-icon icon="solar:calendar-bold"></iconify-icon>
+                Hoy
+            </button>
+            <button class="reportes-pill {{ $periodo == 'ayer' ? 'active' : '' }}" data-periodo="ayer">
+                <iconify-icon icon="solar:history-bold"></iconify-icon>
+                Ayer
+            </button>
+            <button class="reportes-pill {{ $periodo == 'ultimos7' ? 'active' : '' }}" data-periodo="ultimos7">
+                <iconify-icon icon="solar:calendar-mark-bold"></iconify-icon>
+                Esta Semana
+            </button>
+            <button class="reportes-pill {{ $periodo == 'mes' ? 'active' : '' }}" data-periodo="mes">
+                <iconify-icon icon="solar:calendar-bold-duotone"></iconify-icon>
+                Este Mes
+            </button>
+            <button class="reportes-pill {{ $periodo == 'anual' ? 'active' : '' }}" data-periodo="anual">
+                <iconify-icon icon="solar:calendar-date-bold"></iconify-icon>
+                Este Año
+            </button>
+            <button class="reportes-pill {{ $periodo == 'personalizado' ? 'active' : '' }}" data-periodo="personalizado" id="btnPorFecha">
+                <iconify-icon icon="solar:calendar-search-bold"></iconify-icon>
+                Por Fecha
+            </button>
+        </div>
+        
+        
+        <div class="reportes-custom-dates" id="fechasPersonalizadasGroup" style="display: none;">
+            <div class="reportes-date-inputs">
+                <div class="reportes-date-input-group">
+                    <label>Desde</label>
+                    <input type="date" id="fechaInicio" class="reportes-input-date" max="{{ date('Y-m-d') }}">
+                </div>
+                <iconify-icon icon="solar:arrow-right-bold" style="font-size: 1.5rem; color: #9ca3af;"></iconify-icon>
+                <div class="reportes-date-input-group">
+                    <label>Hasta</label>
+                    <input type="date" id="fechaFin" class="reportes-input-date" max="{{ date('Y-m-d') }}">
+                </div>
+                <button id="btnAplicarFechas" class="reportes-apply-dates-btn">
+                    <iconify-icon icon="solar:check-circle-bold"></iconify-icon>
+                    Aplicar
+                </button>
+                <button id="btnCancelarFechas" class="reportes-cancel-dates-btn">
+                    <iconify-icon icon="solar:close-circle-bold"></iconify-icon>
+                    Cancelar
+                </button>
+            </div>
+        </div>
+        
+        
+        <div class="reportes-period-display">
+            <iconify-icon icon="solar:calendar-mark-bold-duotone"></iconify-icon>
+            <span id="textoPeriodoActual">Hoy - {{ now()->format('d') }} de {{ now()->locale('es')->translatedFormat('F') }} del {{ now()->format('Y') }}</span>
+        </div>
+    </div>
+
+    
+    <div class="reportes-metrics-grid-4">
+        <div class="reportes-metric-card blue">
+            <div class="reportes-metric-icon-small">
+                <iconify-icon icon="solar:bag-smile-bold"></iconify-icon>
+            </div>
+            <div class="reportes-metric-content">
+                <div class="reportes-metric-label">Total Ventas</div>
+                <div class="reportes-metric-value-medium" id="statTotalVentas">{{ $datos['total_ventas'] }}</div>
+                <div class="reportes-metric-comparison" id="compTotalVentas">
+                    <iconify-icon icon="solar:arrow-up-bold"></iconify-icon>
+                    <span>+0.0% vs período anterior</span>
                 </div>
             </div>
         </div>
         
-        <!-- Métricas Principales -->
-        <div class="reportes-stats-grid mb-4">
-            <div class="reportes-stat-card reportes-stat-blue-gradient">
-                <div class="reportes-stat-content">
-                    <div class="reportes-stat-label">Total Ventas</div>
-                    <div class="reportes-stat-value">{{ $datos['total_ventas'] }}</div>
-                    <div class="reportes-stat-change">
-                        <iconify-icon icon="bxs:up-arrow" class="text-xs"></iconify-icon>
-                        Ventas realizadas
-                    </div>
-                </div>
-                <div class="reportes-stat-icon">
-                    <iconify-icon icon="solar:bag-smile-bold"></iconify-icon>
-                </div>
+        <div class="reportes-metric-card green">
+            <div class="reportes-metric-icon-small">
+                <iconify-icon icon="solar:dollar-minimalistic-bold"></iconify-icon>
             </div>
-            
-            <div class="reportes-stat-card reportes-stat-green-gradient">
-                <div class="reportes-stat-content">
-                    <div class="reportes-stat-label">Ingresos Totales</div>
-                    <div class="reportes-stat-value">S/ {{ number_format($datos['total_ingresos'], 2) }}</div>
-                    <div class="reportes-stat-change">
-                        <iconify-icon icon="bxs:up-arrow" class="text-xs"></iconify-icon>
-                        Ingresos generados
-                    </div>
-                </div>
-                <div class="reportes-stat-icon">
-                    <iconify-icon icon="solar:dollar-minimalistic-bold"></iconify-icon>
-                </div>
-            </div>
-            
-            <div class="reportes-stat-card reportes-stat-orange-gradient">
-                <div class="reportes-stat-content">
-                    <div class="reportes-stat-label">Ticket Promedio</div>
-                    <div class="reportes-stat-value">S/ {{ number_format($datos['ticket_promedio'], 2) }}</div>
-                    <div class="reportes-stat-change">
-                        <iconify-icon icon="bxs:up-arrow" class="text-xs"></iconify-icon>
-                        Por venta
-                    </div>
-                </div>
-                <div class="reportes-stat-icon">
-                    <iconify-icon icon="solar:calculator-bold"></iconify-icon>
-                </div>
-            </div>
-            
-            <div class="reportes-stat-card reportes-stat-purple-gradient">
-                <div class="reportes-stat-content">
-                    <div class="reportes-stat-label">Productos Vendidos</div>
-                    <div class="reportes-stat-value">{{ $datos['productos_mas_vendidos']->sum('total_vendido') }}</div>
-                    <div class="reportes-stat-change">
-                        <iconify-icon icon="bxs:up-arrow" class="text-xs"></iconify-icon>
-                        Unidades totales
-                    </div>
-                </div>
-                <div class="reportes-stat-icon">
-                    <iconify-icon icon="solar:box-bold"></iconify-icon>
+            <div class="reportes-metric-content">
+                <div class="reportes-metric-label">Ingresos Totales</div>
+                <div class="reportes-metric-value-medium" id="statIngresosTotal">S/ {{ number_format($datos['total_ingresos'], 2) }}</div>
+                <div class="reportes-metric-comparison" id="compIngresos">
+                    <iconify-icon icon="solar:arrow-up-bold"></iconify-icon>
+                    <span>+0.0% vs período anterior</span>
                 </div>
             </div>
         </div>
-
-        <!-- Gráfico principal: Estadística de ventas -->
-        <div class="reportes-chart-container" style="margin-bottom: 1.5rem;">
-            <div class="reportes-chart-header" style="align-items: center; justify-content: space-between; display:flex;">
-                <div class="reportes-chart-title">
-                    <iconify-icon icon="solar:chart-2-bold" class="reportes-chart-icon"></iconify-icon>
-                    <span>Estadística de ventas</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:.75rem;">
-                    <span style="font-weight:600; color:#374151;">Periodo:</span>
-                    <select id="periodoChartSelect" class="historial-input-clean" style="min-width: 160px;">
-                        <option value="hoy" selected>Hoy</option>
-                        <option value="ultimos7">Últimos 7 días</option>
-                        <option value="mes">Mes</option>
-                        <option value="anual">Año</option>
-                    </select>
-                    <span style="font-weight:600; color:#374151; margin-left: .75rem;">Comparar con:</span>
-                    <select id="compararSelect" class="historial-input-clean" style="min-width: 180px;">
-                        <option value="ayer">Ayer</option>
-                        <option value="semana_anterior">Semana anterior</option>
-                        <option value="mes_anterior">Mes anterior</option>
-                        <option value="anio_anterior">Año anterior</option>
-                    </select>
-                    <span id="vistaMesLabel" style="font-weight:600; color:#374151; margin-left: .75rem; display:none;">Vista:</span>
-                    <select id="vistaMesSelect" class="historial-input-clean" style="min-width: 160px; display:none;">
-                        <option value="semanal" selected>Semanal</option>
-                        <option value="diario">Diario</option>
-                    </select>
-                </div>
+        
+        <div class="reportes-metric-card purple">
+            <div class="reportes-metric-icon-small">
+                <iconify-icon icon="solar:box-bold"></iconify-icon>
             </div>
-            <div class="reportes-chart-subtitle" id="reportes-titulo-periodo" style="margin: .25rem 2rem 0; text-align:center;">{{ $datos['fecha_inicio']->format('d/m/Y') }} - {{ $datos['fecha_fin']->format('d/m/Y') }}</div>
-            <div class="chart-mini-stats" style="display:flex; align-items:center; gap:1rem; padding: .5rem 2rem; margin-top:.25rem;">
-                <div class="mini-stat-value estadisticas-total">S/. {{ number_format(collect($datos['ingresos_por_dia'])->sum('ingresos'), 2) }}</div>
-                <span class="mini-stat-badge estadisticas-ventas">{{ $datos['total_ventas'] }} ventas</span>
-                <span class="mini-stat-average estadisticas-promedio">+ S/. {{ number_format(collect($datos['ingresos_por_dia'])->avg('ingresos'), 2) }} Por día</span>
-                <span class="mini-stat-delta" id="miniStatDelta" style="display:none;"></span>
-            </div>
-            <div class="reportes-chart-body">
-                <div id="ventas-chart-reportes" style="height: 360px; width: 100%;"></div>
-                <div id="chart-loading-ventas" class="reportes-chart-loading" style="display: none;">
-                    <div class="reportes-loading-spinner"></div>
-                    <span>Cargando gráfico...</span>
+            <div class="reportes-metric-content">
+                <div class="reportes-metric-label">Productos Vendidos</div>
+                <div class="reportes-metric-value-medium" id="statProductosVendidos">{{ $datos['productos_mas_vendidos']->sum('total_vendido') }}</div>
+                <div class="reportes-metric-comparison">
+                    <iconify-icon icon="solar:check-circle-bold"></iconify-icon>
+                    <span>Unidades totales</span>
                 </div>
             </div>
         </div>
-
-        <!-- Gráficos secundarios: Métodos de Pago y Top 10 lado a lado -->
-        <div class="reportes-charts-grid mb-4">
-            <!-- Métodos de Pago -->
-            <div class="reportes-chart-container reportes-chart-secondary">
-                <div class="reportes-chart-header">
-                    <div class="reportes-chart-title">
-                        <iconify-icon icon="mdi:credit-card-multiple" class="reportes-chart-icon"></iconify-icon>
-                        <span>Métodos de Pago</span>
-                    </div>
-                    <div class="reportes-chart-subtitle">Distribución de pagos en el período</div>
-                </div>
-                <div class="reportes-chart-body" style="min-height: 350px;">
-                    <div id="chart-loading-metodos" class="reportes-chart-loading" style="display: none;">
-                        <div class="reportes-loading-spinner"></div>
-                        <span>Cargando gráfico...</span>
-                    </div>
-                    <canvas id="metodosChart" width="300" height="300"></canvas>
-                </div>
+        
+        <div class="reportes-metric-card teal">
+            <div class="reportes-metric-icon-small">
+                <iconify-icon icon="solar:layers-bold"></iconify-icon>
             </div>
-            
-            <!-- Top 10 Productos Más Vendidos -->
-            <div class="reportes-table-container">
-                <div class="reportes-table-header">
-                    <div class="reportes-table-title">
-                        <iconify-icon icon="mdi:trophy" class="reportes-table-icon"></iconify-icon>
-                        <span>Top 10 Productos Más Vendidos</span>
-                    </div>
-                    <div class="reportes-table-subtitle">Productos con mayor rotación en el período</div>
-                </div>
-                <div class="reportes-table-body">
-                    @if($datos['productos_mas_vendidos']->count() > 0)
-                        <div class="reportes-table-wrapper">
-                            <table class="reportes-table" id="topProductosTable">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Producto</th>
-                                        <th class="text-center">Cantidad</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="topProductosBody">
-                                    @foreach($datos['productos_mas_vendidos'] as $index => $item)
-                                        <tr>
-                                            <td>
-                                                <div class="reportes-rank-badge reportes-rank-{{ $index < 3 ? 'top' : 'normal' }}">
-                                                    {{ $index + 1 }}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="reportes-product-info">
-                                                    <div class="reportes-product-details">
-                                                        <div class="reportes-product-name">{{ $item->producto->nombre }}</div>
-                                                        <div class="reportes-product-code">{{ $item->producto->concentracion ?? 'N/A' }}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="reportes-quantity-badge">{{ (int) $item->total_vendido }}</span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="reportes-empty-state">
-                            <iconify-icon icon="solar:box-bold" class="reportes-empty-icon"></iconify-icon>
-                            <h6 class="reportes-empty-title">No hay productos vendidos</h6>
-                            <p class="reportes-empty-text">No se encontraron productos vendidos en este período</p>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-        <div class="col-span-1">
-            <div class="reportes-table-card">
-                <div class="reportes-table-header">
-                    <div class="reportes-table-title">
-                        <iconify-icon icon="mdi:star-box" class="reportes-table-icon"></iconify-icon>
-                        <span>Marcas Más Compradas</span>
-                    </div>
-                    <div class="reportes-table-subtitle">Principales marcas en el período seleccionado</div>
-                </div>
-                <div class="reportes-table-body">
-                    <div class="reportes-table-wrapper">
-                        <table class="reportes-table" id="topMarcasTable">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Marca</th>
-                                    <th class="text-center">Unidades</th>
-                                </tr>
-                            </thead>
-                            <tbody id="topMarcasBody">
-                                @if(isset($datos['marcas_mas_compradas']) && count($datos['marcas_mas_compradas']) > 0)
-                                    @foreach($datos['marcas_mas_compradas'] as $i => $m)
-                                        <tr>
-                                            <td>
-                                                <div class="reportes-rank-badge reportes-rank-{{ $i < 3 ? 'top' : 'normal' }}">{{ $i + 1 }}</div>
-                                            </td>
-                                            <td>
-                                                <div class="reportes-producto">
-                                                    <div class="reportes-producto-nombre">{{ $m->marca ?? 'Sin marca' }}</div>
-                                                </div>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="reportes-cantidad">{{ (int)($m->unidades ?? 0) }}</span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                @endif
-                            </tbody>
-                        </table>
-                        @if(!isset($datos['marcas_mas_compradas']) || count($datos['marcas_mas_compradas']) === 0)
-                        <div class="reportes-empty">
-                            <p class="reportes-empty-text">Sin datos de marcas para este período</p>
-                        </div>
-                        @endif
-                    </div>
+            <div class="reportes-metric-content">
+                <div class="reportes-metric-label">Productos Únicos</div>
+                <div class="reportes-metric-value-medium" id="statProductosUnicos">{{ $datos['productos_mas_vendidos']->count() }}</div>
+                <div class="reportes-metric-comparison">
+                    <iconify-icon icon="solar:check-circle-bold"></iconify-icon>
+                    <span>Diferentes productos</span>
                 </div>
             </div>
         </div>
     </div>
+
+    
+    <div class="reportes-alerts-section">
+        <div class="reportes-alert-card warning">
+            <iconify-icon icon="solar:danger-triangle-bold"></iconify-icon>
+            <div class="reportes-alert-content">
+                <div class="reportes-alert-title">Stock Crítico</div>
+                <div class="reportes-alert-value" id="alertStockCritico">Cargando...</div>
+            </div>
+        </div>
+        
+        <div class="reportes-alert-card info">
+            <iconify-icon icon="solar:clock-circle-bold"></iconify-icon>
+            <div class="reportes-alert-content">
+                <div class="reportes-alert-title">Próximos a Vencer</div>
+                <div class="reportes-alert-value" id="alertPorVencer">Cargando...</div>
+            </div>
+        </div>
+        
+        <div class="reportes-alert-card danger">
+            <iconify-icon icon="solar:close-circle-bold"></iconify-icon>
+            <div class="reportes-alert-content">
+                <div class="reportes-alert-title">Sin Ventas (7 días)</div>
+                <div class="reportes-alert-value" id="alertSinVentas">Cargando...</div>
+            </div>
+        </div>
+        
+        <div class="reportes-alert-card success">
+            <iconify-icon icon="solar:fire-bold"></iconify-icon>
+            <div class="reportes-alert-content">
+                <div class="reportes-alert-title">Más Vendido Hoy</div>
+                <div class="reportes-alert-value" id="alertMasVendido">Cargando...</div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="reportes-charts-row">
+        
+        <div class="reportes-chart-card large">
+            <div class="reportes-chart-header">
+                <div class="reportes-chart-title-group">
+                    <iconify-icon icon="solar:chart-2-bold-duotone" style="font-size: 1.75rem; color: #3b82f6;"></iconify-icon>
+                    <div>
+                        <h3>Tendencia de Ventas</h3>
+                        <p>Evolución de ingresos en el período seleccionado</p>
+                        <p id="textoPeriodoComparacion" style="font-size: 0.9rem; font-weight: 600; margin-top: 0.5rem; color: #3b82f6;"></p>
+                    </div>
+                </div>
+                <div class="reportes-chart-controls">
+                    <select id="periodoChartSelect" class="reportes-select-mini">
+                        <option value="hoy">Hoy</option>
+                        <option value="ultimos7">Últimos 7 días</option>
+                        <option value="mes" selected>Este mes</option>
+                        <option value="anual">Este año</option>
+                    </select>
+                    <select id="compararSelect" class="reportes-select-mini">
+                        <option value="mes_anterior">vs Mes anterior</option>
+                        <option value="ayer">vs Ayer</option>
+                        <option value="semana_anterior">vs Semana anterior</option>
+                        <option value="anio_anterior">vs Año anterior</option>
+                    </select>
+                </div>
+            </div>
+            <div class="reportes-chart-body">
+                <div id="chart-loading-ventas" class="reportes-chart-loading">
+                    <div class="reportes-loading-spinner"></div>
+                    <p>Cargando datos...</p>
+                </div>
+                <div id="ventas-chart-reportes" style="min-height: 380px;"></div>
+            </div>
+            <div class="reportes-chart-footer">
+                <div class="reportes-chart-stat">
+                    <iconify-icon icon="solar:arrow-up-bold" style="color: #10b981;"></iconify-icon>
+                    <span>Pico: <strong id="statPico">S/ 0.00</strong></span>
+                </div>
+                <div class="reportes-chart-stat">
+                    <iconify-icon icon="solar:arrow-down-bold" style="color: #ef4444;"></iconify-icon>
+                    <span>Mínimo: <strong id="statMinimo">S/ 0.00</strong></span>
+                </div>
+                <div class="reportes-chart-stat">
+                    <iconify-icon icon="solar:chart-bold" style="color: #3b82f6;"></iconify-icon>
+                    <span>Promedio: <strong id="statPromedio">S/ 0.00</strong></span>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="reportes-chart-card small">
+            <div class="reportes-chart-header">
+                <div class="reportes-chart-title-group">
+                    <iconify-icon icon="solar:wallet-bold-duotone" style="font-size: 1.5rem; color: #10b981;"></iconify-icon>
+                    <div>
+                        <h3>Métodos de Pago</h3>
+                        <p>Distribución de pagos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="reportes-chart-body">
+                <div id="chart-loading-metodos" class="reportes-chart-loading">
+                    <div class="reportes-loading-spinner"></div>
+                </div>
+                <canvas id="metodosChart" style="max-height: 280px;"></canvas>
+            </div>
+            <div class="reportes-payment-details">
+                <div class="reportes-payment-item">
+                    <div class="reportes-payment-dot green"></div>
+                    <span>Efectivo</span>
+                    <strong id="montoEfectivo">S/ 0.00</strong>
+                </div>
+                <div class="reportes-payment-item">
+                    <div class="reportes-payment-dot blue"></div>
+                    <span>Tarjeta</span>
+                    <strong id="montoTarjeta">S/ 0.00</strong>
+                </div>
+                <div class="reportes-payment-item">
+                    <div class="reportes-payment-dot orange"></div>
+                    <span>Yape</span>
+                    <strong id="montoYape">S/ 0.00</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="reportes-tables-row">
+        
+        <div class="reportes-table-card">
+            <div class="reportes-table-header">
+                <div class="reportes-table-title-group">
+                    <iconify-icon icon="solar:star-bold-duotone" style="font-size: 1.5rem; color: #f59e0b;"></iconify-icon>
+                    <div>
+                        <h3>Top 10 Productos Más Vendidos</h3>
+                        <p>Productos con mayor rotación en el período</p>
+                    </div>
+                </div>
+            </div>
+            <div class="reportes-table-body">
+                <table class="reportes-table-modern">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Producto</th>
+                            <th style="width: 120px; text-align: center;">Unidades</th>
+                            <th style="width: 140px; text-align: right;">Ingresos</th>
+                            <th style="width: 100px; text-align: center;">Tendencia</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topProductosBody">
+                        @php
+                            $totalVendido = $datos['productos_mas_vendidos']->sum('total_vendido');
+                        @endphp
+                        @foreach($datos['productos_mas_vendidos']->take(10) as $index => $producto)
+                        @php
+                            $precioPromedio = $producto->precio_promedio ?? 60;
+                            $ingresos = ($producto->total_vendido ?? 0) * $precioPromedio;
+                            $porcentaje = $totalVendido > 0 ? (($producto->total_vendido ?? 0) / $totalVendido) * 100 : 0;
+                        @endphp
+                        <tr>
+                            <td>
+                                <div class="reportes-rank-badge {{ $index < 3 ? 'gold' : 'normal' }}">
+                                    {{ $index + 1 }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="reportes-product-info">
+                                    <div class="reportes-product-name">{{ $producto->producto->nombre ?? $producto->nombre ?? 'Producto' }}</div>
+                                    <div class="reportes-product-detail">{{ $producto->producto->concentracion ?? $producto->concentracion ?? '' }}</div>
+                                </div>
+                            </td>
+                            <td style="text-align: center;">
+                                <div class="reportes-quantity-badge">
+                                    {{ $producto->total_vendido ?? 0 }}
+                                </div>
+                            </td>
+                            <td style="text-align: right;">
+                                <strong style="color: #10b981; font-size: 0.95rem;">
+                                    S/ {{ number_format($ingresos, 2) }}
+                                </strong>
+                            </td>
+                            <td style="text-align: center;">
+                                @if($porcentaje >= 20)
+                                    <div class="reportes-trend-badge hot">
+                                        <iconify-icon icon="solar:fire-bold"></iconify-icon>
+                                        Hot
+                                    </div>
+                                @elseif($porcentaje >= 10)
+                                    <div class="reportes-trend-badge up">
+                                        <iconify-icon icon="solar:arrow-up-bold"></iconify-icon>
+                                        Subiendo
+                                    </div>
+                                @else
+                                    <div class="reportes-trend-badge normal">
+                                        <iconify-icon icon="solar:check-circle-bold"></iconify-icon>
+                                        Normal
+                                    </div>
+                                @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        
+        <div class="reportes-table-card">
+            <div class="reportes-table-header">
+                <div class="reportes-table-title-group">
+                    <iconify-icon icon="solar:tag-bold-duotone" style="font-size: 1.5rem; color: #8b5cf6;"></iconify-icon>
+                    <div>
+                        <h3>Marcas Más Compradas</h3>
+                        <p>Principales marcas en el período</p>
+                    </div>
+                </div>
+            </div>
+            <div class="reportes-table-body">
+                <table class="reportes-table-modern">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Marca</th>
+                            <th style="width: 120px; text-align: center;">Unidades</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topMarcasBody">
+                        @foreach($datos['marcas_mas_compradas']->take(10) as $index => $marca)
+                        <tr>
+                            <td>
+                                <div class="reportes-rank-badge {{ $index < 3 ? 'reportes-rank-top' : 'reportes-rank-normal' }}">
+                                    {{ $index + 1 }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="reportes-producto">
+                                    <div class="reportes-producto-nombre">{{ $marca->marca ?? 'Sin marca' }}</div>
+                                </div>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="reportes-cantidad">{{ $marca->unidades ?? 0 }}</span>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+<script>
+
+    window.datosIngresos = @json($datos['ingresos_por_dia'] ?? []);
+    window.datosMetodos = @json($datos['ventas_por_metodo'] ?? []);
+    window.datosComparativo = @json($datos['comparativo'] ?? null);
+</script>
 
 @endsection
 
-<style>
-/* Estilos adicionales para reportes */
-.historial-ranking {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-}
-
-/* Responsive para reportes */
-@media (max-width: 1024px) {
-    div[style*="grid-template-columns: 1fr 1fr"] {
-        grid-template-columns: 1fr !important;
-    }
-}
-
-@media (max-width: 768px) {
-    .historial-filters-left-improved div[style*="display: flex"] {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 0.5rem !important;
-    }
-    
-    .historial-table th:nth-child(4),
-    .historial-table td:nth-child(4) {
-        display: none;
-    }
-}
-</style>
-
-<script>
-// Datos iniciales para gráficos
-window.datosIngresos = @json($datos['ingresos_por_dia']);
-window.datosMetodos = @json($datos['ventas_por_metodo']);
-
-document.addEventListener('DOMContentLoaded', function() {
-    const btn = document.querySelector('.historial-btn-nueva-entrada');
-    if (btn) {
-        btn.style.opacity = '1';
-        btn.style.visibility = 'visible';
-        btn.style.display = 'inline-flex';
-        btn.style.alignItems = 'center';
-        btn.style.gap = '6px';
-    }
-    // Inicializa gráficos del módulo
-    try { inicializarGraficos(); } catch (e) { console.warn('Inicialización diferida de reportes'); }
-});
-</script>

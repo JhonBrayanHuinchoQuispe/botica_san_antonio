@@ -18,7 +18,7 @@
                 </div>
                 
                 <div class="card-body">
-                    <!-- Información del Producto -->
+                    
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="card bg-light">
@@ -73,7 +73,7 @@
                         </div>
                     </div>
 
-                    <!-- Tabla de Lotes -->
+                    
                     <div class="table-responsive">
                         <table class="table table-striped table-hover" id="tablaLotes">
                             <thead class="thead-dark">
@@ -159,7 +159,6 @@
     </div>
 </div>
 
-<!-- Modal para ver movimientos -->
 <div class="modal fade" id="modalMovimientos" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -170,13 +169,12 @@
                 </button>
             </div>
             <div class="modal-body" id="contenidoMovimientos">
-                <!-- Contenido cargado dinámicamente -->
+                
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal para ajustar stock -->
 <div class="modal fade" id="modalAjustarStock" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -227,20 +225,12 @@
 $(document).ready(function() {
     $('#tablaLotes').DataTable({
         language: {
-            url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json'
+            url: '
         },
-        order: [[2, 'desc']], // Ordenar por fecha de ingreso descendente
-        pageLength: 25,
-        responsive: true
-    });
-});
-
-function verMovimientos(loteId) {
+        order: [[2, 'desc']],
     $('#contenidoMovimientos').html('<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>');
     $('#modalMovimientos').modal('show');
-    
-    // Aquí se cargarían los movimientos del lote
-    // Por ahora mostramos un mensaje placeholder
+
     setTimeout(() => {
         $('#contenidoMovimientos').html(`
             <div class="alert alert-info">
@@ -253,10 +243,9 @@ function verMovimientos(loteId) {
 }
 
 function ajustarStock(loteId) {
-    // Aquí se cargarían los datos del lote
+
     $('#modalAjustarStock').modal('show');
-    
-    // Placeholder - en implementación real se cargarían los datos del lote
+
     $('#cantidadActual').val('100');
     $('#nuevaCantidad').val('');
     $('#motivoAjuste').val('');
@@ -265,8 +254,7 @@ function ajustarStock(loteId) {
 
 $('#formAjustarStock').on('submit', function(e) {
     e.preventDefault();
-    
-    // Aquí se procesaría el ajuste de stock
+
     alert('Funcionalidad de ajuste de stock en desarrollo');
     $('#modalAjustarStock').modal('hide');
 });
@@ -291,7 +279,6 @@ $('#formCambiarEstado').on('submit', function(e) {
         return;
     }
 
-    // Deshabilitar botón para prevenir doble envío
     const btnSubmit = $(this).find('button[type="submit"]');
     const originalText = btnSubmit.text();
     btnSubmit.prop('disabled', true).text('Guardando...');

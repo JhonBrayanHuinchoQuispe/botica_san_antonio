@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/compras/compras.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/admin/roles.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SweetAlert2 -->
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 </head>
@@ -23,7 +23,7 @@
 
 <div class="grid grid-cols-12 gap-6">
     <div class="col-span-12">
-        <!-- Estadísticas Mejoradas con Degradados Bonitos -->
+        
         <div class="proveedores-stats-grid">
             <div class="proveedores-stat-card proveedores-stat-red-improved">
                 <div class="proveedores-stat-content">
@@ -82,11 +82,11 @@
             </div>
         </div>
         
-        <!-- Filtros Mejorados Sin Etiquetas -->
+        
         <div class="proveedores-table-container-improved">
             <div class="proveedores-table-header-improved">
                 <div class="proveedores-filters-layout-improved">
-                    <!-- Filtros a la izquierda -->
+                    
                     <div class="proveedores-filters-left-improved">
                         <input type="text" 
                                class="proveedores-input-clean" 
@@ -123,7 +123,7 @@
                         </div>
                     </div>
                     
-                    <!-- Botón a la derecha -->
+                    
                     <div class="proveedores-filters-right">
                         <button type="button" class="proveedores-btn-nueva-entrada-visible" onclick="window.abrirModalAgregar && window.abrirModalAgregar()">
                             <iconify-icon icon="solar:add-circle-bold-duotone"></iconify-icon>
@@ -134,7 +134,7 @@
             </div>
         
             <div class="proveedores-table-wrapper-improved">
-                <!-- Mensaje de no resultados (oculto por defecto) -->
+                
                 <table class="proveedores-table" id="tablaProveedores">
                     <thead>
                         <tr>
@@ -148,7 +148,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Mensaje de no resultados (oculto por defecto) -->
+                        
                         <tr id="noResultsRow" style="display: none;">
                             <td colspan="7" class="proveedores-no-results-cell">
                                 <div class="proveedores-no-results-content">
@@ -243,13 +243,13 @@
                                             title="Editar">
                                         <iconify-icon icon="solar:pen-bold-duotone"></iconify-icon>
                                     </button>
-                                    <!-- Toggle estado activo/inactivo -->
+                                    
                                     <label class="toggle-switch proveedor-toggle" title="Activar/Desactivar">
                                         <input type="checkbox" class="proveedor-status-toggle" data-proveedor-id="{{ $proveedor->id }}" {{ $proveedor->estado === 'activo' ? 'checked' : '' }}>
                                         <span class="toggle-slider"></span>
                                     </label>
 
-                                    <!-- Eliminar -->
+                                    
                                     <button class="proveedores-action-btn proveedores-action-btn-delete" 
                                             onclick="eliminarProveedor({{ $proveedor->id }})" 
                                             title="Eliminar">
@@ -280,7 +280,7 @@
                     </tbody>
                 </table>
                 
-                <!-- Skeleton loading for Proveedores -->
+                
                 <div id="proveedoresSkeleton" class="skeleton-table" style="display:none;">
                     <div class="skeleton-row">
                         <span class="skeleton-bar short"></span>
@@ -336,10 +336,7 @@
 @endsection
 
 <style>
-/* TODOS LOS ESTILOS CSS EXISTENTES SE MANTIENEN IGUAL */
-/* Solo se ha eliminado el JavaScript duplicado */
 
-/* Header Elegante */
 .proveedores-header {
     background: linear-gradient(135deg, #e53e3e 0%, #dc2626 100%);
     color: white;
@@ -362,7 +359,6 @@
     font-size: 2.25rem;
 }
 
-/* Estadísticas con Degradados Bonitos */
 .proveedores-stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -438,7 +434,6 @@
     z-index: 1;
 }
 
-/* Degradados específicos con colores vibrantes */
 .proveedores-stat-red-improved {
     background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 50%, #e74c3c 100%);
     color: white;
@@ -467,7 +462,6 @@
     box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
 }
 
-/* Texto blanco para todas las tarjetas */
 .proveedores-stat-red-improved .proveedores-stat-label,
 .proveedores-stat-red-improved .proveedores-stat-value,
 .proveedores-stat-red-improved .proveedores-stat-change,
@@ -484,7 +478,6 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-/* Iconos blancos con opacidad */
 .proveedores-stat-red-improved .proveedores-stat-icon,
 .proveedores-stat-orange-improved .proveedores-stat-icon,
 .proveedores-stat-blue-improved .proveedores-stat-icon,
@@ -492,7 +485,6 @@
     color: rgba(255, 255, 255, 0.9);
 }
 
-/* Contenedor de tabla mejorado */
 .proveedores-table-container-improved {
     background: white;
     border-radius: 16px;
@@ -507,7 +499,6 @@
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
-/* Filtros sin etiquetas */
 .proveedores-filters-layout-improved {
     display: flex;
     justify-content: space-between;
@@ -596,7 +587,6 @@
     font-size: 1rem;
 }
 
-/* Botón Nueva Entrada SUPER FORZADO para que siempre se vea */
 .proveedores-filters-right {
     flex-shrink: 0;
 }
@@ -650,20 +640,17 @@
     color: white !important;
 }
 
-/* Forzar iconos del botón también */
 .proveedores-btn-nueva-entrada-visible iconify-icon {
     color: white !important;
     opacity: 1 !important;
 }
 
-/* Botones de acción */
 .proveedores-action-buttons {
     display: flex;
     gap: 0.5rem;
     justify-content: center;
 }
 
-/* Toggle switch para estado de proveedor (coherente con tablas) */
 .proveedor-toggle.toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; vertical-align: middle; }
 .proveedor-toggle.toggle-switch input { opacity: 0; width: 0; height: 0; }
 .proveedor-toggle .toggle-slider { position: absolute; cursor: pointer; inset: 0; background-color: #e5e7eb; transition: 0.2s ease; border-radius: 9999px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05); }
@@ -721,7 +708,6 @@
     transform: translateY(-1px) !important;
 }
 
-/* Tabla con bordes redondeados */
 .proveedores-table-wrapper-improved {
     overflow: hidden;
     border-radius: 0 0 16px 16px;
@@ -766,7 +752,6 @@
     border-bottom: none;
 }
 
-/* Elementos específicos de proveedores */
 .proveedores-id {
     font-weight: 600;
     color: #4f46e5;
@@ -829,7 +814,6 @@
     color: #6b7280;
 }
 
-/* Badges */
 .proveedores-badge {
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
@@ -860,7 +844,6 @@
     color: #64748b;
 }
 
-/* Mensaje de no resultados */
 .proveedores-no-results-cell {
     padding: 3rem 2rem !important;
     text-align: center;
@@ -927,7 +910,6 @@
     transform: translateY(-1px);
 }
 
-/* Estado vacío */
 .proveedores-empty-improved {
     text-align: center;
     padding: 2rem;
@@ -956,7 +938,6 @@
     justify-content: center;
 }
 
-/* Skeleton loading (Proveedores) */
 .skeleton-table { padding: 8px 0; }
 .skeleton-row { display:grid; grid-template-columns: 64px 1fr 1fr 1fr 120px 140px 170px; gap: 16px; align-items:center; padding: 14px 10px; border-bottom: 1px solid #f1f5f9; }
 .skeleton-bar { display:block; height: 16px; border-radius: 8px; background: linear-gradient(90deg, #e5e7eb 25%, #f1f5f9 37%, #e5e7eb 63%); background-size: 400% 100%; animation: skeleton-shimmer 1.2s ease-in-out infinite; }
@@ -968,7 +949,6 @@
 @keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .skeleton-bar, .skeleton-dot { animation: none; } }
 
-/* Responsive */
 @media (max-width: 768px) {
     .proveedores-filters-layout-improved {
         flex-direction: column;
@@ -1006,7 +986,6 @@
     }
 }
 
-/* Estilos para modales modernos de proveedores */
 .btn-metodo-registro {
   flex: 1;
   padding: 0.625rem 1rem;
@@ -1146,7 +1125,7 @@
 
 @section('scripts')
 <script>
-// JavaScript se maneja desde el archivo externo proveedores.js
+
 console.log('✅ Vista de proveedores cargada - funciones disponibles desde proveedores.js');
 </script>
 @endsection

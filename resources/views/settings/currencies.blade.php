@@ -3,7 +3,7 @@
     $title='Currencies';
     $subTitle = 'Settings - Currencies';
     $script = '<script>
-                        // Remove Tr when click on delete button js
+
                         $(".remove-item-button").on("click", function() {
                             $(this).closest("tr").addClass("hidden");
                         });
@@ -298,12 +298,12 @@
         </div>
     </div>
 
-    <!-- Add Currency Modal -->
+    
     <div id="add-currency-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
         <div class="relative p-4 w-full max-w-2xl max-h-full">
-            <!-- Modal content -->
+            
             <div class="relative bg-white rounded-lg shadow">
-                <!-- Modal header -->
+                
                 <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
                     <h3 class="text-xl font-semibold text-gray-900">
                         Add New Currency
@@ -315,7 +315,7 @@
                         <span class="sr-only">Close modal</span>
                     </button>
                 </div>
-                <!-- Modal body -->
+                
                 <div class="p-4 md:p-5 space-y-4">
                     <form action="#">
                         <div class="grid grid-cols-12 gap-5">
@@ -365,12 +365,12 @@
         </div>
     </div>
 
-    <!-- Edit Currency Modal -->
+    
     <div id="edit-currency-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
         <div class="relative p-4 w-full max-w-2xl max-h-full">
-            <!-- Modal content -->
+            
             <div class="relative bg-white rounded-lg shadow">
-                <!-- Modal header -->
+                
                 <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
                     <h3 class="text-xl font-semibold text-gray-900">
                         Edit Currency
@@ -382,7 +382,7 @@
                         <span class="sr-only">Close modal</span>
                     </button>
                 </div>
-                <!-- Modal body -->
+                
                 <div class="p-4 md:p-5 space-y-4">
                     <form action="#">
                         <div class="grid grid-cols-12 gap-5">

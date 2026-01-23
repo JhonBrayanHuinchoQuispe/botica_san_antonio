@@ -8,26 +8,26 @@
 <head>
     <title>Detalle del Estante</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <!-- CSS Principal del Estante -->
+    
     <link rel="stylesheet" href="{{ asset('assets/css/ubicacion/estante-detalle.css') }}">
     
-    <!-- CSS Especializado para Configuración de Estructura -->
+    
     <link rel="stylesheet" href="{{ asset('assets/css/ubicacion/configuracion/estructura-modal.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/ubicacion/configuracion/estructura-form.css') }}">
     
-    <!-- CSS de Modales -->
+    
     <link rel="stylesheet" href="{{ asset('assets/css/ubicacion/modal_agregar.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/ubicacion/modal_editar.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/ubicacion/modal_mover.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/ubicacion/modal_ver.css') }}">
     
-    <!-- Variables globales -->
+    
     <script>
         window.estanteActual = {{ $estante->id }};
         window.estanteNombre = "{{ $estante->nombre }}";
     </script>
     
-    <!-- JavaScript del Estante -->
+    
     <script src="{{ asset('assets/js/ubicacion/estante/estante.js') }}" defer></script>
     <script src="{{ asset('assets/js/ubicacion/estante-detalle.js') }}" defer></script>
     <script src="{{ asset('assets/js/ubicacion/modal_agregar.js') }}" defer></script>
@@ -35,9 +35,9 @@
     <script src="{{ asset('assets/js/ubicacion/fusion-slots.js') }}" defer></script>
     <script src="{{ asset('assets/js/ubicacion/fix-slot-click.js') }}" defer></script>
     
-    <!-- Script de Diagnóstico del Sistema - Solo funciones de utilidad -->
+    
     <script>
-        // FUNCIÓN DE EMERGENCIA PARA DRAG AND DROP (sin timers automáticos)
+
         window.emergenciaDragDrop = function() {
             console.log('%c🆘 ACTIVANDO DRAG AND DROP DE EMERGENCIA', 'background: #dc2626; color: white; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 14px;');
             
@@ -53,8 +53,7 @@
             console.log('%c🎯 DRAG AND DROP EMERGENCIA ACTIVADO', 'background: #10b981; color: white; padding: 6px; border-radius: 4px; font-weight: bold;');
             console.log('¡Ahora puedes arrastrar los productos!');
         };
-        
-        // Función para mostrar productos fuera de rango
+
         window.mostrarProductosFueraDeRango = function() {
             const productosExtraRango = document.querySelectorAll('.slot-fuera-rango.ocupado');
             
@@ -70,8 +69,7 @@
                 });
                 return;
             }
-            
-            // Crear lista de productos fuera de rango
+
             let listaProductos = '<div style="text-align: left; max-height: 300px; overflow-y: auto;">';
             listaProductos += '<h4 style="margin-bottom: 15px; color: #1e293b;">Productos fuera del rango configurado:</h4>';
             
@@ -94,8 +92,7 @@
             });
             
             listaProductos += '</div>';
-            
-            // Resaltar productos fuera de rango
+
             productosExtraRango.forEach(slot => {
                 slot.style.animation = 'fuera-rango-pulse 2s ease-in-out 3';
                 slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -113,7 +110,6 @@
             });
         };
 
-        // Solo mensaje de información sin timers automáticos
         document.addEventListener('DOMContentLoaded', function() {
             console.log('%c🎉 SISTEMA DRAG & DROP CARGADO', 'background: #10b981; color: white; padding: 8px; border-radius: 6px; font-weight: bold;');
             console.log('💡 Función disponible: emergenciaDragDrop()');
@@ -121,23 +117,23 @@
         });
     </script>
     
-    <!-- Scripts de testing y fix temporalmente deshabilitados para evitar recargas automáticas -->
-    <!-- <script src="{{ asset('verificar-datos-dom.js') }}"></script> -->
-    <!-- <script src="{{ asset('test-directo.js') }}"></script> -->
-    <!-- <script src="{{ asset('fix-drag-inmediato.js') }}"></script> -->
     
-    <!-- JavaScript Especializado para Configuración de Estructura -->
+    
+    
+    
+    
+    
     <script src="{{ asset('assets/js/ubicacion/configuracion/estructura-modal.js') }}" defer></script>
     
-    <!-- Iconify -->
+    
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     
-    <!-- SweetAlert2 -->
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <!-- Estilos para productos fuera de rango -->
+    
     <style>
-        /* Alerta principal para productos fuera de rango */
+        
         .alert-productos-fuera-rango {
             background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
             border: 1px solid #f59e0b;
@@ -208,7 +204,7 @@
             transform: translateY(-1px);
         }
 
-        /* Estilos para niveles fuera de rango */
+        
         .nivel-fuera-rango {
             position: relative;
             border: 2px dashed #f59e0b;
@@ -231,7 +227,7 @@
             font-weight: 500;
         }
 
-        /* Estilos para slots fuera de rango */
+        
         .slot-fuera-rango {
             position: relative;
             border: 2px solid #f59e0b !important;
@@ -279,7 +275,7 @@
             white-space: nowrap;
         }
 
-        /* Animación de atención para productos fuera de rango */
+        
         .slot-fuera-rango.ocupado {
             animation: fuera-rango-pulse 3s ease-in-out infinite;
         }
@@ -293,7 +289,7 @@
             }
         }
 
-        /* Tooltip para productos fuera de rango */
+        
         .slot-fuera-rango .slot-content {
             position: relative;
         }
@@ -321,9 +317,9 @@
         }
     </style>
     
-    <!-- Estilos para SweetAlert personalizado -->
+    
     <style>
-        /* Estilos para modal sobrio */
+        
         .modal-intercambio-sobrio {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
             border-radius: 16px !important;
@@ -338,7 +334,7 @@
             margin-bottom: 8px !important;
         }
         
-        /* Botones sobrios y profesionales */
+        
         .btn-confirmar-sobrio {
             background: #10b981 !important;
             border: none !important;
@@ -385,7 +381,7 @@
             box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3) !important;
         }
         
-        /* Botón cancelar rojizo especial para modal de guardar cambios */
+        
         .btn-cancelar-sobrio-rojo {
             background: #ef4444 !important;
             border: none !important;
@@ -409,7 +405,7 @@
             box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35) !important;
         }
         
-        /* Asegurar que los botones se vean en el modal */
+        
         .swal2-actions {
             margin-top: 30px !important;
             gap: 15px !important;
@@ -421,7 +417,7 @@
             display: inline-block !important;
         }
         
-        /* OCULTAR BOTONES EXTRA COMO "NO" */
+        
         .swal2-actions .swal2-deny {
             display: none !important;
             visibility: hidden !important;
@@ -438,12 +434,12 @@
             opacity: 0 !important;
         }
         
-        /* Eliminar cualquier botón con texto "No" */
+        
         .swal2-actions button:contains("No") {
             display: none !important;
         }
         
-        /* Solo mostrar confirm y cancel */
+        
         .swal2-actions-clean {
             justify-content: center !important;
         }
@@ -455,7 +451,7 @@
             opacity: 1 !important;
         }
         
-        /* MOSTRAR SOLO LOS BOTONES CORRECTOS */
+        
         .swal2-actions .swal2-confirm,
         .swal2-actions .swal2-cancel {
             display: inline-block !important;
@@ -463,7 +459,7 @@
             opacity: 1 !important;
         }
         
-        /* ASEGURAR VISIBILIDAD TOTAL DE BOTONES */
+        
         .btn-confirmar-sobrio,
         .btn-cancelar-sobrio,
         .swal2-confirm {
@@ -474,14 +470,14 @@
             z-index: 9999 !important;
         }
         
-        /* OCULTAR BOTONES ESPECÍFICOS PROBLEMÁTICOS */
+        
         .swal2-actions button:nth-child(n+3):not(.swal2-confirm):not(.swal2-cancel) {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
         }
         
-        /* Mejorar el contenedor del modal */
+        
         .swal2-html-container {
             margin: 0 !important;
             padding: 0 !important;
@@ -509,13 +505,13 @@
             to { transform: rotate(360deg); }
         }
         
-        /* Mejorar el modal de carga */
+        
         .swal2-loading .swal2-title {
             color: #10b981 !important;
             font-weight: 600 !important;
         }
         
-        /* BOTÓN ENTENDIDO SIEMPRE VISIBLE */
+        
         .swal2-popup[class*="modal-intercambio-sobrio"] .swal2-actions {
             margin-top: 25px !important;
             padding: 0 !important;
@@ -544,7 +540,7 @@
             box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35) !important;
         }
         
-        /* Estilos específicos para modal SIN CAMBIOS */
+        
         .modal-sin-cambios .swal2-actions {
             gap: 0 !important;
             justify-content: center !important;
@@ -561,7 +557,7 @@
             padding: 0 !important;
         }
         
-        /* Estilos específicos para modal GUARDAR CAMBIOS */
+        
         .modal-guardar-cambios .swal2-actions {
             gap: 15px !important;
             justify-content: center !important;
@@ -581,7 +577,7 @@
 <div class="card border-0 overflow-hidden">
     <div class="card-body">
         
-        <!-- Header del Estante -->
+        
         <div class="estante-header-section">
             <div class="breadcrumb-modern">
                 <a href="{{ route('ubicaciones.mapa') }}" class="breadcrumb-link">
@@ -612,9 +608,9 @@
             </div>
         </div>
 
-        <!-- Métricas Compactas del Estante -->
+        
         @php
-            // Calcular métricas reales
+
             $totalSlots = 0;
             $slotsOcupados = 0;
             $totalProductos = 0;
@@ -626,8 +622,7 @@
                     if (!empty($ubicacion['nombre'])) {
                         $slotsOcupados++;
                         $totalProductos += $ubicacion['unidades'] ?? 0;
-                        
-                        // Contar alertas si el stock es bajo
+
                         $stock = $ubicacion['unidades'] ?? 0;
                         if ($stock > 0 && $stock <= 10) {
                             $alertas++;
@@ -689,7 +684,7 @@
             </div>
         </div>
 
-        <!-- Alerta de productos fuera de rango -->
+        
         @if($estante->tiene_productos_fuera_de_rango)
         <div class="alert-productos-fuera-rango">
             <div class="alert-icon">
@@ -713,7 +708,7 @@
         </div>
         @endif
 
-        <!-- Contenido Principal -->
+        
         <div class="slots-main-content">
             <div class="slots-section">
                 <div class="slots-header">
@@ -733,9 +728,7 @@
                     </div>
                 </div>
 
-
-
-                <!-- Grid de Slots -->
+                
                 <div class="estante-grid">
                     @if(empty($estante->niveles))
                         <div class="no-ubicaciones-message">
@@ -745,7 +738,7 @@
                         </div>
                     @else
                         @php
-                            // Ordenar niveles de mayor a menor (de arriba hacia abajo)
+
                             $nivelesOrdenados = collect($estante->niveles)->sortByDesc('numero');
                         @endphp
                         @foreach($nivelesOrdenados as $nivel)
@@ -773,8 +766,7 @@
                                         $esFusionado = $ubicacionData['es_fusionado'] ?? false;
                                         $tipoFusion = $ubicacionData['tipo_fusion'] ?? null;
                                         $slotsOcupados = $ubicacionData['slots_ocupados'] ?? 1;
-                                        
-                                        // Determinar estado según stock
+
                                         $estado = 'vacio';
                                         if ($esProducto) {
                                             $stock = $ubicacionData['unidades'] ?? 0;
@@ -786,8 +778,7 @@
                                                 $estado = 'peligro';
                                             }
                                         }
-                                        
-                                        // Determinar clases CSS para fusión
+
                                         $clasesFusion = '';
                                         if ($esFusionado) {
                                             $clasesFusion = 'fusionado ' . $tipoFusion;
@@ -820,7 +811,7 @@
                                                 window.modalAgregar.abrirModoSlotEspecifico('{{ $codigoUbicacion }}'); 
                                             } else {
                                                 console.error('❌ Error: window.modalAgregar no está inicializado');
-                                                // Intento de recuperación de emergencia
+
                                                 if(typeof ModalAgregar !== 'undefined') {
                                                     window.modalAgregar = new ModalAgregar();
                                                     window.modalAgregar.abrirModoSlotEspecifico('{{ $codigoUbicacion }}');
@@ -917,7 +908,7 @@
                                                     {{ $rangoTexto }}
                                                 </span>
                                                 
-                                                <!-- Botón de separar oculto que aparece al hover -->
+                                                
                                                 <div class="slot-acciones">
                                                     <button class="btn-slot-accion btn-separar-fusionado" data-action="separar" title="Separar slots" data-ubicacion-id="{{ $ubicacionData['ubicacion_id'] }}" data-slot="{{ $codigoUbicacion }}">
                                                         <iconify-icon icon="solar:widget-broken-bold-duotone"></iconify-icon>
@@ -942,7 +933,7 @@
                     @endif
                 </div>
 
-                <!-- Panel de Control de Fusión (Oculto por defecto) -->
+                
                 <div id="panelControlFusion" class="panel-fusion-control hidden">
                     <div class="panel-fusion-header">
                         <div class="panel-fusion-title">
@@ -967,7 +958,7 @@
                     </div>
                 </div>
 
-                <!-- Leyenda -->
+                
                 <div class="leyenda-estados">
                     <div class="leyenda-item">
                         <div class="leyenda-color estado-ok"></div>
@@ -989,16 +980,9 @@
             </div>
         </div>
 
-
-
-
-
     </div>
 </div>
 
-
-
-<!-- Modal Ver Producto -->
 <div id="modalVerProducto" class="modal-overlay-estante hidden">
     <div class="modal-container-estante modal-ver-producto">
         <div class="modal-header-ver">
@@ -1010,7 +994,7 @@
         </div>
         
         <div class="modal-content-ver">
-            <!-- Información Principal del Producto -->
+            
             <div class="producto-info-header">
                 <div class="producto-titulo-seccion">
                     <h2 class="producto-nombre-principal" id="verProductoNombreCompleto">Paracetamol 500mg</h2>
@@ -1043,7 +1027,7 @@
                 </div>
             </div>
 
-            <!-- Grid de Información Detallada -->
+            
             <div class="producto-detalles-grid">
                 <div class="detalle-card">
                     <div class="detalle-card-header">
@@ -1080,7 +1064,6 @@
     </div>
 </div>
 
-<!-- Modal Editar Producto -->
 <div id="modalEditarProducto" class="modal-overlay-estante modal-editar hidden">
     <div class="modal-container-estante">
         <div class="modal-header-estante">
@@ -1127,7 +1110,6 @@
     </div>
 </div>
 
-<!-- Modal Mover Producto -->
 <div id="modalMoverProducto" class="modal-overlay-estante modal-mover hidden">
     <div class="modal-container-estante">
         <div class="modal-header-estante">
@@ -1139,7 +1121,7 @@
         </div>
         <div class="modal-content-estante">
             <div class="mover-info">
-                <!-- Producto a Mover - Ahora en la parte superior -->
+                
                 <div class="producto-mover-info">
                     <h4>Producto a Mover</h4>
                     <div class="producto-card-mover">
@@ -1154,7 +1136,7 @@
                     </div>
                 </div>
 
-                <!-- Sección de Posiciones -->
+                
                 <div class="origen-destino">
                     <div class="slot-info origen">
                         <h4>Posición Actual</h4>
@@ -1203,7 +1185,6 @@
     </div>
 </div>
 
-<!-- Modal Agregar Producto -->
 <div id="modalAgregarProducto" class="modal-overlay-estante hidden">
     <div class="modal-container-estante">
         <div class="modal-header-estante">
@@ -1221,7 +1202,7 @@
                         <select class="form-select" name="producto" id="selectProducto" onchange="mostrarInfoProducto(this.value)">
                             <option value="">Buscar producto...</option>
                         </select>
-                        <!-- Información del producto seleccionado -->
+                        
                         <div id="infoProductoSeleccionado" class="producto-info-card hidden" style="margin-top: 12px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
                             <div class="info-producto-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                                 <iconify-icon icon="solar:box-bold-duotone" style="color: #6366f1; font-size: 16px;"></iconify-icon>
@@ -1253,7 +1234,7 @@
                             <option value="">Seleccionar slot...</option>
                         </select>
                     </div>
-                    <!-- Campo para mostrar slot específico (cuando se hace click en un slot) -->
+                    
                     <div class="form-group hidden" id="grupoSlotEspecifico">
                         <label>Ubicación</label>
                         <div class="slot-info-display">
@@ -1290,7 +1271,6 @@
     </div>
 </div>
 
-<!-- Modal de Fusión de Slots -->
 <div id="modalFusionSlots" class="modal-fusion hidden">
     <div class="modal-fusion-content">
         <div class="modal-fusion-header">
@@ -1357,7 +1337,7 @@
                     Vista Previa
                 </div>
                 <div id="fusionPreviewGrid" class="fusion-preview-grid">
-                    <!-- Se llena dinámicamente con JavaScript -->
+                    
                 </div>
             </div>
         </div>
@@ -1376,9 +1356,8 @@
 
 @endsection
 
-<!-- JavaScript para funcionalidades mejoradas -->
 <script>
-// Función para mostrar información del producto seleccionado
+
 function mostrarInfoProducto(productoId) {
     const infoCard = document.getElementById('infoProductoSeleccionado');
     const cantidadInput = document.getElementById('cantidadProducto');
@@ -1388,8 +1367,7 @@ function mostrarInfoProducto(productoId) {
         cantidadInput.max = 0;
         return;
     }
-    
-    // Mostrar loading
+
     infoCard.classList.remove('hidden');
     infoCard.innerHTML = `
         <div style="text-align: center; padding: 20px;">
@@ -1397,15 +1375,13 @@ function mostrarInfoProducto(productoId) {
             <p style="margin: 8px 0 0 0; color: #6b7280;">Cargando información...</p>
         </div>
     `;
-    
-    // Hacer llamada AJAX para obtener información del producto
+
     fetch(`/api/productos/${productoId}/informacion-stock`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 const producto = data.producto;
-                
-                // Actualizar información
+
                 infoCard.innerHTML = `
                     <div class="info-producto-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                         <iconify-icon icon="solar:box-bold-duotone" style="color: #6366f1; font-size: 16px;"></iconify-icon>
@@ -1437,15 +1413,13 @@ function mostrarInfoProducto(productoId) {
                         </div>
                     ` : ''}
                 `;
-                
-                // Actualizar validaciones del input cantidad
+
                 cantidadInput.max = producto.stock_sin_ubicar;
                 const hintCantidad = document.getElementById('hintCantidad');
                 if (hintCantidad) {
                     hintCantidad.textContent = `Máximo disponible: ${producto.stock_sin_ubicar} unidades`;
                 }
-                
-                // Si no hay stock disponible, deshabilitar cantidad
+
                 if (producto.stock_sin_ubicar <= 0) {
                     cantidadInput.disabled = true;
                     cantidadInput.placeholder = "Sin stock disponible";
@@ -1471,7 +1445,6 @@ function mostrarInfoProducto(productoId) {
         });
 }
 
-// Función para validar cantidad disponible
 function validarCantidadDisponible(input) {
     const cantidad = parseInt(input.value);
     const maxDisponible = parseInt(input.max);
@@ -1486,7 +1459,6 @@ function validarCantidadDisponible(input) {
     }
 }
 
-// Funciones auxiliares para mostrar/ocultar alertas
 function mostrarAlertaCantidad(mensaje) {
     const alerta = document.getElementById('alertaCantidad');
     if (alerta) {
@@ -1501,7 +1473,5 @@ function ocultarAlertaCantidad() {
         alerta.classList.add('hidden');
     }
 }
-
-
 
 </script>

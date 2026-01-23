@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\Inventario\presentacion;
+namespace App\Http\Controllers\Inventario\Presentacion;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;

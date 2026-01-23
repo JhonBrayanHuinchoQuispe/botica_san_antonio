@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Producto;
 use App\Models\ProductoUbicacion;
+use App\Models\LoteMovimiento;
 use App\Models\Notification;
 use App\Models\User;
 use App\Services\LoteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
 class LoteController extends Controller
@@ -332,19 +334,35 @@ class LoteController extends Controller
         try {
             $request->validate([
                 'lote' => 'required|string|max:100',
-                'fecha_vencimiento' => 'nullable|date'
+                'fecha_vencimiento' => 'nullable|date',
+                'cantidad' => 'nullable|numeric|min:0',
+                'precio_compra' => 'nullable|numeric|min:0',
+                'precio_venta' => 'nullable|numeric|min:0',
+                'proveedor_id' => 'nullable|exists:proveedores,id'
             ]);
 
             $lote = ProductoUbicacion::findOrFail($loteId);
             
-            // Verificar unicidad si cambia el código (opcional, depende de reglas de negocio)
-            // Por ahora permitimos duplicados en diferentes productos, pero advertimos si es el mismo producto?
-            // Dejamos flexible.
-
             $lote->update([
                 'lote' => $request->lote,
-                'fecha_vencimiento' => $request->fecha_vencimiento
+                'fecha_vencimiento' => $request->fecha_vencimiento,
+                'cantidad' => $request->has('cantidad') ? $request->cantidad : $lote->cantidad,
+                'precio_compra_lote' => $request->has('precio_compra') ? $request->precio_compra : $lote->precio_compra_lote,
+                'precio_venta_lote' => $request->has('precio_venta') ? $request->precio_venta : $lote->precio_venta_lote,
+                'proveedor_id' => $request->has('proveedor_id') ? $request->proveedor_id : $lote->proveedor_id,
             ]);
+
+            // Sincronizar el stock_actual del producto con la suma de sus lotes
+            if ($lote->producto) {
+                $producto = $lote->producto;
+                $nuevoStockTotal = ProductoUbicacion::where('producto_id', $producto->id)->sum('cantidad');
+                $producto->update(['stock_actual' => $nuevoStockTotal]);
+                
+                // Recalcular el estado del producto
+                if (method_exists($producto, 'recalcularEstado')) {
+                    $producto->fresh()->recalcularEstado();
+                }
+            }
 
             // Verificar alertas inmediatas
             $this->verificarAlertasLote($lote);
@@ -359,43 +377,80 @@ class LoteController extends Controller
             Log::error('Error al actualizar lote: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error al actualizar el lote'
+                'message' => 'Error al actualizar el lote: ' . $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Eliminar un lote
+     * Dar de baja un lote (Vencimiento/Merma)
+     * Automáticamente ajusta el stock a 0 y registra el movimiento
      */
     public function destroy($loteId)
     {
         try {
             $lote = ProductoUbicacion::findOrFail($loteId);
+            $producto = $lote->producto;
+            $cantidadAnterior = $lote->cantidad;
             
-            // Validar si tiene stock
-            if ($lote->cantidad > 0) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No se puede eliminar un lote con stock. Ajuste el stock a 0 primero.'
-                ], 400);
-            }
+            // Si el lote tiene stock, registrar como merma/vencimiento antes de dar de baja
+            if ($cantidadAnterior > 0) {
+                // Registrar el movimiento en la tabla lote_movimientos
+                if (Schema::hasTable('lote_movimientos')) {
+                    \App\Models\LoteMovimiento::create([
+                        'producto_ubicacion_id' => $loteId,
+                        'tipo_movimiento' => 'ajuste',
+                        'cantidad' => $cantidadAnterior,
+                        'cantidad_anterior' => $cantidadAnterior,
+                        'cantidad_nueva' => 0,
+                        'motivo' => 'Baja de lote por vencimiento/merma',
+                        'usuario_id' => auth()->id(),
+                        'datos_adicionales' => [
+                            'tipo_ajuste' => 'merma',
+                            'observaciones' => 'Lote dado de baja. Stock anterior: ' . $cantidadAnterior
+                        ]
+                    ]);
+                }
 
-            // Opcional: Verificar si tiene movimientos (ventas, etc)
-            // Si tiene movimientos, quizás solo marcar como inactivo o eliminado lógico?
-            // Por simplicidad, permitimos eliminar si stock es 0.
-            
-            $lote->delete();
+                // Ajustar el stock del lote a 0
+                $lote->update([
+                    'cantidad' => 0,
+                    'estado_lote' => 'mermas'
+                ]);
+
+                // Actualizar stock total del producto
+                $stockTotal = ProductoUbicacion::where('producto_id', $producto->id)
+                    ->where('estado_lote', 'activo')
+                    ->sum('cantidad');
+                
+                $producto->update(['stock_actual' => $stockTotal]);
+                
+                // Recalcular el estado del producto
+                $producto->fresh()->recalcularEstado();
+            } else {
+                // Si el lote ya tiene 0 stock, solo marcarlo como dado de baja
+                $lote->update([
+                    'estado_lote' => 'mermas',
+                    'cantidad' => 0
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Lote eliminado correctamente'
+                'message' => 'Lote dado de baja correctamente. Stock registrado como vencimiento/merma.'
             ]);
             
         } catch (\Exception $e) {
-            Log::error('Error al eliminar lote: ' . $e->getMessage());
+            Log::error('Error al dar de baja el lote: ' . $e->getMessage(), [
+                'lote_id' => $loteId,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Error al eliminar el lote'
+                'message' => 'Error al dar de baja el lote: ' . $e->getMessage()
             ], 500);
         }
     }

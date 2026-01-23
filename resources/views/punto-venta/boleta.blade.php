@@ -6,7 +6,7 @@
     <title>Boleta Electrónica - {{ $venta->numero_venta }}</title>
     <style>
         @media print {
-            /* Mantener colores en impresión (Chrome/Edge/Firefox) */
+            
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
@@ -28,7 +28,7 @@
             @page {
                 size: A4;
                 margin: 5mm;
-                /* Intentar preservar colores en algunos motores */
+                
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -36,7 +36,7 @@
                 display: none !important;
             }
 
-            /* Forzar los colores del tema rojo en impresión */
+            
             .header { border-bottom: 2px solid #000 !important; }
             .document-section { border: 2px solid #000 !important; }
             .company-name { color: #000 !important; }
@@ -79,7 +79,7 @@
             flex: 1;
         }
         
-        /* Se elimina caja duplicada de boleta electrónica */
+        
         
         .boleta-title {
             font-size: 12px;
@@ -299,7 +299,7 @@
 </head>
 <body>
     <div class="boleta-container">
-        <!-- Header -->
+        
         <div class="header">
             <div class="company-section">
                 <div class="logo">
@@ -316,7 +316,7 @@
             </div>
         </div>
 
-        <!-- Client Information -->
+        
         <div class="client-info">
             <div class="info-row">
                 <span class="info-label">Cliente:</span>
@@ -342,7 +342,7 @@
             </div>
         </div>
 
-        <!-- Products Table -->
+        
         <table class="products-table">
             <thead>
                 <tr>
@@ -369,7 +369,7 @@
             </tbody>
         </table>
 
-        <!-- Totals -->
+        
         <div class="totals-section">
             <div class="row"><span class="total-label">Op. Gravada:</span><span class="total-amount">S/ {{ number_format($venta->subtotal, 2) }}</span></div>
             <div class="row"><span class="total-label">Op. Exonerada:</span><span class="total-amount">S/ 0.00</span></div>
@@ -387,7 +387,7 @@
             </div>
         </div>
 
-        <!-- Payment Info -->
+        
         <div class="payment-info">
             <div><strong>SON:</strong> {{ numeroALetras($venta->total) ?? 'CIENTO SESENTA Y DOS CON 25/100 SOLES' }}</div>
             <div style="margin-top:8px;"><strong>Met. Pago:</strong> {{ ucfirst($venta->metodo_pago) }}</div>
@@ -402,9 +402,9 @@
             @endif
         </div>
 
-        <!-- Se elimina QR y datos bancarios -->
+        
 
-        <!-- Footer -->
+        
         <div class="footer">
             <div style="font-weight:700;">¡Gracias por su compra!</div>
             <div style="margin-top:6px;">
@@ -418,7 +418,7 @@
     </div>
 
     <script>
-        // Impresión controlada desde el POS; no auto-imprimir aquí para evitar dobles.
+
     </script>
 </body>
 </html>

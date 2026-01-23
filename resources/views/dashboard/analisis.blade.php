@@ -6,16 +6,16 @@
 @endphp
 
 @push('styles')
-    <!-- ⚡ OPTIMIZACIÓN SÚPER RÁPIDA PARA ANÁLISIS -->
+    
     <link rel="preload" href="{{ asset('assets/images/users/user1.png') }}" as="image">
     <link rel="preload" href="{{ asset('assets/images/users/user2.png') }}" as="image">
     <link rel="preload" href="{{ asset('assets/images/users/user3.png') }}" as="image">
     <link rel="preload" href="{{ asset('assets/images/users/user4.png') }}" as="image">
     <link rel="preload" href="{{ asset('assets/images/users/user5.png') }}" as="image">
-    <!-- ⚡ DNS Prefetch para recursos externos -->
+    
     <link rel="dns-prefetch" href="//code.iconify.design">
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
-    <!-- ⚡ CSS específico para Dashboard de Análisis -->
+    
     <link rel="stylesheet" href="{{ asset('assets/css/dashboard/analisis.css') }}">
 @endpush
 
@@ -61,7 +61,7 @@
                     Stock crítico: {{ $productosStockBajo }}
                 </p>
             </div>
-        </div><!-- card end -->
+        </div>
         
         <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-blue-600/10 to-white">
             <div class="card-body p-5">
@@ -89,7 +89,7 @@
                     {{ $cambiosComparativos['etiqueta'] ?? 'vs anterior' }}
                 </p>
             </div>
-        </div><!-- card end -->
+        </div>
         
         <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-success-600/10 to-white">
             <div class="card-body p-5">
@@ -110,7 +110,7 @@
                     Promedio diario
                 </p>
             </div>
-        </div><!-- card end -->
+        </div>
         
         <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-red-600/10 to-white">
             <div class="card-body p-5">
@@ -141,7 +141,7 @@
         </div>
     </div>
 
-    <!-- Gráfico principal de ventas -->
+    
     <div class="grid grid-cols-1 gap-6 mt-6">
         <div class="col-span-1">
             <div class="card h-full rounded-lg border-0">
@@ -156,7 +156,7 @@
                         </select>
                     </div>
                     
-                    <!-- Título del período -->
+                    
                     @if(!empty($tituloPeriodo ?? ''))
                     <div class="text-center mt-2 mb-1">
                         <p class="text-sm font-medium text-gray-600 dark:text-gray-300 titulo-periodo">{{ $tituloPeriodo }}</p>
@@ -170,12 +170,12 @@
                         <span class="text-xs font-medium estadisticas-promedio dark:text-gray-300">+ S/. {{ number_format(collect($ventasPorDia)->avg('total'), 2) }} Por día</span>
                     </div>
                     <div class="pt-[28px] apexcharts-tooltip-style-1 relative">
-                        <!-- ⚡ Contenedor único del gráfico con padding adecuado -->
+                        
                         <div class="overflow-visible">
                             <div id="ventas-chart-analisis" class="h-[320px]" style="margin-left: 5px; width: calc(100% - 5px);"></div>
                         </div>
                         
-                        <!-- ⚡ Placeholder mientras carga el gráfico -->
+                        
                         <div id="chart-loading" class="absolute inset-0 flex items-center justify-center h-64 text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800">
                             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                             <span class="ml-2">Cargando gráfico...</span>
@@ -186,9 +186,9 @@
             </div>
         </div>
 
-    <!-- Sección de Categorías y Top Productos -->
+    
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <!-- Categorías más vendidas -->
+        
         <div class="col-span-1">
             <div class="card h-full rounded-lg border-0 shadow-sm">
                 <div class="card-body p-6">
@@ -200,7 +200,7 @@
                     <div class="overflow-visible">
                         <div id="categorias-chart-analisis" class="h-[280px]"></div>
                         
-                        <!-- Loading para gráfico de categorías -->
+                        
                         <div id="categorias-loading" class="absolute inset-0 flex items-center justify-center h-64 text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800" style="display: none;">
                             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
                             <span class="ml-2 text-sm font-medium">Cargando categorías...</span>
@@ -210,7 +210,7 @@
                                                     </div>
                                                 </div>
 
-        <!-- Top Productos Vendidos -->
+        
         <div class="col-span-1">
             <div class="card h-full border-0 shadow-sm">
                 <div class="card-body p-6">
@@ -275,9 +275,9 @@
         </div>
     </div>
 
-    <!-- Sección inferior: Stock Crítico y Usuarios Activos -->
+    
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <!-- Stock Crítico -->
+        
         <div class="col-span-1">
             <div class="card h-full border-0 shadow-sm">
                 <div class="card-body p-6">
@@ -337,10 +337,9 @@
                 </div>
             </div>
 
-
         </div>
 
-        <!-- Usuarios Activos -->
+        
         <div class="col-span-1">
             <div class="card h-full border-0 shadow-sm">
                 <div class="card-body p-6">
@@ -366,7 +365,7 @@
                             </div>
                             <div class="text-right">
                                 @php
-                                    // Usuario está "en línea" si hizo login en los últimos 5 minutos
+
                                     $isOnline = $usuario->last_login_at && $usuario->last_login_at->diffInMinutes(now()) <= 5;
                                 @endphp
                                 
@@ -407,7 +406,7 @@
         </div>
     </div>
 
-    <!-- Alertas de Lotes por Vencer (Full Width) -->
+    
     @if(isset($alertasLotes) && count($alertasLotes) > 0)
     <div class="grid grid-cols-1 gap-6 mt-6">
         <div class="col-span-1">
@@ -487,8 +486,8 @@
 @endsection
 
 @push('scripts')
-<!-- ApexCharts para gráficos -->
+
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
-<!-- ⚡ JavaScript específico para Dashboard de Análisis -->
+
 <script src="{{ asset('assets/js/dashboard/analisis.js') }}"></script>
 @endpush

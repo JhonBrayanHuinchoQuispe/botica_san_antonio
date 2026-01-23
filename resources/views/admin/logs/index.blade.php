@@ -1,928 +1,759 @@
 @extends('layout.layout')
 @php
-    $title = 'Auditoría del Sistema';
-    $subTitle = 'Registro completo de cambios en Productos, Categorías y Presentaciones';
+    $title = 'Auditoría de cambios de inventario';
+    $subTitle = 'Auditoría';
 @endphp
 
-<head>
-    <title>Auditoría del Sistema</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
-
 @push('head')
-<style>
-/* Contenedor principal */
-.audit-container {
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
-    margin: 20px 0;
-}
-
-/* Header de auditoría - Color rojo suave */
-.audit-header {
-    background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
-    padding: 28px 32px;
-    color: white;
-}
-
-.audit-header h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: white;
-}
-
-/* Filtros modernos */
-.audit-filters {
-    padding: 24px 32px;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.filters-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.filter-label {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #475569;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.filter-select, .filter-input {
-    padding: 10px 14px;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 0.9375rem;
-    color: #334155;
-    background: white;
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.filter-select:hover, .filter-input:hover {
-    border-color: #cbd5e1;
-}
-
-.filter-select:focus, .filter-input:focus {
-    outline: none;
-    border-color: #f87171;
-    box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.1);
-}
-
-/* Tabla de auditoría */
-.audit-table-wrapper {
-    padding: 0;
-    position: relative;
-}
-
-.audit-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-}
-
-.audit-table thead {
-    background: #f1f5f9;
-}
-
-.audit-table thead th {
-    padding: 16px 20px;
-    text-align: left;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    color: #475569;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 2px solid #e2e8f0;
-}
-
-.audit-table tbody tr {
-    border-bottom: 1px solid #f1f5f9;
-}
-
-.audit-table tbody td {
-    padding: 16px 20px;
-    font-size: 0.9375rem;
-    color: #334155;
-}
-
-/* Badges modernos */
-.audit-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    border-radius: 9999px;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    line-height: 1;
-}
-
-/* Colores de eventos actualizados */
-.badge-created {
-    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-    color: #1e40af;
-    border: 1px solid #93c5fd;
-}
-
-.badge-updated {
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-    color: #065f46;
-    border: 1px solid #6ee7b7;
-}
-
-.badge-deleted {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    color: #991b1b;
-    border: 1px solid #fca5a5;
-}
-
-.badge-disabled {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    color: #92400e;
-    border: 1px solid #fcd34d;
-}
-
-/* Badge de módulo con colores diferentes */
-.badge-producto {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    color: #92400e;
-    border: 1px solid #fcd34d;
-    font-weight: 700;
-}
-
-.badge-categoria {
-    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-    color: #3730a3;
-    border: 1px solid #a5b4fc;
-    font-weight: 700;
-}
-
-.badge-presentacion {
-    background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
-    color: #831843;
-    border: 1px solid #f9a8d4;
-    font-weight: 700;
-}
-
-/* Información de usuario sin avatar */
-.user-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.user-name {
-    font-weight: 600;
-    color: #1e293b;
-    font-size: 0.9375rem;
-}
-
-.user-email {
-    font-size: 0.8125rem;
-    color: #64748b;
-}
-
-/* Fecha y hora */
-.datetime-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.date-text {
-    font-weight: 600;
-    color: #1e293b;
-    font-size: 0.9375rem;
-}
-
-.time-text {
-    font-size: 0.8125rem;
-    color: #64748b;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-/* Detalles del cambio */
-.change-details {
-    max-width: 350px;
-    font-size: 0.875rem;
-}
-
-.change-item {
-    margin-bottom: 8px;
-    padding: 8px;
-    background: #f8fafc;
-    border-radius: 6px;
-    border-left: 3px solid #cbd5e1;
-}
-
-.change-field {
-    font-weight: 700;
-    color: #475569;
-    margin-bottom: 4px;
-}
-
-.change-values {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.value-old {
-    color: #dc2626;
-    background: #fee2e2;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.8125rem;
-}
-
-.value-new {
-    color: #16a34a;
-    background: #dcfce7;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.8125rem;
-    font-weight: 600;
-}
-
-.value-arrow {
-    color: #94a3b8;
-}
-
-/* Botón de acción */
-.btn-view {
-    padding: 8px 16px;
-    background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.btn-view:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(248, 113, 113, 0.3);
-}
-
-/* Estado vacío */
-.empty-state {
-    padding: 60px 20px;
-    text-align: center;
-}
-
-.empty-icon {
-    font-size: 4rem;
-    color: #cbd5e1;
-    margin-bottom: 16px;
-}
-
-.empty-text {
-    font-size: 1.125rem;
-    color: #64748b;
-    font-weight: 500;
-}
-
-/* Paginación */
-.pagination-wrapper {
-    padding: 20px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-}
-
-.pagination-wrapper nav {
-    display: flex;
-    gap: 4px;
-}
-
-.pagination-wrapper .pagination {
-    display: flex;
-    gap: 4px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.pagination-wrapper .page-item {
-    display: inline-block;
-}
-
-.pagination-wrapper .page-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 36px;
-    height: 36px;
-    padding: 0 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    background: white;
-    color: #374151;
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.2s;
-}
-
-.pagination-wrapper .page-link:hover {
-    background: #f3f4f6;
-    border-color: #d1d5db;
-}
-
-.pagination-wrapper .page-item.active .page-link {
-    background: #ef4444;
-    border-color: #ef4444;
-    color: white;
-}
-
-.pagination-wrapper .page-item.disabled .page-link {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-/* Información del módulo con nombre */
-.module-info {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.module-name {
-    font-size: 0.8125rem;
-    color: #64748b;
-    font-weight: 500;
-}
-
-/* Modal personalizado */
-.modal-audit-detail {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-audit-detail.show {
-    display: flex;
-}
-
-.modal-audit-content {
-    background: white;
-    border-radius: 16px;
-    width: 90%;
-    max-width: 900px;
-    max-height: 90vh;
-    overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-}
-
-.modal-audit-header {
-    background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
-    color: white;
-    padding: 20px 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.modal-audit-header h3 {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.modal-close-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    transition: all 0.2s ease;
-}
-
-.modal-close-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.modal-audit-body {
-    padding: 28px;
-    max-height: calc(90vh - 100px);
-    overflow-y: auto;
-}
-
-.modal-info-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-}
-
-.modal-info-item {
-    background: white;
-    padding: 16px;
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.modal-info-label {
-    font-size: 0.6875rem;
-    font-weight: 700;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.modal-info-value {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: #1e293b;
-}
-
-.modal-item-name {
-    margin-bottom: 20px;
-    padding: 16px;
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border-radius: 10px;
-    border-left: 4px solid #f59e0b;
-}
-
-.modal-item-name strong {
-    color: #92400e;
-    font-weight: 700;
-}
-
-.modal-item-name span {
-    color: #78350f;
-    font-weight: 500;
-}
-
-.modal-changes-section {
-    margin-top: 20px;
-}
-
-.modal-changes-title {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: #475569;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.modal-changes-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    overflow: hidden;
-    background: white;
-}
-
-.modal-changes-table thead {
-    background: #f8fafc;
-}
-
-.modal-changes-table thead th {
-    padding: 12px 16px;
-    text-align: left;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 2px solid #e2e8f0;
-}
-
-.modal-changes-table thead th:nth-child(1) {
-    width: 30%;
-}
-
-.modal-changes-table thead th:nth-child(2) {
-    width: 35%;
-}
-
-.modal-changes-table thead th:nth-child(3) {
-    width: 35%;
-}
-
-.modal-changes-table tbody td {
-    padding: 12px 16px;
-    font-size: 0.875rem;
-    border-top: 1px solid #f1f5f9;
-    vertical-align: middle;
-}
-
-.modal-changes-table tbody tr:hover {
-    background: #fafbfc;
-}
-
-.modal-changes-table .field-name {
-    font-weight: 600;
-    color: #475569;
-}
-
-.modal-changes-table .value-old {
-    color: #dc2626;
-    background: #fee2e2;
-    padding: 6px 12px;
-    border-radius: 6px;
-    display: inline-block;
-    font-weight: 500;
-}
-
-.modal-changes-table .value-new {
-    color: #16a34a;
-    background: #dcfce7;
-    padding: 6px 12px;
-    border-radius: 6px;
-    display: inline-block;
-    font-weight: 600;
-}
-
-.modal-changes-table tr.highlight-change {
-    background: #fffbeb;
-}
-
-.modal-empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: #64748b;
-    font-style: italic;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .audit-header {
-        padding: 20px;
-    }
-    
-    .audit-filters {
-        padding: 20px;
-    }
-    
-    .filters-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .audit-table thead {
-        display: none;
-    }
-    
-    .audit-table tbody tr {
-        display: block;
-        margin-bottom: 16px;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 16px;
-    }
-    
-    .audit-table tbody td {
-        display: block;
-        padding: 8px 0;
-        border: none;
-    }
-    
-    .audit-table tbody td::before {
-        content: attr(data-label);
-        font-weight: 700;
-        color: #475569;
-        display: block;
-        margin-bottom: 4px;
-        font-size: 0.8125rem;
-    }
-    
-    .modal-info-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .modal-audit-content {
-        width: 95%;
-        margin: 20px;
-    }
-}
-</style>
+    <title>Auditoría | Botica San Antonio</title>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <style>
+        :root {
+            --audit-primary: #4f46e5;
+            --audit-success: #10b981;
+            --audit-danger: #ef4444;
+            --audit-warning: #f59e0b;
+            --audit-bg: #f8fafc;
+            --audit-card-bg: #ffffff;
+            --audit-border: #e2e8f0;
+            --audit-text-main: #1e293b;
+            --audit-text-muted: #64748b;
+        }
+
+        .audit-page-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        
+        .audit-filters-card {
+            background: var(--audit-card-bg);
+            border: 1px solid var(--audit-border);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-section-title {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .chip-filter {
+            padding: 0.4rem 1rem;
+            border-radius: 10px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            border: 1px solid var(--audit-border);
+            background: white;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .chip-filter:hover {
+            border-color: var(--audit-primary);
+            color: var(--audit-primary);
+            background: #f5f3ff;
+        }
+
+        .chip-filter.active {
+            background: #eff6ff;
+            color: #2563eb;
+            border-color: #bfdbfe;
+            box-shadow: none;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 0.65rem 1rem 0.65rem 2.5rem;
+            border-radius: 12px;
+            border: 1.5px solid #e2e8f0;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        .search-input-wrapper input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        
+        .audit-table-card {
+            background: white;
+            border: 1px solid var(--audit-border);
+            border-radius: 1.25rem;
+            overflow: hidden;
+            box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .audit-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .audit-table thead {
+            background: #f1f5f9; 
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .audit-table th {
+            padding: 1rem 1.5rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+        }
+
+        .audit-table td {
+            padding: 0.85rem 1.5rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        
+        .event-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .event-created { background: #ecfdf5; color: #059669; border: 1px solid #d1fae5; }
+        .event-updated { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; }
+        .event-deleted { background: #fff1f2; color: #e11d48; border: 1px solid #ffe4e6; }
+
+        
+        .module-badge-producto {
+            background: #fff7ed;
+            color: #c2410c;
+            border: 1px solid #ffedd5;
+            padding: 0.35rem 0.75rem;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .module-badge-categoria {
+            background: #f5f3ff;
+            color: #6d28d9;
+            border: 1px solid #ede9fe;
+            padding: 0.35rem 0.75rem;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .module-item-name {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #334155;
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        
+        .comparison-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .mini-comparison {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #ffffff;
+            padding: 0.3rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.75rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .mini-comparison .field {
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+        }
+
+        .mini-comparison .new-val {
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .btn-details-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            background: #3b82f6;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-details-circle:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+            box-shadow: 0 6px 10px -1px rgba(59, 130, 246, 0.4);
+        }
+
+        
+        .modal-premium-overlay {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content-professional {
+            background: white;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 900px;
+            border: none;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .modal-header-pro {
+            padding: 1.5rem 2rem;
+            background: white;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body-pro {
+            padding: 2rem;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: #fcfdfe;
+        }
+
+        .audit-info-banner {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .banner-item {
+            background: white;
+            padding: 1.25rem;
+            border-radius: 20px;
+            border: 1px solid #eef2f6;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        }
+
+        .banner-label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .banner-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .comparison-grid-pro {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .comparison-card-pro {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            padding: 1.25rem;
+            display: grid;
+            grid-template-columns: 200px 1fr 1fr;
+            gap: 1.5rem;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .comparison-card-pro:hover {
+            border-color: #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .field-title-pro {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #475569;
+            text-transform: uppercase;
+        }
+
+        .value-pill-pro {
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid transparent;
+        }
+
+        .value-pill-old {
+            background: #fff1f2;
+            color: #be123c;
+            border-color: #ffe4e6;
+            text-decoration: line-through;
+        }
+
+        .value-pill-new {
+            background: #f0fdf4;
+            color: #15803d;
+            border-color: #dcfce7;
+            font-weight: 700;
+        }
+
+        .comparison-labels-pro {
+            display: grid;
+            grid-template-columns: 200px 1fr 1fr;
+            gap: 1.5rem;
+            padding: 0 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .comparison-labels-pro span {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .pagination-container {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .pagination-container nav > div:first-child {
+            display: none !important; 
+        }
+
+        .pagination-container .relative.z-0 {
+            display: flex;
+            gap: 0.5rem;
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        .pagination-container .relative.z-0 > span,
+        .pagination-container .relative.z-0 > a {
+            border-radius: 12px !important;
+            border: 1px solid #f0f0ff !important;
+            background: #f5f3ff !important;
+            color: #6366f1 !important;
+            font-weight: 700;
+            padding: 0.6rem 1rem !important;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 42px;
+        }
+
+        .pagination-container .relative.z-0 > span[aria-current="page"] > span {
+            background: #6366f1 !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        .pagination-container .relative.z-0 > span[aria-current="page"] {
+            background: #6366f1 !important;
+            color: white !important;
+            border-color: #6366f1 !important;
+        }
+
+        .pagination-container .relative.z-0 > a:hover {
+            background: #6366f1 !important;
+            color: white !important;
+            transform: translateY(-2px);
+        }
+
+        
+        .change-pill-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .change-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            padding: 0.4rem 0.8rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .change-field-label {
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            min-width: 80px;
+        }
+
+        .change-val-old {
+            color: #ef4444;
+            text-decoration: line-through;
+            background: #fee2e2;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .change-val-new {
+            color: #10b981;
+            background: #dcfce7;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        .change-val-only {
+            color: #3b82f6;
+            background: #eff6ff;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        .arrow-divider {
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        
+        .skeleton-loader {
+            background: linear-gradient(90deg, #f1f5f9 25%, #f8fafc 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-row td {
+            padding: 1rem 1.5rem;
+        }
+
+        .skeleton-bar {
+            height: 14px;
+            width: 100%;
+            border-radius: 4px;
+            background: #f1f5f9;
+        }
+    </style>
 @endpush
 
 @section('content')
-<div class="audit-container">
-    <!-- Header -->
-    <div class="audit-header">
-        <h2>
-            <i class="fas fa-clipboard-list"></i>
-            Registro completo de cambios en Productos, Categorías y Presentaciones
-        </h2>
-    </div>
+<div class="audit-page-container">
+    
+    <div class="audit-filters-card">
+        <form id="auditFiltersForm" method="GET" action="{{ route('admin.logs') }}">
+            <input type="hidden" name="event" id="inputEvent" value="{{ request('event') }}">
+            <input type="hidden" name="module" id="inputModule" value="{{ request('module') }}">
 
-    <!-- Filtros -->
-    <div class="audit-filters">
-        <form method="GET" action="{{ route('admin.logs') }}" id="filtrosForm">
-            <div class="filters-grid">
-                <div class="filter-group" style="position: relative;">
-                    <label class="filter-label">
-                        <i class="fas fa-search"></i>
-                        Buscar Producto
-                    </label>
-                    <div style="position: relative;">
-                        <input type="text" class="filter-input" name="search" id="filtroSearch" 
-                               placeholder="Buscar por nombre de producto..." 
-                               value="{{ request('search') }}"
-                               style="cursor: text; padding-right: 35px;">
-                        @if(request('search'))
-                            <button type="button" 
-                                    id="clearSearch" 
-                                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 20px; padding: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;"
-                                    title="Limpiar búsqueda">
-                                ×
-                            </button>
-                        @else
-                            <button type="button" 
-                                    id="clearSearch" 
-                                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 20px; padding: 0; width: 20px; height: 20px; display: none; align-items: center; justify-content: center;"
-                                    title="Limpiar búsqueda">
-                                ×
-                            </button>
-                        @endif
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                <div>
+                    <div class="filter-section-title">
+                        <iconify-icon icon="solar:filter-bold-duotone"></iconify-icon>
+                        Filtrar por Evento
+                    </div>
+                    <div class="chips-container" id="eventChips">
+                        <div class="chip-filter {{ !request('event') ? 'active' : '' }}" data-value="">
+                            Todos
+                        </div>
+                        <div class="chip-filter {{ request('event') == 'created' ? 'active' : '' }}" data-value="created">
+                            <iconify-icon icon="solar:add-circle-bold-duotone" style="color: #10b981;"></iconify-icon>
+                            Creaciones
+                        </div>
+                        <div class="chip-filter {{ request('event') == 'updated' ? 'active' : '' }}" data-value="updated">
+                            <iconify-icon icon="solar:pen-new-square-bold-duotone" style="color: #3b82f6;"></iconify-icon>
+                            Actualizaciones
+                        </div>
+                        <div class="chip-filter {{ request('event') == 'deleted' ? 'active' : '' }}" data-value="deleted">
+                            <iconify-icon icon="solar:trash-bin-trash-bold-duotone" style="color: #ef4444;"></iconify-icon>
+                            Eliminaciones
+                        </div>
                     </div>
                 </div>
-                
-                <div class="filter-group">
-                    <label class="filter-label">
-                        <i class="fas fa-filter"></i>
-                        Tipo de Evento
-                    </label>
-                    <select class="filter-select auto-submit" name="event" id="filtroEvento">
-                        <option value="">Todos los eventos</option>
-                        <option value="created" {{ request('event') == 'created' ? 'selected' : '' }}>Creación</option>
-                        <option value="updated" {{ request('event') == 'updated' ? 'selected' : '' }}>Actualización</option>
-                        <option value="deleted" {{ request('event') == 'deleted' ? 'selected' : '' }}>Eliminación</option>
-                    </select>
+
+                <div>
+                    <div class="filter-section-title">
+                        <iconify-icon icon="solar:widget-bold-duotone"></iconify-icon>
+                        Filtrar por Módulo
+                    </div>
+                    <div class="chips-container" id="moduleChips">
+                        <div class="chip-filter {{ !request('module') ? 'active' : '' }}" data-value="">
+                            Todos los módulos
+                        </div>
+                        <div class="chip-filter {{ request('module') == 'App\Models\Producto' ? 'active' : '' }}" data-value="App\Models\Producto">
+                            <iconify-icon icon="solar:box-bold-duotone"></iconify-icon>
+                            Productos
+                        </div>
+                        <div class="chip-filter {{ request('module') == 'App\Models\Categoria' ? 'active' : '' }}" data-value="App\Models\Categoria">
+                            <iconify-icon icon="solar:tag-bold-duotone"></iconify-icon>
+                            Categorías
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-slate-100">
+                <div class="search-input-wrapper">
+                    <iconify-icon icon="solar:magnifer-linear" class="search-icon"></iconify-icon>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar por nombre de producto o categoría...">
                 </div>
                 
-                <div class="filter-group">
-                    <label class="filter-label">
-                        <i class="fas fa-cube"></i>
-                        Módulo
-                    </label>
-                    <select class="filter-select auto-submit" name="module" id="filtroModulo">
-                        <option value="">Todos los módulos</option>
-                        <option value="App\Models\Producto" {{ request('module') == 'App\Models\Producto' ? 'selected' : '' }}>Productos</option>
-                        <option value="App\Models\Categoria" {{ request('module') == 'App\Models\Categoria' ? 'selected' : '' }}>Categorías</option>
-                        <option value="App\Models\Presentacion" {{ request('module') == 'App\Models\Presentacion' ? 'selected' : '' }}>Presentaciones</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label class="filter-label">
-                        <i class="fas fa-user"></i>
-                        Usuario
-                    </label>
-                    <select class="filter-select auto-submit" name="user_id" id="filtroUsuario">
-                        <option value="">Todos los usuarios</option>
-                        @foreach($usuarios as $usuario)
-                            <option value="{{ $usuario->id }}" {{ request('user_id') == $usuario->id ? 'selected' : '' }}>
-                                {{ $usuario->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label class="filter-label">
-                        <i class="fas fa-calendar"></i>
-                        Fecha
-                    </label>
-                    <input type="date" class="filter-input auto-submit" name="fecha" value="{{ request('fecha') }}">
+                <div class="flex items-center gap-3">
+                    <input type="date" name="fecha" value="{{ request('fecha') }}" 
+                           max="{{ date('Y-m-d') }}"
+                           class="chip-filter" style="height: 42px; padding: 0 1rem;">
+                    
+                    <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 flex items-center gap-2">
+                        <iconify-icon icon="solar:filter-bold" style="font-size: 1.1rem;"></iconify-icon>
+                        Aplicar Filtros
+                    </button>
+
+                    @if(request()->anyFilled(['event', 'module', 'search', 'fecha']))
+                        <a href="{{ route('admin.logs') }}" class="px-4 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all flex items-center gap-2">
+                            <iconify-icon icon="solar:restart-bold"></iconify-icon>
+                            Limpiar
+                        </a>
+                    @endif
                 </div>
             </div>
         </form>
     </div>
 
-    <!-- Tabla -->
-    <div class="audit-table-wrapper">
+    
+    <div class="audit-table-card">
         <table class="audit-table">
             <thead>
                 <tr>
-                    <th>Fecha y Hora</th>
-                    <th>Evento</th>
-                    <th>Módulo</th>
-                    <th>Usuario</th>
-                    <th>Detalles del Cambio</th>
-                    <th>Acciones</th>
+                    <th style="width: 180px;">Fecha y Hora</th>
+                    <th style="width: 140px;">Evento</th>
+                    <th style="width: 250px;">Módulo / Ítem</th>
+                    <th style="width: 200px;">Usuario</th>
+                    <th>Resumen Detallado de Cambios</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="auditSkeleton" style="display: none;">
+                @for($i = 0; $i < 6; $i++)
+                <tr class="skeleton-row">
+                    <td><div class="skeleton-bar skeleton-loader" style="width: 120px; height: 18px;"></div></td>
+                    <td><div class="skeleton-bar skeleton-loader" style="width: 100px; height: 24px; border-radius: 10px;"></div></td>
+                    <td>
+                        <div class="flex flex-col gap-2">
+                            <div class="skeleton-bar skeleton-loader" style="width: 140px; height: 16px;"></div>
+                            <div class="skeleton-bar skeleton-loader" style="width: 80px; height: 12px;"></div>
+                        </div>
+                    </td>
+                    <td><div class="skeleton-bar skeleton-loader" style="width: 130px; height: 16px;"></div></td>
+                    <td>
+                        <div class="flex flex-col gap-2">
+                            <div class="skeleton-bar skeleton-loader" style="height: 35px; border-radius: 10px;"></div>
+                            <div class="skeleton-bar skeleton-loader" style="height: 35px; border-radius: 10px;"></div>
+                        </div>
+                    </td>
+                </tr>
+                @endfor
+            </tbody>
+            <tbody id="auditTableBody">
                 @forelse($audits as $audit)
+                    @php
+                        $auditable = $audit->auditable;
+                        $itemName = $auditable->nombre ?? ($auditable->razon_social ?? 'Elemento Eliminado');
+                        $isProductCreation = ($audit->event === 'created' && $audit->auditable_type === 'App\Models\Producto');
+                    @endphp
                     <tr>
-                        <td data-label="Fecha y Hora">
-                            <div class="datetime-info">
-                                <span class="date-text">{{ $audit->created_at->format('d/m/Y') }}</span>
-                                <span class="time-text">
-                                    <i class="far fa-clock"></i>
-                                    {{ $audit->created_at->format('g:i A') }}
-                                </span>
+                        <td>
+                            <div class="flex flex-col">
+                                <span class="text-slate-800 font-extrabold text-sm">{{ \Carbon\Carbon::parse($audit->created_at)->translatedFormat('d M, Y') }}</span>
+                                <span class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-tighter">{{ \Carbon\Carbon::parse($audit->created_at)->translatedFormat('h:i A') }}</span>
                             </div>
                         </td>
-                        <td data-label="Evento">
+                        <td>
                             @php
-                                $changes = $audit->getModified();
-                                $isStatusChange = isset($changes['estado']) || isset($changes['activo']);
+                                $eventClasses = [
+                                    'created' => 'event-created',
+                                    'updated' => 'event-updated',
+                                    'deleted' => 'event-deleted'
+                                ];
+                                $eventIcons = [
+                                    'created' => 'solar:add-circle-bold-duotone',
+                                    'updated' => 'solar:pen-new-square-bold-duotone',
+                                    'deleted' => 'solar:trash-bin-trash-bold-duotone'
+                                ];
+                                $eventLabels = [
+                                    'created' => 'Creación',
+                                    'updated' => 'Actualización',
+                                    'deleted' => 'Eliminación'
+                                ];
                             @endphp
-                            
-                            @if($audit->event == 'created')
-                                <span class="audit-badge badge-created">
-                                    <i class="fas fa-plus-circle"></i>
-                                    Creado
-                                </span>
-                            @elseif($audit->event == 'updated')
-                                @if($isStatusChange)
-                                    <span class="audit-badge badge-disabled">
-                                        <i class="fas fa-toggle-on"></i>
-                                        Estado
-                                    </span>
-                                @else
-                                    <span class="audit-badge badge-updated">
-                                        <i class="fas fa-edit"></i>
-                                        Actualizado
-                                    </span>
-                                @endif
-                            @elseif($audit->event == 'deleted')
-                                <span class="audit-badge badge-deleted">
-                                    <i class="fas fa-trash-alt"></i>
-                                    Eliminado
-                                </span>
-                            @endif
-                        </td>
-                        <td data-label="Módulo">
-                            @php
-                                $moduleName = class_basename($audit->auditable_type);
-                                $moduleIcon = 'fas fa-box';
-                                $badgeClass = 'badge-producto';
-                                
-                                if($moduleName == 'Producto') {
-                                    $moduleIcon = 'fas fa-pills';
-                                    $badgeClass = 'badge-producto';
-                                } elseif($moduleName == 'Categoria') {
-                                    $moduleIcon = 'fas fa-tags';
-                                    $badgeClass = 'badge-categoria';
-                                } elseif($moduleName == 'Presentacion') {
-                                    $moduleIcon = 'fas fa-cube';
-                                    $badgeClass = 'badge-presentacion';
-                                }
-                                
-                                // Obtener nombre del item
-                                $itemName = '';
-                                if($audit->auditable) {
-                                    if($moduleName == 'Producto' && isset($audit->auditable->nombre)) {
-                                        $itemName = $audit->auditable->nombre;
-                                        if(isset($audit->auditable->concentracion)) {
-                                            $itemName .= ' ' . $audit->auditable->concentracion;
-                                        }
-                                    } elseif(isset($audit->auditable->nombre)) {
-                                        $itemName = $audit->auditable->nombre;
-                                    }
-                                }
-                            @endphp
-                            <div class="module-info">
-                                <span class="audit-badge {{ $badgeClass }}">
-                                    <i class="{{ $moduleIcon }}"></i>
-                                    {{ $moduleName }}
-                                </span>
-                                @if($itemName)
-                                    <span class="module-name">{{ Str::limit($itemName, 40) }}</span>
-                                @endif
+                            <div class="event-badge {{ $eventClasses[$audit->event] ?? 'bg-slate-100 text-slate-600' }}">
+                                <iconify-icon icon="{{ $eventIcons[$audit->event] ?? 'solar:info-circle-bold' }}" style="font-size: 1rem;"></iconify-icon>
+                                {{ $eventLabels[$audit->event] ?? $audit->event }}
                             </div>
                         </td>
-                        <td data-label="Usuario">
-                            @if($audit->user)
-                                <div class="user-info">
-                                    <span class="user-name">{{ $audit->user->name }}</span>
-                                    <span class="user-email">{{ $audit->user->email }}</span>
+                        <td>
+                            <div class="flex flex-col gap-1">
+                                <div class="module-badge-{{ strtolower(class_basename($audit->auditable_type)) }}">
+                                    <iconify-icon icon="{{ $audit->auditable_type === 'App\Models\Producto' ? 'solar:box-bold-duotone' : 'solar:tag-horizontal-bold-duotone' }}"></iconify-icon>
+                                    {{ class_basename($audit->auditable_type) }}
                                 </div>
-                            @else
-                                <span class="audit-badge" style="background: #f1f5f9; color: #64748b;">
-                                    <i class="fas fa-robot"></i>
-                                    Sistema
-                                </span>
-                            @endif
+                                <span class="text-xs font-bold text-slate-700 ml-1">{{ $itemName }}</span>
+                            </div>
                         </td>
-                        <td data-label="Detalles">
-                            <div class="change-details">
+                        <td>
+                            <span class="text-xs font-bold text-slate-700">{{ $audit->user->name ?? 'Sistema' }}</span>
+                        </td>
+                        <td>
+                            <div class="change-pill-row">
                                 @php
                                     $changes = $audit->getModified();
-                                    $displayCount = min(count($changes), 2);
+                                    $displayCount = 0;
+                                    $ignoreFieldsSummary = ['updated_at', 'id', 'user_id', 'auditable_id', 'auditable_type', 'created_at', 'deleted_at'];
+
+                                    if ($isProductCreation) {
+                                        $fieldsToProcess = array_filter(array_keys($changes), function($f) {
+                                            return in_array($f, ['nombre', 'presentaciones']);
+                                        });
+                                    } else {
+                                        $fieldsToProcess = array_keys($changes);
+                                    }
                                 @endphp
-                                 
-                                @if(count($changes) > 0)
-                                    @foreach(array_slice($changes, 0, $displayCount, true) as $field => $values)
+                                @forelse($fieldsToProcess as $field)
+                                    @php $values = $changes[$field] ?? null; @endphp
+                                    @if($values && !in_array($field, $ignoreFieldsSummary) && $displayCount < 3)
                                         <div class="change-item">
-                                            <div class="change-field">
-                                                @if($field == 'estado' || $field == 'activo')
-                                                    Estado
-                                                @else
-                                                    {{ ucfirst($field) }}
-                                                @endif
-                                            </div>
-                                            <div class="change-values">
-                                                @if($field == 'estado' || $field == 'activo')
-                                                    <span class="value-old">{{ $values['old'] == 1 ? 'Activo' : 'Desactivado' }}</span>
-                                                    <span class="value-arrow">→</span>
-                                                    <span class="value-new">{{ $values['new'] == 1 ? 'Activo' : 'Desactivado' }}</span>
-                                                @else
-                                                    <span class="value-old">{{ Str::limit($values['old'] ?? '-', 20) }}</span>
-                                                    <span class="value-arrow">→</span>
-                                                    <span class="value-new">{{ Str::limit($values['new'] ?? '-', 20) }}</span>
-                                                @endif
-                                            </div>
+                                            <span class="change-field-label">{{ str_replace('_', ' ', $field) }}</span>
+                                            
+                                            @if($audit->event === 'updated')
+                                                @php
+                                                    $old = $values['old'] ?? '-';
+                                                    $new = $values['new'] ?? '-';
+                                                    $boolMap = ['1' => 'Activo', '0' => 'Inactivo', 'true' => 'Activo', 'false' => 'Inactivo'];
+                                                    if(in_array($field, ['estado', 'activo', 'habilitado'])) {
+                                                        $old = $boolMap[string_value($old)] ?? $old;
+                                                        $new = $boolMap[string_value($new)] ?? $new;
+                                                    }
+                                                @endphp
+                                                <span class="change-val-old">{{ Str::limit($old, 20) }}</span>
+                                                <iconify-icon icon="solar:double-alt-arrow-right-bold-duotone" class="arrow-divider"></iconify-icon>
+                                                <span class="change-val-new">{{ Str::limit($new, 20) }}</span>
+                                            @else
+                                                @php
+                                                    $val = ($audit->event === 'created' ? ($values['new'] ?? '-') : ($values['old'] ?? '-'));
+                                                    if(in_array($field, ['estado', 'activo', 'habilitado'])) {
+                                                        $val = $boolMap[string_value($val)] ?? $val;
+                                                    }
+                                                @endphp
+                                                <span class="change-val-only">{{ Str::limit($val, 40) }}</span>
+                                            @endif
                                         </div>
-                                    @endforeach
-                                    
-                                    @if(count($changes) > 2)
-                                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
-                                            +{{ count($changes) - 2 }} más
-                                        </div>
+                                        @php $displayCount++; @endphp
                                     @endif
-                                @else
-                                    <span style="color: #94a3b8; font-style: italic; font-size: 0.875rem;">Sin cambios</span>
+                                @empty
+                                    <span class="text-xs italic text-slate-400">Sin cambios relevantes</span>
+                                @endforelse
+                                
+                                {{-- Solo mostrar el contador de cambios extras si NO es creación de producto --}}
+                                @if(!$isProductCreation && count($changes) > $displayCount)
+                                    <div class="px-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[0.65rem] font-bold text-slate-500 inline-block w-max">
+                                        +{{ count($changes) - $displayCount }} otros cambios realizados
+                                    </div>
                                 @endif
                             </div>
-                        </td>
-                        <td data-label="Acciones">
-                            <button type="button" 
-                                    class="btn-view btn-ver-detalles"
-                                    data-old="{{ json_encode($audit->old_values) }}"
-                                    data-new="{{ json_encode($audit->new_values) }}"
-                                    data-event="{{ $audit->event }}"
-                                    data-model="{{ class_basename($audit->auditable_type) }}"
-                                    data-id="{{ $audit->auditable_id }}"
-                                    data-user="{{ $audit->user ? $audit->user->name : 'Sistema' }}"
-                                    data-date="{{ $audit->created_at->format('d/m/Y H:i:s') }}"
-                                    data-item-name="{{ $itemName ?? '' }}">
-                                <i class="fas fa-eye"></i>
-                                Ver Detalles
-                            </button>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6">
-                            <div class="empty-state">
-                                <div class="empty-icon">
-                                    <i class="fas fa-inbox"></i>
-                                </div>
-                                <p class="empty-text">No hay registros de auditoría disponibles</p>
-                            </div>
+                        <td colspan="5" class="py-20 text-center">
+                            <iconify-icon icon="solar:document-text-bold-duotone" style="font-size: 4rem; color: #e2e8f0;"></iconify-icon>
+                            <h3 class="text-lg font-bold text-slate-400 mt-4">No hay registros</h3>
                         </td>
                     </tr>
                 @endforelse
@@ -930,215 +761,94 @@
         </table>
     </div>
 
-    <!-- Paginación -->
+    
     @if($audits->hasPages())
-        <div class="pagination-wrapper">
+        <div class="pagination-container">
             {{ $audits->links() }}
         </div>
     @endif
 </div>
 
-<!-- Modal de Detalles de Auditoría -->
-<div class="modal-audit-detail" id="modalAuditDetail">
-    <div class="modal-audit-content">
-        <div class="modal-audit-header">
-            <h3 style="color: white;">
-                <i class="fas fa-file-alt"></i>
-                Detalle Completo de Auditoría
-            </h3>
-            <button class="modal-close-btn" onclick="closeAuditModal()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="modal-audit-body" id="modalAuditBody">
-            <!-- El contenido se cargará dinámicamente -->
-        </div>
-    </div>
-</div>
+@php
+    function string_value($val) {
+        if (is_bool($val)) return $val ? 'true' : 'false';
+        return (string) $val;
+    }
+@endphp
 @endsection
 
 @push('scripts')
 <script>
-// Función para cerrar el modal
-function closeAuditModal() {
-    const modal = document.getElementById('modalAuditDetail');
-    modal.classList.remove('show');
-}
+    document.addEventListener('DOMContentLoaded', function() {
 
-// Cerrar modal al hacer clic fuera de él
-document.addEventListener('click', function(e) {
-    const modal = document.getElementById('modalAuditDetail');
-    if (e.target === modal) {
-        closeAuditModal();
-    }
-});
+        const eventChips = document.querySelectorAll('#eventChips .chip-filter');
+        const moduleChips = document.querySelectorAll('#moduleChips .chip-filter');
+        const inputEvent = document.getElementById('inputEvent');
+        const inputModule = document.getElementById('inputModule');
+        const filtersForm = document.getElementById('auditFiltersForm');
+        const searchInput = document.querySelector('input[name="search"]');
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Filtros en tiempo real
-    const autoSubmitElements = document.querySelectorAll('.auto-submit');
-    autoSubmitElements.forEach(element => {
-        element.addEventListener('change', function() {
-            document.getElementById('filtrosForm').submit();
-        });
-    });
-    
-    // Buscador con Enter y botón limpiar
-    const searchInput = document.getElementById('filtroSearch');
-    const clearSearchBtn = document.getElementById('clearSearch');
-    
-    if (searchInput) {
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                document.getElementById('filtrosForm').submit();
+        function handleChipClick(chips, hiddenInput) {
+            chips.forEach(chip => {
+                chip.addEventListener('click', function() {
+                    chips.forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    hiddenInput.value = this.dataset.value;
+                    showSkeletonAndSubmit();
+                });
+            });
+        }
+
+        function showSkeletonAndSubmit() {
+            const tbody = document.getElementById('auditTableBody');
+            const skeleton = document.getElementById('auditSkeleton');
+            if (tbody && skeleton) {
+                tbody.style.display = 'none';
+                skeleton.style.display = 'table-row-group';
             }
-        });
-        
-        // Mostrar/ocultar botón X según contenido
+            filtersForm.submit();
+        }
+
+        handleChipClick(eventChips, inputEvent);
+        handleChipClick(moduleChips, inputModule);
+
+        let searchTimeout = null;
         searchInput.addEventListener('input', function() {
-            if (clearSearchBtn) {
-                clearSearchBtn.style.display = this.value ? 'flex' : 'none';
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                showSkeletonAndSubmit();
+            }, 600);
+        });
+
+        filtersForm.addEventListener('submit', function(e) {
+            const tbody = document.getElementById('auditTableBody');
+            const skeleton = document.getElementById('auditSkeleton');
+            if (tbody && skeleton) {
+                tbody.style.display = 'none';
+                skeleton.style.display = 'table-row-group';
             }
         });
-    }
-    
-    // Limpiar búsqueda
-    if (clearSearchBtn) {
-        clearSearchBtn.addEventListener('click', function() {
-            searchInput.value = '';
-            this.style.display = 'none';
-            document.getElementById('filtrosForm').submit();
-        });
-    }
-    
-    // Modal de detalles
-    const botonesVer = document.querySelectorAll('.btn-ver-detalles');
-    
-    botonesVer.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const oldValues = JSON.parse(this.getAttribute('data-old') || '{}');
-            const newValues = JSON.parse(this.getAttribute('data-new') || '{}');
-            const event = this.getAttribute('data-event');
-            const model = this.getAttribute('data-model');
-            const id = this.getAttribute('data-id');
-            const user = this.getAttribute('data-user');
-            const date = this.getAttribute('data-date');
-            const itemName = this.getAttribute('data-item-name');
-            
-            // Traducir evento
-            const eventText = {
-                'created': 'Creación',
-                'updated': 'Actualización',
-                'deleted': 'Eliminación'
-            }[event] || event;
-            
-            // Icono del módulo
-            let moduleIcon = 'fas fa-box';
-            if(model == 'Producto') moduleIcon = 'fas fa-pills';
-            else if(model == 'Categoria') moduleIcon = 'fas fa-tags';
-            else if(model == 'Presentacion') moduleIcon = 'fas fa-cube';
-            
-            // Construir contenido del modal
-            let contentHtml = `
-                <div class="modal-info-grid">
-                    <div class="modal-info-item">
-                        <span class="modal-info-label"><i class="fas fa-user"></i> Usuario</span>
-                        <span class="modal-info-value">${user}</span>
-                    </div>
-                    <div class="modal-info-item">
-                        <span class="modal-info-label"><i class="fas fa-clock"></i> Fecha y Hora</span>
-                        <span class="modal-info-value">${date}</span>
-                    </div>
-                    <div class="modal-info-item">
-                        <span class="modal-info-label"><i class="fas fa-cube"></i> Módulo</span>
-                        <span class="modal-info-value"><i class="${moduleIcon}"></i> ${model}</span>
-                    </div>
-                    <div class="modal-info-item">
-                        <span class="modal-info-label"><i class="fas fa-bolt"></i> Tipo de Evento</span>
-                        <span class="modal-info-value">${eventText}</span>
-                    </div>
-                </div>
-            `;
-            
-            if (itemName) {
-                contentHtml += `
-                    <div class="modal-item-name">
-                        <strong>Nombre:</strong> <span>${itemName}</span>
-                    </div>
-                `;
-            }
-            
-            contentHtml += `
-                <div class="modal-changes-section">
-                    <div class="modal-changes-title">
-                        <i class="fas fa-list-ul"></i> Detalles de los Cambios
-                    </div>
-                    <table class="modal-changes-table">
-                        <thead>
-                            <tr>
-                                <th>Campo</th>
-                                <th>Valor Anterior</th>
-                                <th>Valor Nuevo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            const allKeys = new Set([...Object.keys(oldValues), ...Object.keys(newValues)]);
-            
-            if (allKeys.size === 0) {
-                contentHtml += `
-                    <tr>
-                        <td colspan="3" class="modal-empty-state">
-                            No hay cambios registrados para mostrar
-                        </td>
-                    </tr>
-                `;
-            } else {
-                allKeys.forEach(key => {
-                let oldVal = oldValues[key] !== undefined ? String(oldValues[key]) : '-';
-                let newVal = newValues[key] !== undefined ? String(newValues[key]) : '-';
-                
-                // Traducir valores de estado/activo
-                if (key === 'estado' || key === 'activo') {
-                    oldVal = oldVal === '1' || oldVal === 'true' ? 'Activo' : (oldVal === '0' || oldVal === 'false' ? 'Desactivado' : oldVal);
-                    newVal = newVal === '1' || newVal === 'true' ? 'Activo' : (newVal === '0' || newVal === 'false' ? 'Desactivado' : newVal);
-                }
-                
-                const isChanged = (oldVal !== newVal && event === 'updated');
-                const rowClass = isChanged ? 'highlight-change' : '';
-                
-                // Traducir nombre del campo
-                let fieldLabel = key;
-                if (key === 'estado' || key === 'activo') {
-                    fieldLabel = 'Estado';
-                } else {
-                    fieldLabel = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
-                }
-                
-                contentHtml += `
-                    <tr class="${rowClass}">
-                        <td class="field-name">${fieldLabel}</td>
-                        <td class="value-old">${oldVal}</td>
-                        <td class="value-new">${newVal}</td>
-                    </tr>
-                `;
-            });    }
-            
-            contentHtml += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            
-            // Mostrar el modal
-            const modalBody = document.getElementById('modalAuditBody');
-            modalBody.innerHTML = contentHtml;
-            
-            const modal = document.getElementById('modalAuditDetail');
-            modal.classList.add('show');
-        });
+
+        const paginationInfo = document.querySelector('.pagination-container nav div p');
+        if (paginationInfo) {
+            let text = paginationInfo.innerHTML;
+            text = text.replace('Showing', 'Mostrando')
+                       .replace('to', 'al')
+                       .replace('of', 'de')
+                       .replace('results', 'registros');
+            paginationInfo.innerHTML = text;
+        }
+
+        const prevButton = document.querySelector('.pagination-container nav a[rel="prev"]');
+        if (prevButton) prevButton.innerHTML = 'Anterior';
+        
+        const nextButton = document.querySelector('.pagination-container nav a[rel="next"]');
+        if (nextButton) nextButton.innerHTML = 'Siguiente';
     });
-});
+
+    function class_basename(path) {
+        if (!path) return '';
+        return path.split('\\').pop();
+    }
 </script>
 @endpush

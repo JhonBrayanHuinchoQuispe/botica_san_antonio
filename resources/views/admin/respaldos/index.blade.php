@@ -93,7 +93,7 @@
 @push('scripts')
 <script src="{{ asset('assets/js/inventario/backup.js') }}"></script>
 <script>
-// Función para realizar backup (ya existe en backup.js)
+
 function realizarBackup() {
     Swal.fire({
         title: 'Crear Respaldo',
@@ -106,7 +106,7 @@ function realizarBackup() {
         cancelButtonColor: '#d33'
     }).then((result) => {
         if (result.isConfirmed) {
-            // Mostrar loading
+
             Swal.fire({
                 title: 'Creando respaldo...',
                 text: 'Por favor espere mientras se genera el respaldo.',
@@ -135,7 +135,7 @@ function realizarBackup() {
                         text: `Respaldo generado exitosamente: ${data.filename}`,
                         confirmButtonText: 'Entendido'
                     }).then(() => {
-                        // Recargar la página para actualizar el historial
+
                         location.reload();
                     });
                 } else {
@@ -155,14 +155,12 @@ function realizarBackup() {
     });
 }
 
-// Cargar historial de respaldos al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
     cargarHistorialRespaldos();
 });
 
 function cargarHistorialRespaldos() {
-    // Esta función se puede implementar más tarde para mostrar el historial real
-    // Por ahora solo muestra el mensaje de "no hay respaldos"
+
 }
 </script>
 @endpush

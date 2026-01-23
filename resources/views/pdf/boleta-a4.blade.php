@@ -189,7 +189,7 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
+        
         <div class="header">
             <div class="company-info">
                 <div class="company-name">{{ $company->razon_social }}</div>
@@ -212,7 +212,7 @@
             </div>
         </div>
 
-        <!-- Client Information (Optional for Boletas) -->
+        
         @if($boleta->cliente_razon_social)
         <div class="client-info">
             <div class="client-title">DATOS DEL CLIENTE</div>
@@ -245,7 +245,7 @@
         </div>
         @endif
 
-        <!-- Items Table -->
+        
         <table class="items-table">
             <thead>
                 <tr>
@@ -273,7 +273,7 @@
             </tbody>
         </table>
 
-        <!-- Totals -->
+        
         <div class="totals">
             <table>
                 @if($boleta->total_operaciones_gravadas > 0)
@@ -313,7 +313,7 @@
             </table>
         </div>
 
-        <!-- Footer -->
+        
         <div class="footer">
             <div class="qr-section">
                 @if($boleta->qr)

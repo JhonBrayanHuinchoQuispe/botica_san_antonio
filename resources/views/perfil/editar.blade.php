@@ -23,11 +23,11 @@
 <div class="grid grid-cols-12">
     <div class="col-span-12">
 <div class="editar-perfil-container">
-            <!-- Layout Principal Moderno: Información + Formulario -->
+            
             <div class="editar-perfil-layout">
-                <!-- Panel Izquierdo - Vista Previa del Perfil -->
+                
                 <div class="perfil-preview-panel">
-                    <!-- Header de Usuario -->
+                    
                     <div class="usuario-preview-header">
                         <div class="gradient-background"></div>
                         <div class="avatar-section">
@@ -88,7 +88,7 @@
                         </div>
                     </div>
 
-                    <!-- Información Personal Actual -->
+                    
                     <div class="info-personal-actual">
                         <h3>
                             <iconify-icon icon="heroicons:identification-solid"></iconify-icon>
@@ -119,12 +119,11 @@
                         </div>
                     </div>
 
-
                 </div>
 
-                <!-- Panel Derecho - Formularios de Edición -->
+                
                 <div class="formularios-panel">
-                    <!-- Tabs Simplificados -->
+                    
                     <div class="tabs-navigation-simple">
             <button class="tab-btn active" data-tab="informacion-personal">
                 <iconify-icon icon="heroicons:user-solid"></iconify-icon>
@@ -136,9 +135,9 @@
             </button>
     </div>
 
-                    <!-- Contenido de los Tabs -->
+                    
     <div class="tabs-content">
-        <!-- Tab: Información Personal -->
+        
         <div id="informacion-personal" class="tab-content active">
                             <div class="form-header">
                                 <h3>
@@ -235,7 +234,7 @@
                 </form>
         </div>
 
-        <!-- Tab: Cambiar Contraseña -->
+        
         <div id="cambiar-password" class="tab-content">
                             <div class="form-header">
                                 <h3>
@@ -317,11 +316,11 @@
 
 @push('scripts')
 <script>
-    // Debug adicional para verificar que todo esté cargado
+
     console.log('🔍 Verificando elementos del DOM...');
     
     document.addEventListener('DOMContentLoaded', function() {
-        // Verificar elementos críticos
+
         var avatarPreview = document.getElementById('avatarPreview');
         var avatarInput = document.getElementById('avatarInput');
         var btnCambiar = document.querySelector('.btn-cambiar-avatar');
@@ -333,14 +332,12 @@
         console.log('🔘 Botón Cambiar:', btnCambiar ? '✅ Encontrado' : '❌ No encontrado');
         console.log('🗑️ Botón Remover:', btnRemover ? '✅ Encontrado' : '❌ No encontrado');
         console.log('📋 Formulario:', form ? '✅ Encontrado' : '❌ No encontrado');
-        
-        // Verificar funciones exportadas
+
         console.log('🔧 Funciones disponibles:');
         console.log('  - previewAvatar:', typeof window.previewAvatar);
         console.log('  - removeAvatar:', typeof window.removeAvatar);
         console.log('  - submitPersonalInfo:', typeof window.submitPersonalInfo);
-        
-        // Test manual del input de avatar
+
         if (avatarInput && btnCambiar) {
             console.log('🧪 Configurando test manual...');
             window.testAvatarInput = function() {
@@ -349,16 +346,14 @@
             };
             console.log('✅ Usa window.testAvatarInput() para probar manualmente');
         }
-        
-        // FORZAR INICIALES INMEDIATAMENTE
+
         setTimeout(function() {
             if (typeof window.forceAvatarInitials === 'function') {
                 window.forceAvatarInitials();
             }
         }, 100);
     });
-    
-    // Script adicional para forzar iniciales
+
     window.addEventListener('load', function() {
         console.log('🔧 Página completamente cargada, forzando iniciales...');
         if (typeof window.forceAvatarInitials === 'function') {

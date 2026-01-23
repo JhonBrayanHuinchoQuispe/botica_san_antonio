@@ -3,7 +3,7 @@
     $title='View Profile';
     $subTitle = 'View Profile';
     $script ='<script>
-                    // ======================== Upload Image Start =====================
+
                     function readURL(input) {
                         if (input.files && input.files[0]) {
                             var reader = new FileReader();
@@ -18,9 +18,7 @@
                     $("#imageUpload").change(function() {
                         readURL(this);
                     });
-                    // ======================== Upload Image End =====================
 
-                    // ================== Password Show Hide Js Start ==========
                     function initializePasswordToggle(toggleSelector) {
                         $(toggleSelector).on("click", function() {
                             $(this).toggleClass("ri-eye-off-line");
@@ -32,9 +30,9 @@
                             }
                         });
                     }
-                    // Call the function
+
                     initializePasswordToggle(".toggle-password");
-                    // ========================= Password Show Hide Js End ===========================
+
             </script>';
 @endphp
 
@@ -111,7 +109,7 @@
                     <div id="default-tab-content">
                         <div class="hidden" id="edit-profile" role="tabpanel" aria-labelledby="edit-profile-tab">
                             <h6 class="text-base text-neutral-600 mb-4">Profile Image</h6>
-                            <!-- Upload Image Start -->
+                            
                             <div class="mb-6 mt-4">
                                 <div class="avatar-upload">
                                     <div class="avatar-edit absolute bottom-0 end-0 me-6 mt-4 z-[1] cursor-pointer">
@@ -126,7 +124,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Upload Image End -->
+                            
                             <form action="#">
                                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-x-6">
                                     <div class="col-span-12 sm:col-span-6">

@@ -23,7 +23,7 @@
                     <form id="formConfiguracionTickets" onsubmit="guardarConfiguracionTickets(event)">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Mostrar Logo -->
+                            
                             <div>
                                 <label class="form-label">Mostrar Logo en Ticket</label>
                                 <select name="ticket_mostrar_logo" id="ticket_mostrar_logo" class="form-control" onchange="actualizarVistaPrevia()">
@@ -33,7 +33,7 @@
                                 <small class="text-muted">Incluir el logo de la empresa en el ticket</small>
                             </div>
 
-                            <!-- Mostrar Dirección -->
+                            
                             <div>
                                 <label class="form-label">Mostrar Dirección</label>
                                 <select name="ticket_mostrar_direccion" id="ticket_mostrar_direccion" class="form-control" onchange="actualizarVistaPrevia()">
@@ -43,7 +43,7 @@
                                 <small class="text-muted">Incluir la dirección de la empresa</small>
                             </div>
 
-                            <!-- Mostrar Teléfono -->
+                            
                             <div>
                                 <label class="form-label">Mostrar Teléfono</label>
                                 <select name="ticket_mostrar_telefono" id="ticket_mostrar_telefono" class="form-control" onchange="actualizarVistaPrevia()">
@@ -53,7 +53,7 @@
                                 <small class="text-muted">Incluir el teléfono de contacto</small>
                             </div>
 
-                            <!-- Mostrar IGV -->
+                            
                             <div>
                                 <label class="form-label">Mostrar Desglose IGV</label>
                                 <select name="ticket_mostrar_igv" id="ticket_mostrar_igv" class="form-control" onchange="actualizarVistaPrevia()">
@@ -63,7 +63,7 @@
                                 <small class="text-muted">Mostrar el desglose del IGV en el ticket</small>
                             </div>
 
-                            <!-- Ancho del Papel -->
+                            
                             <div>
                                 <label class="form-label">Ancho del Papel (mm)</label>
                                 <select name="ticket_ancho_papel" id="ticket_ancho_papel" class="form-control" onchange="actualizarVistaPrevia()">
@@ -73,7 +73,7 @@
                                 <small class="text-muted">Ancho del papel para el ticket</small>
                             </div>
 
-                            <!-- Margen Superior -->
+                            
                             <div>
                                 <label class="form-label">Margen Superior (mm)</label>
                                 <input type="number" name="ticket_margen_superior" id="ticket_margen_superior" 
@@ -83,7 +83,7 @@
                                 <small class="text-muted">Espacio en la parte superior del ticket</small>
                             </div>
 
-                            <!-- Margen Inferior -->
+                            
                             <div>
                                 <label class="form-label">Margen Inferior (mm)</label>
                                 <input type="number" name="ticket_margen_inferior" id="ticket_margen_inferior" 
@@ -94,7 +94,7 @@
                             </div>
                         </div>
 
-                        <!-- Mensaje del Pie -->
+                        
                         <div class="mt-6">
                             <label class="form-label">Mensaje del Pie de Página</label>
                             <textarea name="ticket_mensaje_pie" id="ticket_mensaje_pie" 
@@ -123,7 +123,7 @@
             </div>
         </div>
 
-        <!-- Vista Previa -->
+        
         <div class="col-lg-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-gray-100 p-4">
@@ -131,7 +131,7 @@
                 </div>
                 <div class="card-body p-4">
                     <div id="ticket-preview" class="ticket-preview bg-white border rounded p-3" style="font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.2;">
-                        <!-- El contenido se generará dinámicamente -->
+                        
                     </div>
                 </div>
             </div>
@@ -183,8 +183,7 @@ function actualizarVistaPrevia() {
     const mostrarTelefono = document.getElementById('ticket_mostrar_telefono').value === '1';
     const mostrarIgv = document.getElementById('ticket_mostrar_igv').value === '1';
     const mensajePie = document.getElementById('ticket_mensaje_pie').value;
-    
-    // Cambiar clase según el ancho
+
     preview.className = `ticket-preview bg-white border rounded p-3 ticket-${ancho}mm`;
     
     let html = `
@@ -263,7 +262,6 @@ function mostrarVistaPrevia() {
     window.open('{{ route("admin.configuracion.tickets.vista-previa") }}', '_blank', 'width=400,height=600');
 }
 
-// Inicializar vista previa
 document.addEventListener('DOMContentLoaded', function() {
     actualizarVistaPrevia();
 });

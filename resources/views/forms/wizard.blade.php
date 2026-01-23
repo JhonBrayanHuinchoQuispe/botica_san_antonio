@@ -3,9 +3,9 @@
     $title='Wizard';
     $subTitle = 'Wizard';
     $script = ' <script>
-        // =============================== Wizard Step Js Start ================================
+
         $(document).ready(function() {
-            // click on next button
+
             $(".form-wizard-next-btn").on("click", function() {
                 var parentFieldset = $(this).parents(".wizard-fieldset");
                 var currentActiveStep = $(this).parents(".form-wizard").find(".form-wizard-list .active");
@@ -43,7 +43,7 @@
                     });
                 }
             });
-            //click on previous button
+
             $(".form-wizard-previous-btn").on("click",function() {
                 var counter = parseInt($(".wizard-counter").text());;
                 var prev =$(this);
@@ -67,7 +67,7 @@
                     }
                 });
             });
-            //click on form submit button
+
             $(document).on("click",".form-wizard .form-wizard-submit" , function(){
                 var parentFieldset = $(this).parents(".wizard-fieldset");
                 var currentActiveStep = $(this).parents(".form-wizard").find(".form-wizard-list .active");
@@ -81,7 +81,7 @@
                     }
                 });
             });
-            // focus on input field check empty or not
+
             $(".form-control").on("focus", function(){
                 var tmpThis = $(this).val();
                 if(tmpThis == "" ) {
@@ -102,7 +102,7 @@
                 }
             });
         });
-        // =============================== Wizard Step Js End ================================
+
     </script>';
 @endphp
 
@@ -114,7 +114,7 @@
                 <h6 class="mb-1.5 text-xl">Numbering wizard</h6>
                 <p class="text-neutral-400">Fill up your details and proceed next steps.</p>
 
-                <!-- Form Wizard Start -->
+                
                 <div class="form-wizard">
                     <form action="#" method="post">
                         <div class="form-wizard-header overflow-x-auto scroll-sm pb-2 mt-8 mb-8">
@@ -407,7 +407,7 @@
                         </fieldset>
                     </form>
                 </div>
-                <!-- Form Wizard End -->
+                
             </div>
         </div>
 
@@ -416,7 +416,7 @@
                 <h6 class="mb-1.5 text-xl">Numbering wizard with label</h6>
                 <p class="text-neutral-400">Fill up your details and proceed next steps.</p>
 
-                <!-- Form Wizard Start -->
+                
                 <div class="form-wizard">
                     <form action="#" method="post">
                         <div class="form-wizard-header overflow-x-auto scroll-sm pb-2 mt-8 mb-8">
@@ -715,7 +715,7 @@
                         </fieldset>
                     </form>
                 </div>
-                <!-- Form Wizard End -->
+                
             </div>
         </div>
 
@@ -724,7 +724,7 @@
                 <h6 class="mb-1.5 text-xl">Order By Following Step</h6>
                 <p class="text-neutral-400">Fill up your details and proceed next steps.</p>
 
-                <!-- Form Wizard Start -->
+                
                 <div class="form-wizard">
                     <form action="#" method="post">
                         <div class="form-wizard-header overflow-x-auto scroll-sm pb-2 mt-8 mb-8">
@@ -902,7 +902,7 @@
                         </fieldset>
                     </form>
                 </div>
-                <!-- Form Wizard End -->
+                
             </div>
         </div>
 
@@ -911,7 +911,7 @@
                 <h6 class="mb-1.5 text-xl">Wizard with beside label</h6>
                 <p class="text-neutral-400">Fill up your details and proceed next steps.</p>
 
-                <!-- Form Wizard Start -->
+                
                 <div class="form-wizard">
                     <form action="#" method="post">
                         <div class="form-wizard-header overflow-x-auto scroll-sm pb-2 mt-8 mb-8">
@@ -1089,12 +1089,10 @@
                         </fieldset>
                     </form>
                 </div>
-                <!-- Form Wizard End -->
+                
             </div>
         </div>
     </div>
 
 @endsection
-
-
 

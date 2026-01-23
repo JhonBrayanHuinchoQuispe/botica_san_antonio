@@ -1,4 +1,4 @@
-    @extends('layout.layout')
+@extends('layout.layout')
 
     @php
         $title = 'Asistente Inteligente';
@@ -7,15 +7,15 @@
 
     @section('content')
 
-    <!-- Contenedor Principal con diseño moderno -->
+    
     <div class="ia-dashboard-container">
         <div class="grid grid-cols-12 gap-6 h-full">
             <div class="col-span-12 h-full">
                 
-                <!-- Tarjeta del Chat -->
+                
                 <div class="ia-card">
                     
-                    <!-- Cabecera del Chat -->
+                    
                     <div class="ia-header">
                         <div class="ia-header-info">
                             <div class="ia-avatar-header">
@@ -37,9 +37,9 @@
                         </div>
                     </div>
 
-                    <!-- Cuerpo del Chat (Mensajes) -->
+                    
                     <div class="ia-body" id="iaChat">
-                        <!-- Mensaje de Bienvenida por defecto -->
+                        
                         <div class="ia-message ia-message-ai">
                             <div class="ia-message-avatar">
                                 <iconify-icon icon="fluent:bot-sparkle-24-filled"></iconify-icon>
@@ -58,10 +58,10 @@
                                 <span class="ia-timestamp">Ahora</span>
                             </div>
                         </div>
-                        <!-- Aquí se inyectarán los mensajes dinámicamente -->
+                        
                     </div>
 
-                    <!-- Pie del Chat (Input) -->
+                    
                     <div class="ia-footer">
                         <div class="ia-input-wrapper">
                             <input type="text" id="iaInput" placeholder="Escribe tu consulta aquí..." autocomplete="off">
@@ -77,11 +77,11 @@
         </div>
     </div>
 
-    <!-- ESTILOS CSS MODERNOS -->
+    
     <style>
-        /* Variables de diseño */
+        
         :root {
-            --ia-primary: #4f46e5; /* Indigo moderno */
+            --ia-primary: #4f46e5; 
             --ia-primary-light: #6366f1;
             --ia-bg-user: #f3f4f6;
             --ia-text-user: #1f2937;
@@ -90,13 +90,13 @@
             --ia-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
         }
 
-        /* Contenedor General - Ajuste para evitar scroll global */
+        
         .ia-dashboard-container {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             padding: 1rem;
         }
 
-        /* Tarjeta Principal */
+        
         .ia-card {
             background: #ffffff;
             border-radius: 24px;
@@ -108,7 +108,7 @@
             border: 1px solid rgba(255,255,255,0.5);
         }
 
-        /* Header */
+        
         .ia-header {
             background: linear-gradient(135deg, #4f46e5 0%, #818cf8 100%);
             padding: 1.25rem 1.5rem;
@@ -187,22 +187,22 @@
         }
         .ia-action-btn:hover { background: rgba(255,255,255,0.25); }
 
-        /* Cuerpo del Chat - SCROLL INTERNO */
+        
         .ia-body {
             flex: 1;
             background-color: #f8fafc;
             background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
             background-size: 20px 20px;
             padding: 1.5rem;
-            overflow-y: auto; /* Habilita scroll vertical */
+            overflow-y: auto; 
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
             scroll-behavior: smooth;
-            min-height: 0; /* CRUCIAL: Permite que flexbox calcule el scroll interno correctamente */
+            min-height: 0; 
         }
 
-        /* Estilos personalizados para la barra de scroll (Webkit: Chrome, Safari, Edge) */
+        
         .ia-body::-webkit-scrollbar {
             width: 6px;
         }
@@ -217,7 +217,7 @@
             background-color: #94a3b8;
         }
 
-        /* Mensajes */
+        
         .ia-message {
             display: flex;
             gap: 1rem;
@@ -285,7 +285,7 @@
         }
         .ia-message-user .ia-timestamp { text-align: right; }
 
-        /* Listas y Sugerencias */
+        
         .ia-suggestions {
             list-style: none;
             padding: 0;
@@ -304,7 +304,7 @@
         }
         .ia-suggestions li:hover { background: #e2e8f0; }
 
-        /* Tablas en Chat */
+        
         .ia-table-container {
             overflow-x: auto;
             border-radius: 12px;
@@ -333,7 +333,7 @@
         .ia-table tr:last-child td { border-bottom: none; }
         .ia-table tr:hover { background: #f8fafc; }
 
-        /* Footer / Input */
+        
         .ia-footer {
             padding: 1.25rem;
             background: white;
@@ -346,12 +346,12 @@
             gap: 0.75rem;
             background: #f8fafc;
             padding: 0.5rem;
-            border-radius: 999px; /* Pill shape */
+            border-radius: 999px; 
             border: 1px solid #e2e8f0;
             transition: all 0.3s;
         }
 
-        /* FIX 1: Eliminar el borde y sombra azul al hacer click */
+        
         .ia-input-wrapper:focus-within {
             background: #f8fafc;
             border-color: #e2e8f0;
@@ -397,18 +397,18 @@
             margin-top: 0.5rem;
         }
 
-        /* Gráficos */
-        /* FIX 2: Eliminar el recuadro blanco interno para que el gráfico se integre */
+        
+        
         .ia-chart-wrapper {
-            background: transparent; /* Transparente */
+            background: transparent; 
             padding: 0.5rem 0;
             border-radius: 0;
-            border: none; /* Sin borde */
+            border: none; 
             margin-top: 0.5rem;
             width: 100%;
         }
 
-        /* Animación de "Pensando..." */
+        
         .ia-typing {
             display: flex;
             gap: 4px;
@@ -417,7 +417,7 @@
             height: 24px;
         }
 
-        /* SweetAlert2 overrides: asegurar visibilidad de botones */
+        
         .swal2-container { z-index: 9999 !important; }
         .swal2-popup { border-radius: 16px; }
         .swal2-actions { display: flex !important; gap: .5rem; }
@@ -453,7 +453,7 @@
             40% { transform: scale(1); }
         }
 
-        /* Toggle Grafico/Texto */
+        
         .ia-toggle-group {
             display: flex;
             background: #f1f5f9;
@@ -479,20 +479,18 @@
         }
     </style>
 
-    <!-- SweetAlert2 -->
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- LÓGICA JAVASCRIPT -->
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function(){
-            // Elementos DOM
+
             const chat = document.getElementById('iaChat');
             const input = document.getElementById('iaInput');
             const sendBtn = document.getElementById('iaSend');
             const clearBtn = document.getElementById('iaClear');
-            
-            // --- UTILIDADES ---
 
             function nowTime(){
                 const d = new Date();
@@ -539,15 +537,12 @@
                 }catch(e){}
             }
 
-            // --- RENDERIZADO DE MENSAJES ---
-
             function createMessageElement(role, contentHTML) {
                 const wrap = document.createElement('div');
                 wrap.className = `ia-message ${role === 'user' ? 'ia-message-user' : 'ia-message-ai'}`;
                 
                 const icon = role === 'user' ? 'solar:user-bold-duotone' : 'fluent:bot-sparkle-24-filled';
-                
-                // Estructura del mensaje HTML
+
                 wrap.innerHTML = `
                     <div class="ia-message-avatar">
                         <iconify-icon icon="${icon}"></iconify-icon>
@@ -590,10 +585,9 @@
                 }
             }
 
-            // --- FORMATEO DE TEXTO RICO ---
             function formatRich(text) {
                 let t = (text || '').trim();
-                // Convertir listas con bullet points
+
                 if(t.includes('•') || t.includes('- ')) {
                     const lines = t.split(/\r?\n/);
                     let html = '';
@@ -612,8 +606,6 @@
                 }
                 return `<p>${t.replace(/\n/g, '<br>')}</p>`;
             }
-
-            // --- VISUALIZACIONES (Gráficos y Tablas) ---
 
             function addAiText(thinkingEl, text) {
                 removeThinking(thinkingEl);
@@ -638,10 +630,10 @@
                     items.forEach(row => {
                         tableHtml += `<tr>`;
                         cols.forEach(col => {
-                            // Lógica flexible para encontrar la propiedad correcta en el objeto JSON
+
                             let val = '';
                             const k = col.toLowerCase();
-                            // Mapeo inteligente de columnas
+
                             if(k.includes('prod')) val = row.nombre || row.producto || row.descripcion || '-';
                             else if(k.includes('stock')) val = row.stock || row.cantidad_disponible || row.existencias || '0';
                             else if(k.includes('uni')) val = row.unidades || row.unidad || row.qty || '0';
@@ -677,12 +669,11 @@
                 scrollToBottom();
                 pushHistory('ai', title + ' (Gráfico generado)');
 
-                // Generar Gráfico con Chart.js
                 setTimeout(() => {
                     const ctx = document.getElementById(chartId).getContext('2d');
-                    // Gradiente bonito
+
                     const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                    gradient.addColorStop(0, 'rgba(79, 70, 229, 0.4)'); // Color indigo
+                    gradient.addColorStop(0, 'rgba(79, 70, 229, 0.4)');
                     gradient.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
 
                     new Chart(ctx, {
@@ -718,8 +709,7 @@
             function addAiPrediction(thinkingEl, payload) {
                 removeThinking(thinkingEl);
                 const data = payload || {};
-                
-                // Si hay imagen base64 (Gráfico Python)
+
                 if(data.plot_png_base64) {
                     const imgHtml = `
                         <div style="display:flex; flex-direction:column; gap:10px;">
@@ -738,19 +728,16 @@
                     const el = createMessageElement('ai', imgHtml);
                     chat.appendChild(el);
                 } 
-                // Si es un array simple de forecast
+
                 else if(Array.isArray(data.forecast) && data.forecast.length) {
                     addAiChart(null, data.text || 'Pronóstico de Ventas', data.forecast);
                 } 
-                // Texto simple
+
                 else {
                     addAiText(null, data.text || 'No se pudo generar la predicción.');
                 }
                 scrollToBottom();
             }
-
-            // --- LÓGICA DE NEGOCIO (INTENTS) ---
-            // Esta sección mantiene tu lógica original intacta pero conectada al nuevo UI
 
             function normalize(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
             
@@ -766,7 +753,7 @@
 
             function detectIntent(text){
                 var t = normalize(text);
-                // Lógica de detección (Copiada de tu archivo original y limpiada)
+
                 if (t.includes('agotad')) return 'agotados';
                 if (t.includes('critico') || t.includes('bajo stock')) return 'critico';
                 if (t.includes('mas vendido') || t.includes('top')) return 'top';
@@ -777,7 +764,7 @@
                 if (t.includes('pronostic') || t.includes('predec') || t.includes('futuro') || t.includes('grafico') || t.includes('gráfico')) return 'predict';
                 if (t.includes('ayer')) return 'ventas_ayer';
                 if (t.includes('cuantos') && t.includes('producto')) return 'count_products';
-                // Fallback SQL genérico
+
                 const sqlish = ['lista','listar','total','suma','promedio'];
                 if(sqlish.some(x => t.includes(x))) return 'nl_sql';
                 return 'llm';
@@ -795,17 +782,13 @@
 
             async function handleIntent(text) {
                 const intent = detectIntent(text);
-                const thinking = addThinking(); // Mostrar animación
-
-                try {
-                    // 1. PREDICCIÓN (IA Avanzada)
+                const thinking = addThinking();
                     if (intent === 'predict'){
                         const jp = await fetchJson('/api/ia/predict-sklearn?q='+encodeURIComponent(text), 10000);
                         addAiPrediction(thinking, jp?.data);
                         return;
                     }
-                    
-                    // 2. STOCK AGOTADO
+
                     if (intent === 'agotados'){
                         const j = await fetchJson('/api/ia/analytics/agotados?limit=8');
                         const data = j?.data?.slice(0,8) || [];
@@ -814,7 +797,6 @@
                         return;
                     }
 
-                    // 3. STOCK CRITICO
                     if (intent === 'critico'){
                         const j = await fetchJson('/api/ia/analytics/critico?limit=8');
                         const data = j?.data?.slice(0,8) || [];
@@ -823,7 +805,6 @@
                         return;
                     }
 
-                    // 4. TOP VENTAS
                     if (intent === 'top'){
                         const p = parsePeriodo(text);
                         const j = await fetchJson(`/api/ia/analytics/top-ventas?periodo=${p}&limit=8`);
@@ -833,7 +814,6 @@
                         return;
                     }
 
-                    // 5. POR VENCER
                     if (intent === 'por_vencer'){
                         const p = parsePeriodo(text);
                         const j = await fetchJson(`/api/mobile/productos/por-vencer?dias=${p}`);
@@ -843,20 +823,18 @@
                         return;
                     }
 
-                    // 6. SQL GENÉRICO O LLM (Fallback)
                     if (intent === 'nl_sql' || intent === 'llm'){
-                        // Intentar SQL Natural primero
+
                         const ns = await fetchJson('/api/ia/nl-sql?q='+encodeURIComponent(text), 12000);
                         if(ns && (ns.text || ns.data?.text)) {
                             addAiText(thinking, ns.text || ns.data.text);
                         } else {
-                            // Si falla, chat general
+
                             addAiText(thinking, "Lo siento, no pude obtener esa información exacta de la base de datos, pero estoy aprendiendo.");
                         }
                         return;
                     }
 
-                    // Otros intents simples
                     if(intent === 'count_products'){
                         const j = await fetchJson('/api/mobile/productos/count');
                         addAiText(thinking, `Tienes un total de **${j?.data?.count || 0}** productos registrados.`);
@@ -870,8 +848,6 @@
                     addAiText(thinking, "Ocurrió un error al procesar tu solicitud. Por favor intenta de nuevo.");
                 }
             }
-
-            // --- EVENTOS ---
 
             async function handleSend(){
                 const text = input.value.trim();
@@ -914,7 +890,6 @@
                 }
             });
 
-            // Restaurar Historial al cargar
             (function renderHistory(){
                 const h = getHistory();
                 if(h.length > 0) {

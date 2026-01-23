@@ -90,7 +90,7 @@
     border-radius: 12px;
     padding: 1.5rem 2rem;
     text-align: center;
-    min-height: 220px; /* más grande para aprovechar espacio */
+    min-height: 220px; 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -105,24 +105,24 @@
     border: none;
     display: inline-flex;
     align-items: center;
-    gap: 0.75rem; /* separación clara entre icono y texto */
+    gap: 0.75rem; 
 }
 
 .btn-modern iconify-icon {
     display: inline-block;
     line-height: 1;
-    vertical-align: middle; /* centra el icono respecto al texto */
-    font-size: 1.1rem; /* tamaño uniforme del icono */
+    vertical-align: middle; 
+    font-size: 1.1rem; 
 }
 
 .btn-primary-modern {
-    background: #ef4444; /* rojo suave para combinar con el sistema */
+    background: #ef4444; 
     color: white;
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
 }
 
 .btn-primary-modern:hover {
-    background: #dc2626; /* tono un poco más intenso en hover */
+    background: #dc2626; 
     box-shadow: 0 6px 16px rgba(220, 38, 38, 0.28);
 }
 
@@ -221,9 +221,9 @@
                 <div class="empresa-body">
                     <form id="formConfiguracionEmpresa" onsubmit="guardarConfiguracionEmpresa(event)">
                         @csrf
-                        <!-- Grid principal del formulario -->
+                        
                         <div class="space-y-8 max-w-6xl">
-                            <!-- Fila 1: Razón Social y Nombre Comercial -->
+                            
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">
@@ -255,7 +255,7 @@
                                 </div>
                             </div>
 
-                            <!-- Fila 2: RUC y Correo Electrónico -->
+                            
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">
@@ -289,7 +289,7 @@
                                 </div>
                             </div>
 
-                            <!-- Tercera fila: Dirección (ancho completo) -->
+                            
                             <div class="form-group-modern">
                                 <label class="form-label-modern">
                                     <iconify-icon icon="solar:map-point-bold-duotone" class="text-lg mr-2"></iconify-icon>
@@ -305,7 +305,7 @@
                             </div>
                         </div>
 
-                        <!-- Logo de la Empresa -->
+                        
                         <div class="form-group-modern">
                             <label class="form-label-modern">
                                 <iconify-icon icon="solar:gallery-bold-duotone" class="text-lg mr-2"></iconify-icon>
@@ -354,7 +354,7 @@
             </div>
         </div>
 
-        <!-- Panel Lateral -->
+        
         <div class="xl:col-span-1">
             <div class="info-card-modern" style="background: #f8fafc;">
                 <div class="info-header-modern" style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);">
@@ -462,8 +462,7 @@ async function guardarConfiguracionEmpresa(event) {
     
     const form = document.getElementById('formConfiguracionEmpresa');
     const formData = new FormData(form);
-    
-    // Validar RUC
+
     const ruc = document.getElementById('empresa_ruc').value;
     if (ruc && !/^[0-9]{11}$/.test(ruc)) {
         Swal.fire({
@@ -493,7 +492,7 @@ async function guardarConfiguracionEmpresa(event) {
                 timer: 2000,
                 showConfirmButton: false
             }).then(() => {
-                // Recargar la página para mostrar los datos actualizados usando Turbo
+
                 Turbo.visit(window.location.href, { action: 'replace' });
             });
         } else {
@@ -508,13 +507,5 @@ async function guardarConfiguracionEmpresa(event) {
     }
 }
 
-// Validación en tiempo real del RUC
 document.getElementById('empresa_ruc').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, ''); // Solo números
-    if (value.length > 11) {
-        value = value.substring(0, 11);
-    }
-    e.target.value = value;
-});
-</script>
-@endsection
+    let value = e.target.value.replace(/\D/g, '');

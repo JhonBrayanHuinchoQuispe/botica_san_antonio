@@ -92,6 +92,9 @@ class InventarioController extends Controller
             'estado' => $estado
         ]);
         
+        // Agregar eager loading de relaciones necesarias
+        $query->with(['presentaciones', 'ubicaciones.ubicacion.estante', 'proveedor']);
+        
         // Aplicar paginación
         $productos = $query->paginate($perPage)->withQueryString();
         
@@ -333,6 +336,17 @@ class InventarioController extends Controller
                         ];
                     })->values();
 
+                    // Cargar presentaciones del producto
+                    $presentacionesProducto = $producto->presentaciones ?? collect();
+                    $presentacionesFormatted = $presentacionesProducto->map(function($pres) {
+                        return [
+                            'id' => $pres->id,
+                            'nombre_presentacion' => $pres->nombre_presentacion,
+                            'unidades_por_presentacion' => $pres->unidades_por_presentacion,
+                            'precio_venta_presentacion' => $pres->precio_venta_presentacion
+                        ];
+                    })->values();
+
                     return [
                         'id' => $producto->id,
                         'nombre' => $producto->nombre,
@@ -340,6 +354,7 @@ class InventarioController extends Controller
                         'marca' => $producto->marca ?? null,
                         'categoria' => $categoriaNombre,
                         'presentacion' => $presentacionNombre,
+                        'presentaciones' => $presentacionesFormatted, // ✅ Agregado para la lista
                         'precio_compra' => (float)($producto->precio_compra ?? 0),
                         'precio_venta' => (float)($producto->precio_venta ?? 0),
                         'stock_actual' => $stockActual,
@@ -408,7 +423,7 @@ class InventarioController extends Controller
     public function show($id)
     {
         try {
-            $producto = Producto::with('proveedor')->findOrFail($id);
+            $producto = Producto::with(['proveedor', 'presentaciones'])->findOrFail($id);
             
             // Obtener lotes FEFO activos
             $lotes = ProductoUbicacion::where('producto_id', $id)
@@ -431,6 +446,11 @@ class InventarioController extends Controller
             ]);
 
             $lotesFormatted = $lotes->map(function($l) {
+                // Obtener presentaciones específicas para este lote
+                $presLote = DB::table('lote_presentaciones')
+                    ->where('producto_ubicacion_id', $l->id)
+                    ->get();
+
                 return [
                     'id' => $l->id,
                     'lote' => $l->lote,
@@ -439,9 +459,20 @@ class InventarioController extends Controller
                     'precio_compra_lote' => $l->precio_compra_lote,
                     'precio_venta_lote' => $l->precio_venta_lote,
                     'proveedor_id' => $l->proveedor_id,
-                    'dias_para_vencer' => $l->fecha_vencimiento ? Carbon::now()->diffInDays(Carbon::parse($l->fecha_vencimiento), false) : null
+                    'dias_para_vencer' => $l->fecha_vencimiento ? Carbon::now()->diffInDays(Carbon::parse($l->fecha_vencimiento), false) : null,
+                    'presentaciones_lote' => $presLote
                 ];
             })->values();
+            
+            // Cargar presentaciones del producto
+            $presentaciones = $producto->presentaciones->map(function($pres) {
+                return [
+                    'id' => $pres->id,
+                    'nombre_presentacion' => $pres->nombre_presentacion,
+                    'unidades_por_presentacion' => $pres->unidades_por_presentacion,
+                    'precio_venta_presentacion' => $pres->precio_venta_presentacion
+                ];
+            });
             
             return response()->json([
                 'success' => true,
@@ -452,7 +483,8 @@ class InventarioController extends Controller
                     'marca' => $producto->marca,
                     'proveedor_id' => $producto->proveedor_id,
                     'proveedor' => $producto->proveedor ? $producto->proveedor->razon_social : null,
-                    'presentacion' => $producto->presentacion,
+                    // REMOVIDO: 'presentacion' => $producto->presentacion,
+                    'presentaciones' => $presentaciones, // ✅ Agregado
                     'concentracion' => $producto->concentracion,
                     'lote' => $producto->lote,
                     'codigo_barras' => $producto->codigo_barras,
@@ -460,7 +492,7 @@ class InventarioController extends Controller
                     'stock_minimo' => $producto->stock_minimo,
                     'precio_compra' => $producto->precio_compra,
                     'precio_venta' => $producto->precio_venta,
-                    'fecha_fabricacion' => $producto->fecha_fabricacion_solo_fecha,
+                    // REMOVIDO: 'fecha_fabricacion' => $producto->fecha_fabricacion_solo_fecha,
                     'fecha_vencimiento' => $producto->fecha_vencimiento_solo_fecha,
                     'ubicacion' => $producto->ubicacion,
                     'ubicacion_almacen' => $producto->ubicacion_almacen,
@@ -497,12 +529,12 @@ class InventarioController extends Controller
                 'lote' => 'required|string|max:255',
                 'categoria' => 'required|string|max:255',
                 'marca' => 'required|string|max:255',
-                'presentacion' => 'required|string|max:255',
+                // REMOVIDO: 'presentacion' => 'required|string|max:255', // Ya no se usa, ahora es producto_presentaciones
                 'concentracion' => 'nullable|string|max:255',
                 'stock_actual' => 'required|integer|min:0',
                 'stock_minimo' => 'required|integer|min:0',
-                'fecha_fabricacion' => 'required|date|before_or_equal:today',
-                'fecha_vencimiento' => 'nullable|date|after:fecha_fabricacion|after:today',
+                // REMOVIDO: 'fecha_fabricacion' => 'required|date|before_or_equal:today', // Campo eliminado
+                'fecha_vencimiento' => 'nullable|date', // Opcional
                 'precio_compra' => 'required|numeric|gt:0',
                 'precio_venta' => 'required|numeric|gt:0|gte:precio_compra',
                 'imagen' => 'nullable|image|max:2048',
@@ -518,16 +550,16 @@ class InventarioController extends Controller
                 'lote.required' => 'El lote es obligatorio.',
                 'categoria.required' => 'La categoría es obligatoria.',
                 'marca.required' => 'La marca es obligatoria.',
-                'presentacion.required' => 'La presentación es obligatoria.',
+                // REMOVIDO: 'presentacion.required' => 'La presentación es obligatoria.',
                 'concentracion.regex' => 'La concentración debe ser número + unidad (ej: 500mg, 2.5ml, 10%).',
                 'stock_actual.required' => 'El stock actual es obligatorio.',
                 'stock_actual.min' => 'El stock actual no puede ser negativo.',
                 'stock_minimo.required' => 'El stock mínimo es obligatorio.',
                 'stock_minimo.min' => 'El stock mínimo no puede ser negativo.',
-                'fecha_fabricacion.required' => 'La fecha de fabricación es obligatoria.',
-                'fecha_fabricacion.before_or_equal' => 'La fecha de fabricación no puede ser futura.',
+                // REMOVIDO: 'fecha_fabricacion.required' => 'La fecha de fabricación es obligatoria.',
+                // REMOVIDO: 'fecha_fabricacion.before_or_equal' => 'La fecha de fabricación no puede ser futura.',
                 'fecha_vencimiento.required' => 'La fecha de vencimiento es obligatoria.',
-                'fecha_vencimiento.after' => 'La fecha de vencimiento debe ser posterior a la fecha de fabricación y a hoy.',
+                'fecha_vencimiento.after' => 'La fecha de vencimiento debe ser posterior a hoy.',
                 'precio_compra.gt' => 'El precio de compra debe ser mayor a 0.',
                 'precio_venta.gt' => 'El precio de venta debe ser mayor a 0.',
                 'precio_venta.gte' => 'El precio de venta debe ser mayor o igual al precio de compra.'
@@ -582,12 +614,12 @@ class InventarioController extends Controller
                 'lote' => $request->lote,
                 'categoria' => $request->categoria,
                 'marca' => $request->marca,
-                'presentacion' => $request->presentacion,
+                // REMOVIDO: 'presentacion' => $request->presentacion, // Ya no se guarda aquí
                 'concentracion' => $request->concentracion,
                 'stock_actual' => $request->stock_actual,
                 'stock_minimo' => $request->stock_minimo,
                 'ubicacion' => $request->ubicacion ?? null,
-                'fecha_fabricacion' => $request->fecha_fabricacion,
+                // REMOVIDO: 'fecha_fabricacion' => $request->fecha_fabricacion, // Campo eliminado
                 'fecha_vencimiento' => $request->fecha_vencimiento,
                 'precio_compra' => $request->precio_compra,
                 'precio_venta' => $request->precio_venta,
@@ -602,6 +634,30 @@ class InventarioController extends Controller
 
             $producto = Producto::create($datosProducto);
             Log::info('Producto creado exitosamente con ID: ' . $producto->id);
+
+            // Guardar presentaciones múltiples
+            if ($request->has('presentaciones') && is_array($request->presentaciones)) {
+                Log::info('Guardando presentaciones múltiples para el producto', [
+                    'producto_id' => $producto->id,
+                    'presentaciones' => $request->presentaciones
+                ]);
+                
+                foreach ($request->presentaciones as $presentacionData) {
+                    // Asegúrate de que cada presentación tenga al menos un nombre y unidades
+                    if (isset($presentacionData['nombre_presentacion']) && isset($presentacionData['unidades_por_presentacion'])) {
+                        $producto->presentaciones()->create([
+                            'nombre_presentacion' => $presentacionData['nombre_presentacion'],
+                            'unidades_por_presentacion' => $presentacionData['unidades_por_presentacion'],
+                            'precio_venta_presentacion' => $presentacionData['precio_venta_presentacion'] ?? null,
+                        ]);
+                        
+                        Log::info('Presentación creada', [
+                            'nombre' => $presentacionData['nombre_presentacion'],
+                            'unidades' => $presentacionData['unidades_por_presentacion']
+                        ]);
+                    }
+                }
+            }
 
             // Crear el lote inicial automáticamente si hay stock inicial
             if ($request->stock_actual > 0) {
@@ -627,6 +683,9 @@ class InventarioController extends Controller
 
             DB::commit();
             Log::info('Transacción confirmada');
+
+            // Cargar las presentaciones del producto antes de devolverlo
+            $producto->load('presentaciones');
 
             return response()->json([
                 'success' => true,
@@ -919,7 +978,7 @@ class InventarioController extends Controller
                 'nombre' => 'required|string|max:255',
                 'categoria' => 'required|string|max:255',
                 'marca' => 'required|string|max:255',
-                'presentacion' => 'required|string|max:255',
+                // REMOVIDO: 'presentacion' => 'required|string|max:255',
                 'concentracion' => 'nullable|string|max:100',
                 'lote' => 'required|string|max:100',
                 'codigo_barras' => 'required|string|max:255|unique:productos,codigo_barras,' . $id,
@@ -927,8 +986,8 @@ class InventarioController extends Controller
                 'stock_minimo' => 'required|integer|min:0',
                 'precio_compra' => 'required|numeric|gt:0',
                 'precio_venta' => 'required|numeric|gt:0|gte:precio_compra',
-                'fecha_fabricacion' => 'required|date|before_or_equal:today',
-                'fecha_vencimiento' => 'nullable|date|after:fecha_fabricacion|after:today',
+                // REMOVIDO: 'fecha_fabricacion' => 'required|date|before_or_equal:today',
+                'fecha_vencimiento' => 'nullable|date', // Ahora opcional en edición
                 'ubicacion' => 'nullable|string|max:255',
                 'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
             ];
@@ -940,10 +999,9 @@ class InventarioController extends Controller
                 'precio_compra.gt' => 'El precio de compra debe ser mayor a 0.',
                 'precio_venta.gt' => 'El precio de venta debe ser mayor a 0.',
                 'precio_venta.gte' => 'El precio de venta debe ser mayor o igual al precio de compra.',
-                'fecha_fabricacion.before_or_equal' => 'La fecha de fabricación no puede ser futura.',
-                'fecha_vencimiento.after' => 'La fecha de vencimiento debe ser posterior a la fecha de fabricación.',
-                'fecha_vencimiento.after_or_equal' => 'La fecha de vencimiento debe ser posterior o igual a la fecha de fabricación.',
-                'fecha_vencimiento.after' => 'La fecha de vencimiento debe ser posterior a la fecha de fabricación y a hoy.',
+                // REMOVIDO: 'fecha_fabricacion.before_or_equal' => 'La fecha de fabricación no puede ser futura.',
+                'fecha_vencimiento.required' => 'La fecha de vencimiento es obligatoria.',
+                'fecha_vencimiento.after' => 'La fecha de vencimiento debe ser posterior a hoy.',
                 'codigo_barras.unique' => 'Este código de barras ya está registrado.',
             ];
             $validator = Validator::make($request->all(), $rules, $messages);
@@ -1001,6 +1059,78 @@ class InventarioController extends Controller
             // Actualizar el producto
             $producto->update($datos);
             
+            // Actualizar presentaciones múltiples
+            if ($request->has('presentaciones') && is_array($request->presentaciones)) {
+                Log::info('Actualizando presentaciones múltiples para el producto', [
+                    'producto_id' => $producto->id,
+                    'presentaciones' => $request->presentaciones
+                ]);
+                
+                $existingPresentationIds = $producto->presentaciones->pluck('id')->toArray();
+                $updatedPresentationIds = [];
+                $loteId = $request->input('lote_id');
+
+                foreach ($request->presentaciones as $presId => $presentacionData) {
+                    if (isset($presentacionData['nombre_presentacion']) && isset($presentacionData['unidades_por_presentacion'])) {
+                        $currentPresId = null;
+                        if (str_starts_with($presId, 'new_')) { // Nueva presentación
+                            $nuevaPresentacion = $producto->presentaciones()->create([
+                                'nombre_presentacion' => $presentacionData['nombre_presentacion'],
+                                'unidades_por_presentacion' => $presentacionData['unidades_por_presentacion'],
+                                'precio_venta_presentacion' => $presentacionData['precio_venta_presentacion'] ?? null,
+                            ]);
+                            $currentPresId = $nuevaPresentacion->id;
+                            $updatedPresentationIds[] = $currentPresId;
+                            
+                            Log::info('Nueva presentación creada', [
+                                'id' => $currentPresId,
+                                'nombre' => $presentacionData['nombre_presentacion']
+                            ]);
+                        } else { // Presentación existente
+                            $presentacion = \App\Models\ProductoPresentacion::find($presId);
+                            if ($presentacion && $presentacion->producto_id == $producto->id) {
+                                $presentacion->update([
+                                    'nombre_presentacion' => $presentacionData['nombre_presentacion'],
+                                    'unidades_por_presentacion' => $presentacionData['unidades_por_presentacion'],
+                                    'precio_venta_presentacion' => $presentacionData['precio_venta_presentacion'] ?? null,
+                                ]);
+                                $currentPresId = $presentacion->id;
+                                $updatedPresentationIds[] = $currentPresId;
+                                
+                                Log::info('Presentación actualizada', [
+                                    'id' => $currentPresId,
+                                    'nombre' => $presentacionData['nombre_presentacion']
+                                ]);
+                            }
+                        }
+
+                        // Si hay un lote_id, actualizar también en lote_presentaciones
+                        if ($loteId && $currentPresId) {
+                            DB::table('lote_presentaciones')->updateOrInsert(
+                                [
+                                    'producto_ubicacion_id' => $loteId,
+                                    'producto_presentacion_id' => $currentPresId
+                                ],
+                                [
+                                    'precio_venta' => $presentacionData['precio_venta_presentacion'] ?? 0,
+                                    'unidades_por_presentacion' => $presentacionData['unidades_por_presentacion'] ?? 1,
+                                    'updated_at' => now()
+                                ]
+                            );
+                        }
+                    }
+                }
+                
+                // Eliminar presentaciones que ya no están en el request
+                $presentationsToDelete = array_diff($existingPresentationIds, $updatedPresentationIds);
+                if (!empty($presentationsToDelete)) {
+                    \App\Models\ProductoPresentacion::whereIn('id', $presentationsToDelete)->delete();
+                    // También eliminar de lote_presentaciones
+                    DB::table('lote_presentaciones')->whereIn('producto_presentacion_id', $presentationsToDelete)->delete();
+                    Log::info('Presentaciones eliminadas', ['ids' => $presentationsToDelete]);
+                }
+            }
+            
             // Si se está editando un lote específico, actualizar también el lote en producto_ubicaciones
             if ($request->has('lote_id') && $request->lote_id) {
                 $loteId = $request->lote_id;
@@ -1010,6 +1140,7 @@ class InventarioController extends Controller
                     $lote->update([
                         'lote' => $datos['lote'] ?? $lote->lote,
                         'fecha_vencimiento' => $datos['fecha_vencimiento'] ?? $lote->fecha_vencimiento,
+                        'cantidad' => $datos['stock_actual'] ?? $lote->cantidad, // ACTUALIZAR CANTIDAD DEL LOTE
                         'precio_compra_lote' => $datos['precio_compra'] ?? $lote->precio_compra_lote,
                         'precio_venta_lote' => $datos['precio_venta'] ?? $lote->precio_venta_lote,
                         'proveedor_id' => $datos['proveedor_id'] ?? $lote->proveedor_id,
@@ -1017,11 +1148,37 @@ class InventarioController extends Controller
                     
                     Log::info('Lote actualizado', [
                         'lote_id' => $loteId,
+                        'cantidad' => $lote->cantidad,
                         'precio_compra' => $datos['precio_compra'],
                         'precio_venta' => $datos['precio_venta']
                     ]);
                 }
+            } else {
+                // Si no viene lote_id, pero se cambió el stock_actual, intentar actualizar el primer lote encontrado
+                // para mantener la consistencia en productos que solo tienen un lote.
+                $primerLote = ProductoUbicacion::where('producto_id', $producto->id)->first();
+                if ($primerLote) {
+                    $primerLote->update([
+                        'lote' => $datos['lote'] ?? $primerLote->lote,
+                        'fecha_vencimiento' => $datos['fecha_vencimiento'] ?? $primerLote->fecha_vencimiento,
+                        'cantidad' => $datos['stock_actual'] ?? $primerLote->cantidad,
+                        'precio_compra_lote' => $datos['precio_compra'] ?? $primerLote->precio_compra_lote,
+                        'precio_venta_lote' => $datos['precio_venta'] ?? $primerLote->precio_venta_lote,
+                        'proveedor_id' => $datos['proveedor_id'] ?? $primerLote->proveedor_id,
+                    ]);
+                    Log::info('Primer lote actualizado automáticamente por falta de lote_id');
+                }
             }
+            
+            // SIEMPRE sincronizar el stock_actual del producto con la suma de sus lotes
+            // Esto evita que si se editó un lote, el total quede mal si hay otros lotes.
+            $nuevoStockTotal = ProductoUbicacion::where('producto_id', $producto->id)->sum('cantidad');
+            $producto->update(['stock_actual' => $nuevoStockTotal]);
+            
+            Log::info('Stock total sincronizado para producto', [
+                'producto_id' => $producto->id,
+                'nuevo_stock_total' => $nuevoStockTotal
+            ]);
             
             // Recalcular el estado del producto después de actualizar
             $producto->fresh()->recalcularEstado();
@@ -1248,6 +1405,56 @@ class InventarioController extends Controller
                 'success' => false,
                 'message' => 'Error al obtener categorías'
             ], 500);
+        }
+    }
+
+    /**
+     * Exportar lista completa de productos a Excel profesional (Triple Fallback)
+     */
+    public function exportarExcel(Request $request)
+    {
+        try {
+            $search = $request->get('search', '');
+            $estado = $request->get('estado', 'todos');
+            
+            // Usar el servicio de optimización para obtener productos con eager loading
+            $query = $this->queryOptimizationService->getProductosOptimizados([
+                'search' => $search,
+                'estado' => $estado
+            ]);
+            
+            // Cargar relaciones necesarias para el reporte
+            $query->with(['presentaciones', 'proveedor', 'categoria_model', 'ubicaciones']);
+            
+            // Obtener todos los productos (sin paginación para exportar)
+            $productos = $query->get();
+
+            // Preparar datos para la vista
+            $datos = [
+                'productos' => $productos,
+                'total' => $productos->count(),
+                'titulo' => 'LISTA DE PRODUCTOS - BOTICA SAN ANTONIO',
+                'fecha' => now()->format('d/m/Y H:i'),
+                'filtros' => [
+                    'Búsqueda' => $search ?: 'Ninguna',
+                    'Estado' => $estado
+                ]
+            ];
+
+            // Generar HTML profesional
+            $html = view('admin.reportes.productos-excel-template', compact('datos'))->render();
+            
+            // Añadir BOM para UTF-8 y forzar descarga como Excel
+            $bom = chr(239) . chr(187) . chr(191);
+            $nombreArchivo = 'Reporte_Productos_' . now()->format('dmY_His') . '.xls';
+            
+            return response($bom . $html)
+                ->header('Content-Type', 'application/vnd.ms-excel; charset=utf-8')
+                ->header('Content-Disposition', 'attachment; filename="' . $nombreArchivo . '"');
+            
+        } catch (\Throwable $e) {
+            \Log::error('Error al exportar productos a Excel: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al generar el reporte: ' . $e->getMessage());
         }
     }
 }

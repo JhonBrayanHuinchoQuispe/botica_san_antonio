@@ -3,7 +3,7 @@
     $title='Theme';
     $subTitle = 'Settings - Theme';
     $script = '<script>
-                            // ================== Image Upload Js Start ===========================
+
                             function readURL(input, previewElementId) {
                                 if (input.files && input.files[0]) {
                                     var reader = new FileReader();
@@ -23,7 +23,7 @@
                             $("#imageUploadTwo").change(function() {
                                 readURL(this, "previewImage2");
                             });
-                            // ================== Image Upload Js End ===========================
+
                 </script>';
 @endphp
 

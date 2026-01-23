@@ -4,7 +4,7 @@
         $title='Email';
         $subTitle = 'Components / Email';
         $script = '<script>
-                // Table Header Checkbox checked all js Start
+
                 $("#selectAll").on("change", function() {
                     $(".form-check .form-check-input").prop("checked", $(this).prop("checked"));
 
@@ -15,7 +15,6 @@
                     }
                 });
 
-                // Active Item with js
                 $(".form-check .form-check-input").on("change", function() {
                     if ($(this).is(":checked")) {
                         $(this).closest(".email-item").addClass("active");
@@ -24,7 +23,6 @@
                     }
                 });
 
-                // Selected Checkbox count amount js Start
                 $(".email-card .form-check-input").on("change", function() {
                     let selectedCount = $(".email-card .form-check-input:checked").length;
 
@@ -34,18 +32,15 @@
                         $(".delete-button").addClass("hidden")
                     }
                 });
-                // Selected Checkbox count amount js End
 
                 $(".delete-button").on("click", function() {
                     $(".email-item.active").addClass("hidden")
                 });
 
-                // Page Reload Js
                 $(".reload-button").on("click", function() {
                     history.go(0);
                 });
 
-                // Starred Button js
                 $(".starred-button").on("click", function() {
                     $(this).toggleClass("active")
                 });
@@ -177,7 +172,7 @@
                                         <button data-dropdown-toggle="dropdownArrowDown" class="focus:ring-4 focus:outline-none focus:ring-blue-300  text-sm rounded-full w-4 h-4 flex items-center justify-center" type="button">
                                             <iconify-icon icon="typcn:arrow-sorted-down" class="icon line-height-1"></iconify-icon>
                                         </button>
-                                        <!-- Dropdown menu -->
+                                        
                                         <div id="dropdownArrowDown" class="sm:min-w-max z-10 hidden border border-transparent bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44">
                                             <ul class="rounded-lg bg-white shadow p-4 text-sm text-gray-700">
                                                 <li>
@@ -225,7 +220,7 @@
                                     <button data-dropdown-toggle="dropdownThreeDots" class="focus:ring-4 focus:outline-none focus:ring-blue-300  text-sm rounded-full w-4 h-4 flex items-center justify-center" type="button">
                                         <iconify-icon icon="entypo:dots-three-vertical" class="icon text-secondary-light"></iconify-icon>
                                     </button>
-                                    <!-- Dropdown menu -->
+                                    
                                     <div id="dropdownThreeDots" class="sm:min-w-max z-10 hidden border border-transparent bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44">
                                         <ul class="p-4 text-sm text-gray-700">
                                             <li>

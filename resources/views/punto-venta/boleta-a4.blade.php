@@ -203,10 +203,10 @@
     </style>
 </head>
 <body>
-    <!-- Botón de imprimir removido por requerimiento: descarga directa en PDF -->
+    
     
     <div class="boleta-container">
-        <!-- Header -->
+        
         <div class="header">
             <div class="company-info">
                 <div style="display:flex; align-items:center; gap:12px;">
@@ -231,7 +231,7 @@
             </div>
         </div>
         
-        <!-- Client Info -->
+        
         <div class="client-info">
             <div class="client-title">DATOS DEL CLIENTE</div>
             @if($venta->cliente)
@@ -246,7 +246,7 @@
             @endif
         </div>
         
-        <!-- Items Table -->
+        
         <table class="items-table">
             <thead>
                 <tr>
@@ -284,7 +284,7 @@
             </tbody>
         </table>
         
-        <!-- Totals -->
+        
         <div class="totals-section">
             <table class="totals-table">
                 <tr>
@@ -308,7 +308,7 @@
             </table>
         </div>
         
-        <!-- Payment Info -->
+        
         @if($venta->metodo_pago)
         <div class="payment-info">
             <strong>INFORMACIÓN DE PAGO</strong><br>
@@ -344,7 +344,7 @@
         </div>
         @endif
         
-        <!-- Footer -->
+        
         <div class="footer">
             <div style="margin-bottom: 10px;">
                 <strong>¡GRACIAS POR SU COMPRA!</strong>
@@ -360,7 +360,7 @@
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-YcsIPiJr7G1Vv9skJmZCw1p6Nw0CezrV1BqfIuTaFvH0qC1oWw/3bTxQH3WwqYbG4htA8CwCwLkWCOxZg2nG3A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-    // Descargar automáticamente como PDF al cargar la página
+
     (function() {
         const contenedor = document.querySelector('.boleta-container');
         if (!contenedor) return;
@@ -373,7 +373,7 @@
             html2canvas:  { scale: 2, useCORS: true },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-        // Pequeña espera para asegurar que las imágenes carguen
+
         setTimeout(() => html2pdf().set(opt).from(contenedor).save(), 400);
     })();
 </script>

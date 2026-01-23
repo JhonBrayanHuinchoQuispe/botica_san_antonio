@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http;
+use App\Services\AIService;
 
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Venta\VentaController;
@@ -11,8 +13,8 @@ use App\Http\Controllers\Ubicacion\UbicacionController;
 use App\Http\Controllers\Compra\CompraController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\Inventario\categoria\CategoriaController;
-use App\Http\Controllers\Inventario\presentacion\PresentacionController;
+use App\Http\Controllers\Inventario\Categoria\CategoriaController;
+use App\Http\Controllers\Inventario\Presentacion\PresentacionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -55,6 +57,15 @@ Route::post('/password/resend-code', [AuthController::class, 'resendResetCode'])
 // Rutas legacy (mantenidas para compatibilidad)
 Route::get('/password/reset/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
 Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.store');
+
+// Página de sesión expirada por inactividad (timeout de 30 minutos)
+Route::get('/session-timeout', function () {
+    // Limpiar la sesión expirada
+    session()->forget('session_expired');
+    session()->forget('last_activity_time');
+    
+    return view('errors.session-timeout');
+})->name('session.timeout');
 
 // Diagnóstico del entorno (público solo lectura)
 Route::get('/diagnostico', [\App\Http\Controllers\Admin\DiagnosticoController::class, 'index'])->name('diagnostico');
@@ -147,6 +158,33 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->can('dashboard.view');
     Route::get('/dashboard/analisis', [DashboardController::class, 'analisis'])->name('dashboard.analisis')->can('dashboard.view');
 
+    // ============================================
+    // MÓDULO DE IA - ASISTENTE INTELIGENTE
+    // ============================================
+    Route::controller(\App\Http\Controllers\AIController::class)->prefix('ai')->name('ai.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/chat', 'chat')->name('chat');
+        Route::get('/suggestions', 'suggestions')->name('suggestions');
+        Route::get('/history', 'history')->name('history');
+        Route::delete('/history', 'clearHistory')->name('history.clear');
+        Route::get('/health', 'health')->name('health');
+        
+        // Rutas de predicciones (proxy al servicio AI)
+        Route::get('/predict/sales', 'predictSales')->name('predict.sales');
+        Route::get('/predict/stock', 'predictStock')->name('predict.stock');
+        Route::get('/analytics/trends', 'analyticsTrends')->name('analytics.trends');
+    });
+
+    // ============================================
+    // MÓDULO DE REPORTES DE INVENTARIO
+    // ============================================
+    Route::controller(\App\Http\Controllers\Inventario\InventarioReporteController::class)->prefix('inventario/reportes')->name('admin.reportes.inventario.')->group(function () {
+        Route::get('/salud', 'index')->name('salud');
+        Route::get('/exportar', 'exportarExcel')->name('exportar');
+    });
+
+    // Nueva ruta para exportar lista de productos profesional
+    Route::get('/inventario/productos/exportar', [\App\Http\Controllers\Inventario\InventarioController::class, 'exportarExcel'])->name('inventario.productos.exportar');
 
     // ============================================
     // MÓDULO DE VENTAS - SIN MIDDLEWARES TEMPORALMENTE
@@ -162,6 +200,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/ventas/reportes', 'reportes')->name('ventas.reportes');
         Route::get('/ventas/reportes/datos', 'obtenerDatosReporteAPI')->name('ventas.reportes.datos');
         Route::get('/ventas/reportes/comparativo', 'obtenerComparativoSeriesAPI')->name('ventas.reportes.comparativo');
+        Route::get('/ventas/reportes/exportar', 'exportarReporte')->name('ventas.reportes.exportar');
         Route::get('/ventas/detalle/{id}', 'obtenerDetalle')->name('ventas.detalle');
     });
     
@@ -466,7 +505,7 @@ Route::middleware('auth')->group(function () {
 
     // Presentaciones por producto (Unidad, Blíster, Caja, etc.)
     Route::prefix('inventario/producto/presentaciones/api')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Inventario\producto\ProductoPresentacionController::class, 'index']);
+        Route::get('/{productoId}', [\App\Http\Controllers\Inventario\producto\ProductoPresentacionController::class, 'index']);
         Route::get('/{id}', [\App\Http\Controllers\Inventario\producto\ProductoPresentacionController::class, 'show']);
         Route::post('/', [\App\Http\Controllers\Inventario\producto\ProductoPresentacionController::class, 'store']);
         Route::put('/{id}', [\App\Http\Controllers\Inventario\producto\ProductoPresentacionController::class, 'update']);
@@ -752,6 +791,19 @@ if (config('app.debug')) {
     });
 
 } // Fin del bloque if (config('app.debug'))
+
+// ============================================
+// RUTA DE PRUEBA MÓVIL (temporal)
+// ============================================
+Route::post('/mobile/test-chat', function(Request $request) {
+    return response()->json([
+        'success' => true,
+        'response' => 'Conexión móvil funcionando correctamente',
+        'message' => $request->input('message', 'Sin mensaje'),
+        'timestamp' => now()
+    ]);
+});
+
 // Fallback 404 amigable (opcional). Dejar al final del archivo.
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);

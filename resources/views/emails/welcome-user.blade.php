@@ -20,7 +20,7 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .header {
-            background-color: #D32F2F; /* Rojo corporativo */
+            background-color: #D32F2F; 
             color: #ffffff;
             text-align: center;
             padding: 20px;

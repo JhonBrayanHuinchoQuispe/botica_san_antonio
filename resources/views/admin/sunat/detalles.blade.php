@@ -168,7 +168,7 @@
 @endif
 
 <script>
-// Configurar botones de descarga en el modal
+
 $('#descargarXML').off('click').on('click', function() {
     @if($venta->comprobante_electronico && $venta->comprobante_electronico->xml_path)
     window.open('{{ route("admin.sunat.descargar-xml", $venta->id) }}', '_blank');

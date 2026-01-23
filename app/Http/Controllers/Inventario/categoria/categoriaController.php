@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\Inventario\categoria;
+namespace App\Http\Controllers\Inventario\Categoria;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -21,31 +21,21 @@ class CategoriaController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:100|unique:categorias,nombre',
-            'descripcion' => 'nullable|string|max:255',
-        ]);
-
         try {
-            DB::beginTransaction();
+            $request->validate([
+                'nombre' => 'required|string|max:100|unique:categorias,nombre',
+                'descripcion' => 'nullable|string|max:255',
+            ]);
 
-            // Obtener el siguiente ID manualmente
-            $lastId = DB::table('categorias')->max('id') ?? 0;
-            $nextId = $lastId + 1;
-
-            $categoria = new Categoria();
-            $categoria->id = $nextId;
-            $categoria->nombre = $request->nombre;
-            $categoria->descripcion = $request->descripcion;
-            $categoria->estado = 'activo';
-            $categoria->save();
-
-            DB::commit();
+            $categoria = Categoria::create([
+                'nombre' => $request->nombre,
+                'descripcion' => $request->descripcion,
+                'estado' => 'activo',
+                'activo' => true
+            ]);
 
             return response()->json(['success' => true, 'data' => $categoria]);
-
         } catch (\Exception $e) {
-            DB::rollBack();
             Log::error('Error al guardar categoría: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
@@ -56,47 +46,37 @@ class CategoriaController extends Controller
 
     public function update(Request $request, $id)
     {
-        $categoria = Categoria::findOrFail($id);
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:100|unique:categorias,nombre,'.$categoria->id,
-            'descripcion' => 'nullable|string|max:255',
-        ]);
-        $categoria->update($validated);
-        return response()->json(['success' => true, 'data' => $categoria]);
+        try {
+            $categoria = Categoria::findOrFail($id);
+            $validated = $request->validate([
+                'nombre' => 'required|string|max:100|unique:categorias,nombre,'.$categoria->id,
+                'descripcion' => 'nullable|string|max:255',
+            ]);
+            $categoria->update($validated);
+            return response()->json(['success' => true, 'data' => $categoria]);
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar categoría: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la categoría: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function destroy($id)
     {
         try {
-            DB::beginTransaction();
-
             $categoria = Categoria::findOrFail($id);
             
             if ($categoria->productos()->count() > 0) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No se puede eliminar una categoría que tiene productos asociados.'
-                ], 409); // 409 Conflict
+                ], 409);
             }
 
-            // Eliminar la categoria
             $categoria->delete();
             
-            // Reordenar IDs después de eliminar, replicando la lógica de productos
-            $categorias = DB::table('categorias')
-                ->orderBy('id')
-                ->get();
-                
-            $counter = 1;
-            foreach ($categorias as $c) {
-                DB::table('categorias')
-                    ->where('id', $c->id)
-                    ->update(['id' => $counter]);
-                $counter++;
-            }
-            
-            DB::commit();
-
             return response()->json([
                 'success' => true,
                 'message' => 'Categoría eliminada correctamente',
@@ -104,9 +84,6 @@ class CategoriaController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            if (DB::transactionLevel() > 0) {
-                DB::rollBack();
-            }
             Log::error('Error al eliminar categoría: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
@@ -117,10 +94,24 @@ class CategoriaController extends Controller
 
     public function show($id)
     {
-        $categoria = Categoria::withCount('productos')->find($id);
-        if (!$categoria) {
-            return response()->json(['success' => false, 'message' => 'Categoría no encontrada'], 404);
+        try {
+            $categoria = Categoria::withCount('productos')->find($id);
+            if (!$categoria) {
+                return response()->json(['success' => false, 'message' => 'Categoría no encontrada'], 404);
+            }
+            return response()->json(['success' => true, 'data' => $categoria]);
+        } catch (\Exception $e) {
+            Log::error('Error al mostrar categoría: ' . $e->getMessage());
+            // Intentar cargar sin withCount si falla
+            $categoria = Categoria::find($id);
+            if ($categoria) {
+                $categoria->productos_count = 0; // Valor por defecto
+                return response()->json(['success' => true, 'data' => $categoria]);
+            }
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al mostrar la categoría: ' . $e->getMessage()
+            ], 500);
         }
-        return response()->json(['success' => true, 'data' => $categoria]);
     }
 }

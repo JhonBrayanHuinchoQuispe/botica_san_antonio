@@ -15,20 +15,19 @@ $script = '<script>
             });
             </script>
 
-            <!--=========================== Delete & Duplicate js code start ==============================-->
+            
             <script>
-            // Duplicate Item js
+
             document.addEventListener("DOMContentLoaded", function() {
                 document.querySelectorAll(".duplicate-button").forEach(button => {
                     button.addEventListener("click", function() {
-                        // Find the closest card to the clicked button
+
                         const card = this.closest(".kanban-item");
-                        // Clone the card
+
                         const clone = card.cloneNode(true);
-                        // Append the cloned card to the parent container
+
                         card.parentNode.appendChild(clone);
 
-                        // Add event listener to delete button of the cloned card
                         clone.querySelector(".delete-button").addEventListener("click", function() {
                             clone.remove();
                         });
@@ -40,28 +39,23 @@ $script = '<script>
                 });
             });
             </script>
-            <!--=========================== Delete & Duplicate js code End ==============================-->
+            
 
-            <!--=========================== Add new Task & Edit Task js code Start ==============================-->
+            
             <script>
             document.addEventListener("DOMContentLoaded", function() {
-                // Show the modal to add a new task
+
                 document.querySelectorAll(".add-kanban, .add-task-button").forEach(button => {
                     button.addEventListener("click", function() {
                         var addTaskModal = new bootstrap.Modal(document.getElementById("addTaskModal"));
-                        document.getElementById("editTaskId").value = ""; // Clear edit ID
-                        document.getElementById("taskTitle").value = ""; // Clear title
-                        document.getElementById("taskDescription").value = ""; // Clear description
-                        document.getElementById("taskTag").value = ""; // Clear Tag
-                        document.getElementById("startDate").value = ""; // Clear Date
-                        document.getElementById("taskImage").value = ""; // Clear file input
-                        document.getElementById("taskImagePreview").style.display = "none"; // Hide image preview
-                        document.getElementById("taskImagePreview").src = ""; // Clear image preview
-                        addTaskModal.show();
-                    });
-                });
-
-                // Preview the image when a file is selected
+                        document.getElementById("editTaskId").value = "";
+                        document.getElementById("taskTitle").value = "";
+                        document.getElementById("taskDescription").value = "";
+                        document.getElementById("taskTag").value = "";
+                        document.getElementById("startDate").value = "";
+                        document.getElementById("taskImage").value = "";
+                        document.getElementById("taskImagePreview").style.display = "none";
+                        document.getElementById("taskImagePreview").src = "";
                 document.getElementById("taskImage").addEventListener("change", function() {
                     var file = this.files[0];
                     var reader = new FileReader();
@@ -74,7 +68,6 @@ $script = '<script>
                     }
                 });
 
-                // Save task button click handler
                 document.getElementById("saveTaskButton").addEventListener("click", function() {
                     var title = document.getElementById("taskTitle").value;
                     var description = document.getElementById("taskDescription").value;
@@ -110,13 +103,13 @@ $script = '<script>
                                             `;
 
                     if (editTaskId) {
-                        // Edit existing card
+
                         var editCard = document.getElementById(editTaskId);
                         if (editCard) {
                             editCard.outerHTML = kanbanCardHTML;
                         }
                     } else {
-                        // Add new card
+
                         var targetKanbanItem = document.querySelector(".kanban-item");
                         if (targetKanbanItem) {
                             var firstKanbanCard = targetKanbanItem.querySelector(".card-body .kanban-card");
@@ -132,7 +125,6 @@ $script = '<script>
                     addTaskModal.hide();
                 });
 
-                // Delegate edit and delete button events to dynamically added kanban cards
                 document.addEventListener("click", function(e) {
                     if (e.target.closest(".card-edit-button")) {
                         var card = e.target.closest(".kanban-card");
@@ -256,7 +248,7 @@ $script = '<script>
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- Add Task Button -->
+                                        
                                         <button type="button" class="flex items-center gap-2 font-medium w-full text-primary-600 justify-center text-hover-primary-800 add-task-button" data-modal-target="default-modal" data-modal-toggle="default-modal">
                                             <iconify-icon icon="ph:plus-circle" class="icon text-xl"></iconify-icon>
                                             Add Task
@@ -347,7 +339,7 @@ $script = '<script>
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- Add Task Button -->
+                                        
                                         <button type="button" class="flex items-center gap-2 font-medium w-full text-primary-600 justify-center text-hover-primary-800 add-task-button" data-modal-target="default-modal" data-modal-toggle="default-modal">
                                             <iconify-icon icon="ph:plus-circle" class="icon text-xl"></iconify-icon>
                                             Add Task
@@ -461,7 +453,7 @@ $script = '<script>
                                             </div>
                                         </div>
 
-                                        <!-- Add Task Button -->
+                                        
                                         <button type="button" class="flex items-center gap-2 font-medium w-full text-primary-600 justify-center text-hover-primary-800 add-task-button" data-modal-target="default-modal" data-modal-toggle="default-modal">
                                             <iconify-icon icon="ph:plus-circle" class="icon text-xl"></iconify-icon>
                                             Add Task
@@ -476,7 +468,7 @@ $script = '<script>
                                             <iconify-icon icon="ph:plus-circle" class="icon text-xl flex"></iconify-icon>
                                             Add Task
                                         </button>
-                                        <!-- Modal toggle -->
+                                        
                                     </div>
                                 </div>
                             </div>
@@ -486,7 +478,7 @@ $script = '<script>
             </div>
         </div>
 
-        <!-- Main modal -->
+        
         <div id="default-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
             <div class="relative p-4 w-full max-w-2xl max-h-full">
                 <div class="relative bg-white rounded-lg shadow">
@@ -538,6 +530,4 @@ $script = '<script>
         </div>
 
 @endsection
-
-
 

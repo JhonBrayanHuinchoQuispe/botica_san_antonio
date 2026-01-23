@@ -8,118 +8,303 @@
     $script .= '<script src="' . asset('assets/js/inventario/categoria/eliminar.js') . '"></script>';
 @endphp
 
-<head>
+@push('head')
     <title>Lista de Productos</title>
     <link rel="icon" type="image/png" href="{{ asset('assets/images/logotipo.png') }}" sizes="16x16">
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/productos_botica.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/crud.css') }}?v={{ time() }}">
-    <!-- Reusar estilos de modales originales para mantener el look -->
+    
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/modal_agregar.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/modal_editar.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/modal_ver.css') }}?v={{ time() }}">
-    <!-- Reusar estilos de ubicaciones y tablas para badges idénticos -->
+    
     <link rel="stylesheet" href="{{ asset('assets/css/ubicacion/productos/tablas.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/ubicaciones-multiples.css') }}?v={{ time() }}">
+    
+    <link rel="stylesheet" href="{{ asset('assets/css/inventario/presentaciones-tabla.css') }}?v={{ time() }}">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Librerías para exportar (Excel y PDF) -->
+    
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    <!-- Reusar lógica existente de eliminar y validaciones -->
+    
     <script src="{{ asset('assets/js/inventario/eliminar.js') }}?v={{ time() }}" defer></script>
-    <!-- Script principal de productos -->
-    <script src="{{ asset('assets/js/inventario/productos_botica.js') }}?v={{ time() }}" defer></script>
-<!-- removed legacy realtime validation script to prevent duplicate messages -->
+    
+    <script src="{{ asset('assets/js/inventario/presentaciones-tabla-mejorado.js') }}?v={{ time() }}" defer></script>
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        /* Estilos para Badges de Lotes */
-        .lote-badge {
+        
+        .product-info-cell {
             display: flex;
             flex-direction: column;
-            padding: 6px 10px;
+            gap: 2px;
+        }
+        .product-name-highlight {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .product-concentration-sub {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        
+        .stock-chip { 
+            display:inline-flex !important; 
+            align-items:center !important; 
+            gap:.45rem !important; 
+            padding:.35rem .7rem !important; 
+            border-radius:9999px !important; 
+            font-weight:700 !important; 
+            font-size:.95rem !important; 
+            border:1px solid transparent !important; 
+            box-shadow:0 1px 2px rgba(0,0,0,0.05) !important; 
+        }
+        .stock-chip.high { background:#e7f5ec !important; color:#166534 !important; border-color:#c9e9d6 !important; }
+        .stock-chip.medium { background:#fff7ed !important; color:#92400e !important; border-color:#fed7aa !important; }
+        .stock-chip.low { background:#fef2f2 !important; color:#b91c1c !important; border-color:#fecaca !important; }
+        .stock-chip.empty { background:#fef2f2 !important; color:#b91c1c !important; border-color:#fecaca !important; }
+
+        
+        .price-display-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .price-main {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #059669;
+        }
+        .price-secondary {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-weight: 600;
+            background: #f8fafc;
+            padding: 1px 6px;
+            border-radius: 4px;
+            width: fit-content;
+        }
+
+        
+        .lote-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+            min-width: 140px;
+        }
+        .lote-pill:hover {
+            transform: translateY(-1px);
+        }
+        .lote-pill iconify-icon {
+            font-size: 1.25rem;
+        }
+        
+        
+        .lote-pill.single.normal {
+            border-color: #bfdbfe !important;
+            background-color: #f0f7ff !important; 
+        }
+        .lote-pill.single.normal iconify-icon, .lote-pill.single.normal .lote-code-mini {
+            color: #3b82f6 !important;
+        }
+
+        
+        .lote-pill.multiple.normal {
+            border-color: #ddd6fe !important;
+            background-color: #f5f3ff !important; 
+        }
+        .lote-pill.multiple.normal iconify-icon, .lote-pill.multiple.normal .lote-count-mini {
+            color: #8b5cf6 !important;
+        }
+
+        
+        .lote-pill.expired {
+            background-color: #fef2f2 !important;
+            border-color: #fecaca !important;
+        }
+        .lote-pill.expired iconify-icon, .lote-pill.expired .lote-code-mini, .lote-pill.expired .lote-count-mini {
+            color: #ef4444 !important;
+        }
+        .lote-pill.warning {
+            background-color: #fffbeb !important;
+            border-color: #fde68a !important;
+        }
+        .lote-pill.warning iconify-icon, .lote-pill.warning .lote-code-mini, .lote-pill.warning .lote-count-mini {
+            color: #f59e0b !important;
+        }
+
+        .lote-info-mini { display: flex; flex-direction: column; line-height: 1.1; }
+        .lote-code-mini, .lote-count-mini { font-weight: 700; }
+        .lote-date-mini, .lote-next-mini { font-size: 0.75rem; opacity: 0.8; }
+        .lote-arrow { margin-left: auto; font-size: 0.9rem; opacity: 0.5; }
+
+        
+        .presentacion-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        
+        .presentacion-pill.single.unit {
+            background: #f0f7ff !important;
+            color: #3b82f6 !important;
+            border-color: #bfdbfe !important;
+        }
+        
+        .presentacion-pill.single.none {
+            background: #f8fafc !important;
+            color: #64748b !important;
+            border-color: #e2e8f0 !important;
+        }
+        .presentacion-pill.multiple {
+            background: #f5f3ff !important; 
+            color: #7c3aed !important;
+            border-color: #ddd6fe !important;
+            cursor: pointer;
+        }
+        .presentacion-pill.multiple:hover {
+            filter: brightness(0.98);
+            transform: translateY(-1px);
+        }
+
+        
+        .product-img-wrapper {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            z-index: 5;
+        }
+        .product-img-zoom {
+            cursor: default;
+        }
+
+        
+        .active-filters-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 0;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+        .active-filters-container.has-filters {
+            margin-bottom: 12px;
+            padding: 2px 0 8px 0;
+        }
+        .filter-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 12px;
             border-radius: 8px;
             font-size: 0.85rem;
-            width: fit-content;
-            min-width: 120px;
-        }
-
-        .lote-badge.empty {
-            background-color: #f1f5f9;
-            color: #64748b;
-            align-items: center;
-            flex-direction: row;
-            gap: 6px;
-        }
-
-        .lote-badge.single {
-            border: 1px solid #e2e8f0;
-            background-color: #fff;
-        }
-        .lote-badge.single.expired {
-            background-color: #fee2e2;
-            border-color: #fecaca;
-            color: #991b1b;
-        }
-        .lote-badge.single.warning {
-            background-color: #fef3c7;
-            border-color: #fde68a;
-            color: #92400e;
-        }
-        .lote-badge.single.normal {
-            background-color: #f0fdf4;
-            border-color: #bbf7d0;
-            color: #166534;
-        }
-
-        .lote-badge.multiple {
-            border: 1px solid #e2e8f0;
-            background-color: #fff;
-        }
-        .lote-badge.multiple.expired {
-            border-left: 4px solid #ef4444;
-        }
-        .lote-badge.multiple.warning {
-            border-left: 4px solid #f59e0b;
-        }
-        .lote-badge.multiple.normal {
-            border-left: 4px solid #22c55e;
-        }
-
-        .lote-main {
-            display: flex;
-            flex-direction: column;
-        }
-        .lote-code {
-            font-weight: 600;
-        }
-        .lote-date {
-            font-size: 0.75rem;
-            opacity: 0.9;
-        }
-
-        .lote-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2px;
-        }
-        .lote-count {
             font-weight: 700;
+            border: 1px solid transparent;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
-        .lote-fefo-label {
-            font-size: 0.65rem;
-            background: #0f172a;
-            color: #fff;
-            padding: 1px 4px;
-            border-radius: 4px;
+        
+        .filter-tag.status-normal { background: #f0fdf4 !important; color: #16a34a !important; border-color: #bbf7d0 !important; }
+        .filter-tag.status-bajo-stock { background: #fffbeb !important; color: #d97706 !important; border-color: #fde68a !important; }
+        .filter-tag.status-por-vencer { background: #fff7ed !important; color: #ea580c !important; border-color: #ffedd5 !important; }
+        .filter-tag.status-vencido { background: #fef2f2 !important; color: #dc2626 !important; border-color: #fecaca !important; }
+        .filter-tag.status-agotado { background: #f8fafc !important; color: #475569 !important; border-color: #e2e8f0 !important; }
+        .filter-tag.search-tag { background: #eff6ff !important; color: #2563eb !important; border-color: #dbeafe !important; }
+
+        .filter-tag .remove-filter {
+            cursor: pointer;
+            opacity: 0.6;
+            font-size: 1.1rem;
+            transition: opacity 0.2s;
         }
-        .lote-next {
-            font-size: 0.75rem;
-            color: #475569;
+        .filter-tag .remove-filter:hover {
+            opacity: 1;
         }
+
+        
+        .acciones-cell button {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+            cursor: pointer;
+            margin: 0 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        .acciones-cell button iconify-icon { font-size: 1.25rem; }
+
+        
+        .btn-view { 
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.08) 100%) !important;
+            color: #2563eb !important;
+            border: 1px solid rgba(59, 130, 246, 0.15) !important;
+        }
+        .btn-view:hover { 
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.15) 100%) !important;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        
+        .btn-edit { 
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%) !important;
+            color: #059669 !important;
+            border: 1px solid rgba(16, 185, 129, 0.15) !important;
+        }
+        .btn-edit:hover { 
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%) !important;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        
+        .btn-delete { 
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(239, 68, 68, 0.08) 100%) !important;
+            color: #dc2626 !important;
+            border: 1px solid rgba(239, 68, 68, 0.15) !important;
+        }
+        .btn-delete:hover { 
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.15) 100%) !important;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+        .acciones-cell button iconify-icon { font-size: 1.25rem; }
+
+        
+        .table-scroll { overflow: visible !important; }
+        .tabla-productos-botica { border-collapse: separate !important; }
     </style>
-</head>
+    <style>
+        
+        .lote-badge { display: none; }
+    </style>
+@endpush
 
 @section('content')
 <div class="grid grid-cols-12">
@@ -127,9 +312,9 @@
         <div class="card border-0 overflow-hidden">
             
             <div class="card-body-botica">
-                <div class="botica-header mb-6 flex flex-wrap gap-3 items-center justify-between">
+                <div class="botica-header mb-4 flex flex-wrap gap-3 items-center justify-between">
                     <div class="flex gap-3 flex-1 items-center">
-                        <!-- Búsqueda principal (única) -->
+                        
                         <div class="ml-2" style="flex:1;max-width:340px;">
                             <div class="botica-search" style="width:100%;">
                                 <iconify-icon icon="ion:search-outline" class="search-icon"></iconify-icon>
@@ -158,7 +343,7 @@
                                 <option value="Agotado">Agotado</option>
                             </select>
                         </div>
-                        <!-- Descargas -->
+                        
                         <div class="ml-2 export-dropdown-container">
                             <button type="button" id="btnExportarBotica" class="btn-exportar-dropdown">
                                 <iconify-icon icon="solar:export-bold-duotone"></iconify-icon>
@@ -183,12 +368,14 @@
                     </button>
                 </div>
 
+                <div id="activeFilters" class="active-filters-container"></div>
+
                 <div class="table-scroll">
                     <table class="tabla-productos-botica">
                         <thead>
                             <tr>
                                 <th>Producto</th>
-                                <th>Categoría</th>
+                                <th>Presentaciones</th>
                                 <th>Precio</th>
                                 <th>Stock</th>
                                 <th>Lotes (FEFO)</th>
@@ -234,13 +421,11 @@ document.addEventListener('DOMContentLoaded', function() {
         field.parentNode.appendChild(error);
       }
 
-      // Validación en tiempo real según tipo de campo
       const validateField = () => {
         let isValid = true;
         let errorMsg = '';
         const value = field.value.trim();
 
-        // Validar campos vacíos
         if (field.hasAttribute('required')) {
           const isEmpty = field.tagName.toLowerCase() === 'select' ? !field.value : !value;
           if (isEmpty) {
@@ -249,9 +434,8 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }
 
-        // Validaciones específicas por campo
         if (value && isValid) {
-          // Código de barras: solo números, 13 dígitos
+
           if (fieldName === 'codigo_barras') {
             if (!/^\d+$/.test(value)) {
               isValid = false;
@@ -261,8 +445,7 @@ document.addEventListener('DOMContentLoaded', function() {
               errorMsg = 'Debe tener exactamente 13 dígitos';
             }
           }
-          
-          // Stock: solo números enteros positivos
+
           if (fieldName === 'stock_actual' || fieldName === 'stock_minimo') {
             if (!/^\d+$/.test(value)) {
               isValid = false;
@@ -272,8 +455,7 @@ document.addEventListener('DOMContentLoaded', function() {
               errorMsg = 'Debe ser mayor o igual a 0';
             }
           }
-          
-          // Precios: números con hasta 2 decimales
+
           if (fieldName === 'precio_compra' || fieldName === 'precio_venta') {
             if (!/^\d+(\.\d{1,2})?$/.test(value)) {
               isValid = false;
@@ -283,8 +465,7 @@ document.addEventListener('DOMContentLoaded', function() {
               errorMsg = 'Debe ser mayor o igual a 0';
             }
           }
-          
-          // Validar precio venta > precio compra
+
           if (fieldName === 'precio_venta' && form.querySelector('[name="precio_compra"]')) {
             const precioCompra = parseFloat(form.querySelector('[name="precio_compra"]').value || 0);
             const precioVenta = parseFloat(value || 0);
@@ -295,7 +476,6 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }
 
-        // Mostrar/ocultar error
         if (!isValid) {
           error.querySelector('span').textContent = errorMsg;
           error.classList.add('visible');
@@ -308,7 +488,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return isValid;
       };
 
-      // Eventos de validación en tiempo real
       field.addEventListener('input', validateField);
       field.addEventListener('change', validateField);
       field.addEventListener('blur', validateField);
@@ -338,7 +517,6 @@ document.addEventListener('DOMContentLoaded', function() {
   setupFormValidation('formAgregarProducto');
   setupFormValidation('formEditarProducto');
 
-  // Remover textos negros duplicados (ayudas antiguas)
   function removeLegacyHelperTexts() {
     const selectors = ['#modalAgregar .text-gray-500', '#modalEditar .text-gray-500'];
     selectors.forEach(sel => {
@@ -354,25 +532,21 @@ document.addEventListener('DOMContentLoaded', function() {
   removeLegacyHelperTexts();
 });
 </script>
-<!-- Modal Ver Detalles (mismo diseño que Editar) -->
-<div id="modalDetallesBotica" class="modal-overlay fixed inset-0 hidden items-center justify-center z-50" style="display:none;">
-    <div class="modal-container bg-white mx-auto rounded-lg shadow-lg z-50 overflow-y-auto" style="width:78vw; max-width:980px; max-height:96vh; height:auto; display:flex; flex-direction:column; overflow-y:hidden;">
+
+<div id="modalDetallesBotica" class="modal-overlay fixed inset-0 hidden items-center justify-center z-[1050]">
+    <div class="modal-container bg-white mx-auto rounded-lg shadow-lg z-[1050] overflow-y-auto" style="width:78vw; max-width:980px; max-height:96vh; height:auto; display:flex; flex-direction:column; overflow-y:hidden;">
         <div class="modal-header">
             <h3 class="text-xl font-semibold flex items-center gap-3">
                 <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
                 Detalles del Producto
             </h3>
             <div class="flex items-center gap-3">
-                <button type="button" id="btnVerHistorial" class="hidden flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
-                    <iconify-icon icon="solar:history-bold-duotone" class="text-lg"></iconify-icon>
-                    Ver Historial de Cambios
-                </button>
                 <button class="modal-close text-2xl font-bold" id="cerrarModalBotica">&times;</button>
             </div>
         </div>
         <div class="modal-content px-6 pt-6 pb-6 overflow-auto" style="flex:1 1 auto;">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Columna izquierda: imagen y datos clave -->
+                
                 <div class="lg:col-span-4">
                     <div class="image-upload-wrapper">
                         <p class="upload-text">Imagen del producto</p>
@@ -395,37 +569,29 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <input type="text" id="det-concentracion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" readonly>
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                                <input type="text" id="det-categoria" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" readonly>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Presentación</label>
-                                <input type="text" id="det-presentacion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" readonly>
-                            </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                            <input type="text" id="det-categoria" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" readonly>
                         </div>
                     </div>
                 </div>
 
-                <!-- Columna derecha: resto de información -->
+                
                 <div class="lg:col-span-8">
-                    <!-- Lote, Código, Proveedor -->
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Código de Barras</label>
                             <input type="text" id="det-codigo_barras" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" readonly>
                             <p class="text-xs text-gray-500 mt-1">Ingrese 13 dígitos (EAN13).</p>
                         </div>
-                        <!--
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
                             <input type="text" id="det-proveedor" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" readonly>
                         </div>
-                        -->
                     </div>
 
-                    <!-- Stock y Precios -->
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Stock Actual</label>
@@ -445,15 +611,26 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
 
-                    <!-- Fechas -->
-                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fabricación</label>
-                            <input type="text" id="det-fecha_fabricacion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" readonly>
+                    
+                    <div class="mt-6 border-t pt-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                                <iconify-icon icon="solar:box-minimalistic-bold-duotone" class="text-indigo-600"></iconify-icon>
+                                Presentaciones del Producto
+                            </h4>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-gray-500 uppercase">Lote:</span>
+                                <select id="det-lote-selector" class="text-xs font-bold py-1 px-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-indigo-50 text-indigo-700">
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                        <div id="det-presentaciones-list" class="space-y-2">
+                            <div class="text-sm text-gray-500 italic text-center py-2">Cargando presentaciones...</div>
                         </div>
                     </div>
 
-                    <!-- Lotes Activos (FEFO) -->
+                    
                     <div class="mt-6 border-t pt-4">
                         <div class="flex justify-between items-center mb-3">
                             <h4 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
@@ -472,38 +649,43 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
-<!-- Modal Selector de Lotes -->
-<div id="modalSelectorLotes" class="modal-overlay fixed inset-0 hidden items-center justify-center z-[60]" style="display:none; background: rgba(0,0,0,0.5);">
-    <div class="modal-container bg-white mx-auto rounded-2xl shadow-2xl z-[60] overflow-hidden w-full max-w-2xl">
-        <div class="modal-header px-6 py-5 border-b flex justify-between items-center" style="background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);">
+<div id="modalSelectorLotes" class="modal-overlay fixed inset-0 hidden items-center justify-center z-[1060]">
+    <div class="modal-container bg-white mx-auto rounded-2xl shadow-2xl z-[1060] overflow-hidden w-full" style="max-width: 900px; width: 95%;">
+        <div class="modal-header px-6 py-5 border-b flex justify-between items-center" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
             <div class="flex items-center gap-3">
-                <iconify-icon icon="lucide:package" class="text-red-800 text-2xl"></iconify-icon>
+                <iconify-icon icon="lucide:package" class="text-white text-2xl"></iconify-icon>
                 <div>
-                    <h3 class="text-xl font-bold text-red-900" id="modalSelectorLotesTitle">Ver Detalles - Seleccionar Lote</h3>
+                    <h3 class="text-xl font-bold text-white" id="modalSelectorLotesTitle">Seleccionar Lote para Detalles</h3>
                 </div>
             </div>
-            <button class="text-red-800 hover:text-red-900 transition-colors text-3xl leading-none" id="cerrarModalSelectorLotes">&times;</button>
+            <button class="text-white hover:text-gray-200 transition-colors text-3xl leading-none" id="cerrarModalSelectorLotes">&times;</button>
         </div>
         
         <div class="p-6">
-            <div class="mb-4">
-                <p class="text-sm text-gray-600">PRODUCTO SELECCIONADO</p>
-                <h4 class="text-lg font-bold text-gray-800" id="selectorProductoNombre">-</h4>
+            <div class="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100 flex justify-between items-center">
+                <div>
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">PRODUCTO SELECCIONADO</p>
+                    <h4 class="text-xl font-extrabold text-gray-900" id="selectorProductoNombre">-</h4>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">GESTOR DE INVENTARIO</p>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">FEFO (First Expired, First Out)</span>
+                </div>
             </div>
             
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto border rounded-xl" style="max-height: 60vh; overflow-y: auto;">
                 <table class="w-full text-sm">
-                    <thead class="bg-gradient-to-r from-red-50 to-pink-50 border-b-2 border-red-200">
+                    <thead class="bg-gray-100 border-b sticky top-0 z-10">
                         <tr>
-                            <th class="px-4 py-3 text-left font-semibold text-gray-700">LOTE</th>
-                            <th class="px-4 py-3 text-left font-semibold text-gray-700">VENCIMIENTO</th>
-                            <th class="px-4 py-3 text-center font-semibold text-gray-700">CANT.</th>
-                            <th class="px-4 py-3 text-center font-semibold text-gray-700">PRECIO</th>
-                            <th class="px-4 py-3 text-center font-semibold text-gray-700">ESTADO</th>
+                            <th class="px-4 py-4 text-left font-bold text-gray-700 uppercase" style="font-size: 0.75rem;">LOTE</th>
+                            <th class="px-4 py-4 text-left font-bold text-gray-700 uppercase" style="font-size: 0.75rem;">VENCIMIENTO</th>
+                            <th class="px-4 py-4 text-center font-bold text-gray-700 uppercase" style="font-size: 0.75rem;">CANTIDAD</th>
+                            <th class="px-4 py-4 text-center font-bold text-gray-700 uppercase" style="font-size: 0.75rem;">P. COMPRA</th>
+                            <th class="px-4 py-4 text-center font-bold text-gray-700 uppercase" style="font-size: 0.75rem;">P. VENTA</th>
                         </tr>
                     </thead>
                     <tbody id="selectorLotesBody" class="divide-y divide-gray-100">
-                        <!-- Lotes se cargan aquí dinámicamente -->
+                        
                     </tbody>
                 </table>
             </div>
@@ -511,9 +693,8 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
-<!-- Modal Agregar/Editar Lote -->
-<div id="modalLote" class="modal-overlay fixed inset-0 hidden items-center justify-center z-[60]" style="display:none;">
-    <div class="modal-container bg-white mx-auto rounded-lg shadow-lg z-[60] overflow-hidden w-full max-w-md">
+<div id="modalLote" class="modal-overlay fixed inset-0 hidden items-center justify-center z-[1060]">
+    <div class="modal-container bg-white mx-auto rounded-lg shadow-lg z-[1060] overflow-hidden w-full max-w-md">
         <div class="modal-header bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
             <h3 class="text-lg font-semibold text-gray-800" id="modalLoteTitle">Nuevo Lote</h3>
             <button class="text-gray-400 hover:text-gray-600 transition-colors text-2xl leading-none" id="cerrarModalLote">&times;</button>
@@ -538,7 +719,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <input type="number" id="loteCantidad" name="cantidad" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" min="1" required>
                 </div>
 
-
             </div>
 
             <div class="mt-6 flex justify-end gap-3">
@@ -551,10 +731,9 @@ document.addEventListener('DOMContentLoaded', function() {
         </form>
     </div>
 </div>
-@endsection
 
 <style>
-/* Toggle switch minimal styles */
+
 .tabla-categorias td { vertical-align: middle; }
 .estado-cell { text-align: center; }
 .tabla-categorias td[data-label="Acciones"] { display: flex; align-items: center; gap: 12px; }
@@ -567,7 +746,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </style>
 
 <style>
-/* Buscador unificado */
+
 .search-group { display:flex; align-items:center; gap:.5rem; border:1px solid #E9EDF5; border-radius:12px; padding:0 .85rem; height:44px; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,0.035); }
 .search-group:focus-within { border-color:#8b5cf6; box-shadow:0 0 0 2px rgba(139,92,246,.35); }
 .search-icon { color:#64748b; font-size:18px; }
@@ -590,7 +769,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    // Mostrar/ocultar botón limpiar del buscador
+
     const buscarInput = document.getElementById('buscarCategoria');
     const clearBtn = document.getElementById('clearBuscarCategoria');
     if (buscarInput && clearBtn) {
@@ -625,7 +804,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Verificar si el producto tiene historial y mostrar/ocultar botón (función global)
     window.verificarHistorialProducto = async function(productoId) {
         const btnHistorial = document.getElementById('btnVerHistorial');
         if (!productoId || !btnHistorial) return;
@@ -644,13 +822,12 @@ document.addEventListener('DOMContentLoaded', () => {
             btnHistorial.classList.add('hidden');
         }
     }
-    
-    // Botón "Ver Historial de Cambios" en el header del modal
+
     document.addEventListener('click', function(e) {
         if (e.target.closest('#btnVerHistorial')) {
             const productoNombre = document.getElementById('det-nombre')?.value || '';
             if (productoNombre) {
-                // Redirigir a auditoría con búsqueda automática
+
                 window.location.href = `/admin/logs?search=${encodeURIComponent(productoNombre)}`;
             }
         }
@@ -658,7 +835,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- Overlay de carga para edición -->
 <style>
 .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.6); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 9999; }
 .loading-overlay .loading-spinner {
@@ -666,9 +842,9 @@ document.addEventListener('DOMContentLoaded', () => {
   height: 36px;
   border-radius: 50%;
   position: relative;
-  /* Semicírculo rojo que gira */
+  
   background: conic-gradient(#f87171 0 180deg, transparent 180deg 360deg);
-  /* Grosor del aro */
+  
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0);
   mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0);
   animation: spin 0.7s linear infinite;
@@ -681,8 +857,8 @@ document.addEventListener('DOMContentLoaded', () => {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #f87171; /* círculo interno fijo */
-  box-shadow: 0 0 0 4px #fde2e2; /* halo suave alrededor para estilo similar a la referencia */
+  background: #f87171; 
+  box-shadow: 0 0 0 4px #fde2e2; 
 }
 .loading-overlay .loading-text { margin-top: .6rem; color: #f87171; font-weight: 400; font-size: 20px; text-shadow: none; }
 .loading-overlay .inner { display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -699,15 +875,15 @@ document.addEventListener('DOMContentLoaded', () => {
 ])
 
 <script>
-// Variables globales necesarias para el JavaScript
+
 window.APP_PRODUCTS_AJAX = '{{ route('inventario.productos.ajax') }}';
 window.APP_DEFAULT_IMAGE = '{{ asset('assets/images/default-product.svg') }}';
 
 </script>
 <script src="{{ asset('assets/js/inventario/agregar.js') }}?v={{ time() }}" defer></script>
-<script src="{{ asset('assets/js/inventario/productos_botica.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('assets/js/inventario/productos_botica.js') }}?v={{ time() }}" defer></script>
 <style>
-/* Paginación estilo historial (rojo) */
+
 .historial-pagination-improved { padding: 1.5rem 2rem; border-top: 1px solid #e5e7eb; display:flex; justify-content:between; align-items:center; gap:1rem; background:white; }
 .historial-pagination-info { flex:1; }
 .historial-pagination-controls { display:flex; align-items:center; gap:.5rem; }
@@ -717,7 +893,6 @@ window.APP_DEFAULT_IMAGE = '{{ asset('assets/images/default-product.svg') }}';
 .historial-pagination-btn-disabled { padding:.5rem .75rem; font-size:.875rem; font-weight:500; color:#9ca3af; background:#f9fafb; border:1px solid #e5e7eb; border-radius:6px; cursor:not-allowed; display:inline-flex; align-items:center; justify-content:center; min-width:2.5rem; }
 @media (max-width:768px){ .historial-pagination-improved{ flex-direction:column; align-items:stretch; gap:1rem; } .historial-pagination-controls{ justify-content:center; flex-wrap:wrap; } }
 
-/* Skeleton loading (Categorías) */
 .skeleton-table { padding: 8px 0; }
 .skeleton-row { display:grid; grid-template-columns: 64px 1fr 2fr 140px 170px; gap: 16px; align-items:center; padding: 14px 10px; border-bottom: 1px solid #f1f5f9; }
 .skeleton-bar { display:block; height: 16px; border-radius: 8px; background: linear-gradient(90deg, #e5e7eb 25%, #f1f5f9 37%, #e5e7eb 63%); background-size: 400% 100%; animation: skeleton-shimmer 1.2s ease-in-out infinite; }
@@ -728,12 +903,12 @@ window.APP_DEFAULT_IMAGE = '{{ asset('assets/images/default-product.svg') }}';
 .skeleton-dot { width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(90deg, #e5e7eb 25%, #f1f5f9 37%, #e5e7eb 63%); background-size: 400% 100%; animation: skeleton-shimmer 1.2s ease-in-out infinite; justify-self:start; }
 @keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .skeleton-bar, .skeleton-dot { animation: none; } }
-/* Header del modal: asegurar texto blanco */
+
 .modal-header { color: #ffffff !important; }
 .modal-header h3 { color: #ffffff !important; }
 .modal-header iconify-icon { color: #ffffff !important; }
 .modal-header .modal-close, .modal-close-edit { color: #ffffff !important; }
-/* Fondo del header: púrpura para Agregar, verde para Editar */
+
 #modalAgregar .modal-header {
   background: linear-gradient(90deg, #7c3aed, #6d28d9);
   padding: 16px;
@@ -746,7 +921,7 @@ window.APP_DEFAULT_IMAGE = '{{ asset('assets/images/default-product.svg') }}';
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
 }
-/* Detalles: usa mismo header verde */
+
 #modalDetallesBotica .modal-header {
   background: linear-gradient(90deg, #93c5fd, #3b82f6);
   color: #ffffff;
@@ -755,22 +930,19 @@ window.APP_DEFAULT_IMAGE = '{{ asset('assets/images/default-product.svg') }}';
   border-top-right-radius: 0.5rem;
 }
 
-/* Flechitas visibles en selects dentro de modales */
 #modalAgregar select, #modalEditar select {
-  -webkit-appearance: none; /* Safari */
-  -moz-appearance: none;    /* Firefox */
-  appearance: none;         /* Estándar */
+  -webkit-appearance: none; 
+  -moz-appearance: none;    
+  appearance: none;         
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='%23111827' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 22px 22px;
-  padding-right: 3rem; /* espacio para la flecha */
+  padding-right: 3rem; 
 }
 
-/* Ocultar flecha de IE/Edge heredada */
 select::-ms-expand { display: none; }
 
-/* Wrapper para flecha visible en selects */
 .select-wrapper { position: relative; }
 .select-wrapper select { padding-right: 2.75rem; }
 .select-wrapper::after {
@@ -786,14 +958,14 @@ select::-ms-expand { display: none; }
   background-size: 18px 18px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23111827' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 }
-/* ====== Mejora visual de inputs en los modales (Agregar/Editar) ====== */
+
 :root {
   --input-radius: 10px;
   --input-bg: #f9fafb;
   --input-border: #d1d5db;
   --input-text: #111827;
   --input-placeholder: #9ca3af;
-  --focus-color: #7c3aed; /* violeta del header */
+  --focus-color: #7c3aed; 
   --focus-shadow: rgba(124, 58, 237, 0.25);
 }
 
@@ -862,7 +1034,6 @@ select::-ms-expand { display: none; }
   background: #ffffff;
 }
 
-/* Detalles - estilo más suave y moderno */
 #modalDetallesBotica input[readonly] {
   background: #f8fafc;
   border-color: #e5e7eb;
@@ -880,7 +1051,6 @@ select::-ms-expand { display: none; }
 }
 #modalDetallesBotica .upload-text { color: #475569; font-weight: 500; }
 
-/* Evitar scroll de fondo cuando hay modal abierto */
 body.modal-open { overflow: hidden; }
 
 #modalAgregar .relative > span:first-child,
@@ -905,14 +1075,13 @@ body.modal-open { overflow: hidden; }
 .is-invalid { border-color: #ef4444 !important; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25) !important; }
 .is-disabled, [disabled] { background: #f3f4f6 !important; color: #9ca3af !important; cursor: not-allowed; }
 
-/* Mensajes de validación (solo cuando hay error) */
 .field-error { display: none; color: #dc2626; font-size: 0.875rem; margin-top: .25rem; align-items: center; gap: .375rem; }
 .field-error.visible { display: flex; }
 .field-error iconify-icon { color: #dc2626; font-size: 1rem; }
 </style>
-<!-- Modal Agregar Producto (look original) -->
-<div id="modalAgregar" class="modal-overlay fixed inset-0 hidden items-center justify-center z-50">
-    <div class="modal-container bg-white mx-auto rounded-lg shadow-lg z-50 overflow-y-auto" style="width:78vw; max-width:980px; max-height:96vh; height:auto; display:flex; flex-direction:column; overflow-y:hidden;">
+
+<div id="modalAgregar" class="modal-overlay fixed inset-0 hidden items-center justify-center z-[1050]">
+    <div class="modal-container bg-white mx-auto rounded-lg shadow-lg z-[1050] overflow-y-auto" style="width:78vw; max-width:980px; max-height:96vh; height:auto; display:flex; flex-direction:column; overflow-y:hidden;">
         <div class="modal-header">
             <h3 class="text-xl font-semibold flex items-center gap-3">
                 <iconify-icon icon="heroicons:plus-circle-solid"></iconify-icon>
@@ -924,7 +1093,7 @@ body.modal-open { overflow: hidden; }
         <div class="modal-content px-6 pt-6 pb-6 overflow-auto" style="flex:1 1 auto;">
             <form id="formAgregarProducto" class="space-y-4" enctype="multipart/form-data" novalidate>
                 @csrf
-                <!-- Fila 1: Nombre del producto (ocupa toda la fila) -->
+                
                 <div class="grid grid-cols-1 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto <span class="text-red-500">*</span></label>
@@ -936,8 +1105,8 @@ body.modal-open { overflow: hidden; }
                     </div>
                 </div>
 
-                <!-- Fila 2: Marca, Categoría, Presentación, Concentración -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Marca <span class="text-red-500">*</span></label>
                         <input type="text" name="marca" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Ej: Genfar" required>
@@ -953,22 +1122,13 @@ body.modal-open { overflow: hidden; }
                         <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Selecciona una categoría</span></div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Presentación <span class="text-red-500">*</span></label>
-                        <div class="select-wrapper mt-1">
-                            <select name="presentacion" id="add-presentacion" class="block w-full rounded-md border-gray-300 shadow-sm" required>
-                                <option value="">Seleccionar</option>
-                            </select>
-                        </div>
-                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Selecciona una presentación</span></div>
-                    </div>
-                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Concentración <span class="text-red-500">*</span></label>
                         <input type="text" name="concentracion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Ej: 500mg" required>
                         <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Este campo es obligatorio</span></div>
                     </div>
                 </div>
 
-                <!-- Fila 3: Lote, Código de Barras, Proveedor -->
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Lote <span class="text-red-500">*</span></label>
@@ -992,53 +1152,94 @@ body.modal-open { overflow: hidden; }
                     </div>
                 </div>
 
-                <!-- Fila 4: Stock Actual, Stock Mínimo, Precio Compra, Precio Venta -->
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Stock Actual <span class="text-red-500">*</span></label>
-                        <input type="number" name="stock_actual" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <input type="number" name="stock_actual" id="stock_actual" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
                         <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe ser un número ≥ 0</span></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Stock Mínimo <span class="text-red-500">*</span></label>
-                        <input type="number" name="stock_minimo" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <input type="number" name="stock_minimo" id="stock_minimo" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
                         <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe ser un número ≥ 0</span></div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Compra <span class="text-red-500">*</span></label>
-                        <input type="text" name="precio_compra" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="0.00" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Precio Compra Unitario <span class="text-red-500">*</span>
+                            <span class="text-xs text-blue-600">(por unidad)</span>
+                        </label>
+                        <input type="number" name="precio_compra" id="precio_compra_base" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="0.00" required>
                         <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe ser un número ≥ 0</span></div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Venta <span class="text-red-500">*</span></label>
-                        <input type="text" name="precio_venta" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="0.00" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Precio Venta Unitario <span class="text-red-500">*</span>
+                            <span class="text-xs text-blue-600">(por unidad)</span>
+                        </label>
+                        <input type="number" name="precio_venta" id="precio_venta_base" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="0.00" required>
                         <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe ser mayor al precio de compra</span></div>
                     </div>
                 </div>
 
-                <!-- Fila 5: Fecha Fabricación y Fecha Vencimiento -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fabricación <span class="text-red-500">*</span></label>
-                        <input type="date" name="fecha_fabricacion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
-                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Este campo es obligatorio</span></div>
+                
+                <div class="presentaciones-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div>
+                            <h3 style="margin-bottom: 0.25rem;">
+                                <i class="fas fa-boxes"></i>
+                                Presentaciones del Producto
+                            </h3>
+                            <p style="margin: 0;">La primera presentación "Unidad" usa los precios de arriba. Agrega más presentaciones si vendes en Blíster, Caja, etc.</p>
+                        </div>
+                        <button type="button" id="btn-agregar-presentacion" class="btn-agregar-presentacion">
+                            <i class="fas fa-plus"></i> Agregar
+                        </button>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Vencimiento</label>
-                        <input type="date" name="fecha_vencimiento" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+
+                    <div class="presentaciones-table-wrapper">
+                        <table class="presentaciones-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre Presentación</th>
+                                    <th style="text-align: center;">Unidades</th>
+                                    <th style="text-align: center;">Precio Venta</th>
+                                    <th style="text-align: center;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="presentaciones-table-body">
+                                
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- Fila 8: Imagen (ocupa toda la fila) -->
-                <div class="grid grid-cols-1 gap-4">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <div class="image-upload-wrapper">
-                            <input type="file" name="imagen" accept="image/*" id="imagen-input">
-                            <p class="upload-text">Haz clic para subir una imagen</p>
-                            <p class="upload-hint">PNG, JPG o GIF (Max. 2MB)</p>
-                        </div>
-                        <div id="preview-container" class="mt-4 hidden text-center">
-                            <img id="preview-image" class="h-32 w-32 object-cover rounded-lg inline-block" src="" alt="Vista previa">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Fecha Vencimiento <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" name="fecha_vencimiento" id="fecha_vencimiento" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200" required>
+                        <p class="text-xs text-gray-500 mt-2">
+                            <i class="fas fa-info-circle text-blue-500"></i>
+                            Fecha de vencimiento del lote
+                        </p>
+                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>La fecha de vencimiento es obligatoria</span></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Imagen del Producto</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-indigo-400 transition-colors cursor-pointer bg-gray-50" onclick="document.getElementById('imagen-input').click()">
+                            <input type="file" name="imagen" accept="image/*" id="imagen-input" class="hidden">
+                            <div id="upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-sm text-gray-600 font-medium">Haz clic para subir</p>
+                                <p class="text-xs text-gray-500 mt-1">PNG, JPG o GIF (Max. 2MB)</p>
+                            </div>
+                            <div id="preview-container" class="hidden">
+                                <img id="preview-image" class="h-32 w-32 object-cover rounded-lg mx-auto" src="" alt="Vista previa">
+                                <p class="text-xs text-gray-600 mt-2">Click para cambiar</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1052,9 +1253,80 @@ body.modal-open { overflow: hidden; }
     </div>
  </div>
 
-<!-- Modal Editar Producto (look original) -->
-<div id="modalEditar" class="modal-overlay fixed inset-0 hidden items-center justify-center z-50">
-    <div class="modal-container bg-white mx-auto rounded-lg shadow-lg z-50 overflow-y-auto" style="width:76vw; max-width:960px; max-height:96vh; height:auto; display:flex; flex-direction:column; overflow-y:hidden;">
+<div id="modal-presentacion" class="modal-presentacion-overlay hidden">
+    <div class="modal-presentacion-container">
+        <div class="modal-presentacion-header">
+            <h3 id="modal-presentacion-title">Agregar Presentación</h3>
+            <button type="button" id="btn-cerrar-modal-presentacion">&times;</button>
+        </div>
+        <form id="form-presentacion">
+            <div class="modal-presentacion-body">
+                <div class="form-group-modal">
+                    <label for="nombre_presentacion_modal">Nombre Presentación <span style="color: red;">*</span></label>
+                    <input type="text" id="nombre_presentacion_modal" placeholder="Ej: Blíster, Caja, Tira" required>
+                    <p class="text-xs text-gray-500 mt-1">Nombre de esta forma de venta (no incluyas "Unidad", esa ya existe)</p>
+                </div>
+                <div class="form-group-modal">
+                    <label for="unidades_presentacion_modal">¿Cuántas unidades contiene? <span style="color: red;">*</span></label>
+                    <input type="number" id="unidades_presentacion_modal" min="2" placeholder="Ej: 10, 20, 50" required>
+                    <p class="text-xs text-gray-500 mt-1">Ejemplo: Si un blíster tiene 10 tabletas, pon 10</p>
+                </div>
+                
+                
+                <div id="precio-calculado-info" style="display: none;" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-3">
+                    <div class="flex-1">
+                        <p class="font-semibold text-sm text-blue-900 mb-2">Cálculo Automático:</p>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-700">Costo de esta presentación:</span>
+                                <span id="costo-calculado" class="font-semibold text-gray-900">S/ 0.00</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-700">Precio sugerido:</span>
+                                <span id="precio-sugerido" class="font-semibold text-blue-600">S/ 0.00</span>
+                            </div>
+                            <div class="flex justify-between pt-1 border-t border-blue-200">
+                                <span class="text-gray-700">Tu ganancia sería:</span>
+                                <span id="ganancia-calculada" class="font-semibold text-green-600">S/ 0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group-modal">
+                    <label for="precio_venta_modal">Precio de Venta <span style="color: red;">*</span></label>
+                    <input type="number" id="precio_venta_modal" step="0.01" min="0" placeholder="0.00" required>
+                    <p class="text-xs text-gray-500 mt-1">El sistema calcula automáticamente, pero puedes ajustarlo si das descuento</p>
+                </div>
+            </div>
+            <div class="modal-presentacion-footer">
+                <button type="button" id="btn-cancelar-modal-presentacion" class="btn-modal-cancelar">Cancelar</button>
+                <button type="submit" class="btn-modal-guardar">
+                    <i class="fas fa-save mr-1"></i> Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+
+document.getElementById('imagen-input')?.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('preview-image').src = e.target.result;
+            document.getElementById('upload-placeholder').classList.add('hidden');
+            document.getElementById('preview-container').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+
+<div id="modalEditar" class="modal-overlay fixed inset-0 hidden items-center justify-center z-[1050]">
+    <div class="modal-container bg-white mx-auto rounded-lg shadow-lg z-[1050] overflow-y-auto" style="width:76vw; max-width:960px; max-height:96vh; height:auto; display:flex; flex-direction:column; overflow-y:hidden;">
         <div class="modal-header">
             <h3 class="text-xl font-semibold flex items-center gap-3">
                 <iconify-icon icon="lucide:edit"></iconify-icon>
@@ -1066,7 +1338,7 @@ body.modal-open { overflow: hidden; }
             <form id="formEditarProducto" class="space-y-4" enctype="multipart/form-data" novalidate>
                 <input type="hidden" id="edit-producto-id" name="producto_id">
 
-                <!-- Fila 1: Nombre del producto (ocupa toda la fila) -->
+                
                 <div class="grid grid-cols-1 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto <span class="text-red-500">*</span></label>
@@ -1078,8 +1350,8 @@ body.modal-open { overflow: hidden; }
                     </div>
                 </div>
 
-                <!-- Fila 2: Marca, Categoría, Presentación, Concentración -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Marca <span class="text-red-500">*</span></label>
                         <input type="text" name="marca" id="edit-marca" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Ej: Genfar" required>
@@ -1093,20 +1365,13 @@ body.modal-open { overflow: hidden; }
                         <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Selecciona una categoría</span></div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Presentación <span class="text-red-500">*</span></label>
-                        <div class="select-wrapper mt-1">
-                            <select name="presentacion" id="edit-presentacion" class="block w-full rounded-md border-gray-300 shadow-sm" required></select>
-                        </div>
-                        <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Selecciona una presentación</span></div>
-                    </div>
-                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Concentración <span class="text-red-500">*</span></label>
                         <input type="text" name="concentracion" id="edit-concentracion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Ej: 500mg" required>
                         <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Este campo es obligatorio</span></div>
                     </div>
                 </div>
 
-                <!-- Fila 3: Lote, Código de Barras, Proveedor -->
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Lote <span class="text-red-500">*</span></label>
@@ -1130,7 +1395,7 @@ body.modal-open { overflow: hidden; }
                     </div>
                 </div>
 
-                <!-- Fila 4: Stock Actual, Stock Mínimo, Precio Compra, Precio Venta -->
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Stock Actual <span class="text-red-500">*</span></label>
@@ -1143,30 +1408,57 @@ body.modal-open { overflow: hidden; }
                         <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe ser un número ≥ 0</span></div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Compra <span class="text-red-500">*</span></label>
-                        <input type="text" name="precio_compra" id="edit-precio_compra" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="0.00" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Precio Compra Unitario <span class="text-red-500">*</span>
+                            <span class="text-xs text-blue-600">(por unidad)</span>
+                        </label>
+                        <input type="text" name="precio_compra" id="precio_compra_base_edit" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="0.00" required>
                         <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe ser un número ≥ 0</span></div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Venta <span class="text-red-500">*</span></label>
-                        <input type="text" name="precio_venta" id="edit-precio_venta" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="0.00" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Precio Venta Unitario <span class="text-red-500">*</span>
+                            <span class="text-xs text-blue-600">(por unidad)</span>
+                        </label>
+                        <input type="text" name="precio_venta" id="precio_venta_base_edit" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="0.00" required>
                         <div class="field-error"><iconify-icon icon="heroicons:exclamation-circle-solid"></iconify-icon><span>Debe ser mayor al precio de compra</span></div>
                     </div>
                 </div>
 
-                <!-- Fila 5: Fecha Fabricación y Fecha Vencimiento (ocultos) -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" style="display: none;">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fabricación</label>
-                        <input type="date" name="fecha_fabricacion" id="edit-fecha_fabricacion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                
+                <div id="presentaciones-section-editar" class="mt-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-6 shadow-sm">
+                    <input type="hidden" id="producto_id_hidden_edit" value="">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                <i class="fas fa-boxes text-indigo-600 text-xl"></i>
+                                Presentaciones del Producto
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-600">La primera presentación "Unidad" usa los precios de arriba. Agrega más presentaciones si vendes en Blíster, Caja, etc.</p>
+                        </div>
+                        <button type="button" id="btn-abrir-modal-presentacion-edit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all">
+                            <i class="fas fa-plus mr-2"></i> Agregar
+                        </button>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Vencimiento</label>
-                        <input type="date" name="fecha_vencimiento" id="edit-fecha_vencimiento" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+
+                    <div class="presentaciones-table-wrapper">
+                        <table class="presentaciones-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre Presentación</th>
+                                    <th style="text-align: center;">Unidades</th>
+                                    <th style="text-align: center;">Precio Venta</th>
+                                    <th style="text-align: center;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="presentaciones-table-body-edit">
+                                
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- Fila 8: Imagen (ocupa toda la fila) -->
+                
                 <div class="grid grid-cols-1 gap-4">
                     <div>
                         <div class="image-upload-wrapper">
@@ -1190,9 +1482,9 @@ body.modal-open { overflow: hidden; }
 </div>
 
 <script>
-// Función para manejar la selección de productos desde la búsqueda instantánea
+
 function seleccionarProductoInventario(producto) {
-    // Buscar el producto en la tabla y resaltarlo
+
     const filas = document.querySelectorAll('.tabla-productos-botica tbody tr');
     
     filas.forEach(fila => {
@@ -1201,10 +1493,9 @@ function seleccionarProductoInventario(producto) {
         
         if (nombreProducto && nombreProducto.toLowerCase().includes(producto.nombre.toLowerCase())) {
             fila.classList.add('highlight-producto');
-            // Scroll hacia el producto
+
             fila.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // Remover el highlight después de 3 segundos
+
             setTimeout(() => {
                 fila.classList.remove('highlight-producto');
             }, 3000);
@@ -1220,3 +1511,4 @@ function seleccionarProductoInventario(producto) {
     transition: all 0.3s ease;
 }
 </style>
+@endsection

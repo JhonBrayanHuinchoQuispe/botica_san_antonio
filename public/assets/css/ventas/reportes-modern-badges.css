@@ -1,0 +1,75 @@
+/* Tendencias y Badges - Complemento para reportes-modern.css */
+
+.reportes-tendencia-badge {
+    display: inline-block;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.badge-gold {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+}
+
+.badge-red {
+    background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(248, 113, 113, 0.3);
+}
+
+.badge-blue {
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
+}
+
+.badge-green {
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(52, 211, 153, 0.3);
+}
+
+.badge-gray {
+    background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(156, 163, 175, 0.3);
+}
+
+.reportes-ingresos-valor {
+    font-weight: 700;
+    color: #10b981;
+    font-size: 0.9375rem;
+}
+
+/* Texto de período de comparación */
+#textoPeriodoComparacion {
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    margin-top: 0.5rem !important;
+    color: #3b82f6 !important;
+}
+
+/* Filas de tabla con fondo consistente */
+.reportes-table-modern tbody tr {
+    background-color: white !important;
+}
+
+.reportes-table-modern tbody tr:hover {
+    background-color: #f9fafb !important;
+}
+
+/* Estilos para cantidad */
+.reportes-cantidad {
+    display: inline-block;
+    padding: 0.375rem 0.875rem;
+    background-color: #dbeafe;
+    color: #1e40af;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 700;
+}

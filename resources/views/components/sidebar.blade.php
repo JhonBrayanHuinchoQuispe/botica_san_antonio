@@ -1,5 +1,4 @@
 {{-- Iconify ya está importado globalmente via Vite/app.js. Evitar <head> incrustado que rompe navegación con Turbo. --}}
-        
 <aside class="sidebar {{ request()->cookie('sidebar_collapsed') === '1' ? 'active' : '' }}">
     <button type="button" class="sidebar-close-btn !mt-4">
         <iconify-icon icon="radix-icons:cross-2"></iconify-icon>
@@ -15,10 +14,6 @@
     
     <div class="sidebar-menu-area">
         <ul class="sidebar-menu" id="sidebar-menu">
-            
-            {{-- ============================================ --}}
-            {{-- DASHBOARD - Todos los usuarios autenticados --}}
-            {{-- ============================================ --}}
             @can('dashboard.view')
             <li>
                 <a href="{{ route('dashboard.analisis') }}" class="{{ request()->routeIs('dashboard.analisis') || request()->is('dashboard/analisis') ? 'active-page' : '' }}">
@@ -28,9 +23,14 @@
             </li>
             @endcan
 
-            {{-- ============================================ --}}
-            {{-- PUNTO DE VENTA - Solo vendedores y superiores --}}
-            {{-- ============================================ --}}
+            <li>
+                <a href="{{ route('ai.index') }}" class="{{ request()->routeIs('ai.*') ? 'active-page' : '' }}">
+                    <iconify-icon icon="solar:magic-stick-3-bold-duotone" class="menu-icon" style="color: #8b5cf6;"></iconify-icon>
+                    <span>Asistente IA</span>
+                    <span class="badge bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs px-2 py-0.5 rounded-full ml-2">Nuevo</span>
+                </a>
+            </li>
+
             @if(auth()->check() && (auth()->user()->can('ventas.view') || auth()->user()->can('ventas.create')))
             <li class="sidebar-menu-group-title">Punto de Venta</li>
             
@@ -74,16 +74,12 @@
             </li>
             @endif
 
-            {{-- ============================================ --}}
-            {{-- GESTIÓN DE PRODUCTOS - Almaceneros y superiores --}}
-            {{-- ============================================ --}}
             @if(auth()->check() && (auth()->user()->can('inventario.view') || auth()->user()->can('ubicaciones.view') || auth()->user()->can('compras.view')))
             <li class="sidebar-menu-group-title">Gestión de Inventario</li>
             
-            {{-- Productos e Inventario --}}
             @can('inventario.view')
-            <li class="dropdown {{ request()->routeIs('inventario.productos.botica') || request()->routeIs('inventario.categorias') || request()->routeIs('inventario.presentaciones') ? 'dropdown-open open' : '' }}">
-                <a href="javascript:void(0)" class="{{ request()->routeIs('inventario.productos.botica') || request()->routeIs('inventario.categorias') || request()->routeIs('inventario.presentaciones') ? 'active-page' : '' }}">
+            <li class="dropdown {{ request()->routeIs('inventario.productos.botica') || request()->routeIs('inventario.categorias') ? 'dropdown-open open' : '' }}">
+                <a href="javascript:void(0)" class="{{ request()->routeIs('inventario.productos.botica') || request()->routeIs('inventario.categorias') ? 'active-page' : '' }}">
                     <iconify-icon icon="solar:box-bold" class="menu-icon"></iconify-icon>
                     <span>Productos</span>
                 </a>
@@ -101,20 +97,15 @@
                         </a>
                     </li>
                     @endcan
-                    @can('inventario.categories')
                     <li>
-                        <a href="{{ route('inventario.presentaciones') }}" class="{{ request()->routeIs('inventario.presentaciones') ? 'active-page' : '' }}">
-                            <i class="ri-circle-fill circle-icon text-warning-600"></i> Presentaciones
+                        <a href="{{ route('admin.reportes.inventario.salud') }}" class="{{ request()->routeIs('admin.reportes.inventario.salud') ? 'active-page' : '' }}">
+                            <i class="ri-circle-fill circle-icon text-info-600"></i> Salud del Inventario
                         </a>
                     </li>
-                    @endcan
                 </ul>
             </li>
             @endcan
 
-            
-
-            {{-- Compras y Proveedores --}}
             @can('compras.view')
             <li class="dropdown {{ request()->routeIs('compras.nueva') || request()->routeIs('compras.historial') ? 'dropdown-open open' : '' }}">
                 <a href="javascript:void(0)" class="{{ request()->routeIs('compras.nueva') || request()->routeIs('compras.historial') ? 'active-page' : '' }}">
@@ -134,24 +125,10 @@
                             <i class="ri-circle-fill circle-icon text-info-600"></i> Historial de Entradas
                         </a>
                     </li>
-
                 </ul>
             </li>
             @endcan
 
-            {{-- Mapa Almacén (Oculto por solicitud) --}}
-            {{--
-            @can('ubicaciones.view')
-            <li>
-                <a href="{{ route('ubicaciones.mapa') }}" class="{{ request()->routeIs('ubicaciones.*') ? 'active-page' : '' }}">
-                    <iconify-icon icon="solar:map-point-bold" class="menu-icon"></iconify-icon>
-                    <span>Gestión de Almacén</span>
-                </a>
-            </li>
-            @endcan
-            --}}
-
-            {{-- Auditoría de Inventario --}}
             <li>
                 <a href="{{ route('admin.logs') }}" class="{{ request()->routeIs('admin.logs') ? 'active-page' : '' }}">
                     <iconify-icon icon="solar:clipboard-list-bold-duotone" class="menu-icon"></iconify-icon>
@@ -160,9 +137,6 @@
             </li>
             @endif
 
-            {{-- ============================================ --}}
-            {{-- ADMINISTRACIÓN - Solo administradores y superiores --}}
-            {{-- ============================================ --}}
             @if(auth()->check() && (auth()->user()->can('usuarios.view') || auth()->user()->can('usuarios.roles')))
             <li class="sidebar-menu-group-title">Control de Usuarios</li>
             <li class="dropdown {{ request()->routeIs('admin.usuarios.*') || request()->routeIs('admin.roles.*') ? 'dropdown-open open' : '' }}">
@@ -189,7 +163,6 @@
             </li>
             @endif
 
-            {{-- Proveedores --}}
             @can('compras.view')
             <li>
                 <a href="{{ route('compras.proveedores') }}" class="{{ request()->routeIs('compras.proveedores') ? 'active-page' : '' }}">
@@ -198,129 +171,6 @@
                 </a>
             </li>
             @endcan
-
-
-            {{-- ============================================ --}}
-            {{-- CONFIGURACIÓN DEL SISTEMA - Oculto según solicitud --}}
-            {{-- ============================================ --}}
-            {{-- IA - Centro de Inteligencia Artificial --}}
-            @if(auth()->check())
-            <li class="sidebar-menu-group-title">IA</li>
-            <li>
-                <a href="{{ route('ia.dashboard') }}" class="{{ request()->routeIs('ia.dashboard') ? 'active-page' : '' }}">
-                    <iconify-icon icon="solar:cpu-bolt-bold-duotone" class="menu-icon"></iconify-icon>
-                    <span>Inteligencia Artificial</span>
-                </a>
-            </li>
-            @endif
-
-            @if(false)
-            <li class="sidebar-menu-group-title">Configuración del Sistema</li>
-            
-            {{-- Configuración General --}}
-            <li class="dropdown">
-                <a href="javascript:void(0)">
-                    <iconify-icon icon="solar:settings-bold" class="menu-icon"></iconify-icon>
-                    <span>Configuración General</span>
-                </a>
-                <ul class="sidebar-submenu">
-                    @can('config.system')
-                    <li>
-                        <a href="{{ route('admin.configuracion.empresa') }}">
-                            <i class="ri-circle-fill circle-icon text-primary-600"></i> Datos de la Empresa
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('admin.configuracion.igv') }}">
-                            <i class="ri-circle-fill circle-icon text-success-600"></i> Configuración IGV
-                        </a>
-                    </li>
-                    @endcan
-                </ul>
-            </li>
-
-            {{-- Impresoras y Tickets --}}
-            <li class="dropdown">
-                <a href="javascript:void(0)">
-                    <iconify-icon icon="solar:printer-bold" class="menu-icon"></iconify-icon>
-                    <span>Comprobante de Venta</span>
-                </a>
-                <ul class="sidebar-submenu">
-                    @can('config.system')
-                    <li>
-                        <a href="{{ route('admin.configuracion.impresoras') }}">
-                            <i class="ri-circle-fill circle-icon text-primary-600"></i> Boleta de Venta
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('admin.configuracion.tickets') }}">
-                            <i class="ri-circle-fill circle-icon text-warning-600"></i> Formato de Tickets
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('admin.configuracion.comprobantes') }}">
-                            <i class="ri-circle-fill circle-icon text-info-600"></i> Comprobantes Electrónicos
-                        </a>
-                    </li>
-                    @endcan
-                </ul>
-            </li>
-
-            {{-- Sistema y Mantenimiento --}}
-            <li class="dropdown">
-                <a href="javascript:void(0)">
-                    <iconify-icon icon="solar:shield-check-bold" class="menu-icon"></iconify-icon>
-                    <span>Sistema y Mantenimiento</span>
-                </a>
-                <ul class="sidebar-submenu">
-                    @can('config.backups')
-                    <li>
-                        <a href="{{ route('admin.respaldos') }}">
-                            <i class="ri-circle-fill circle-icon text-warning-600"></i> Respaldos
-                        </a>
-                    </li>
-                    @endcan
-                    @can('config.logs')
-                    <li>
-                        <a href="{{ route('admin.logs') }}">
-                            <i class="ri-circle-fill circle-icon text-danger-600"></i> Logs del Sistema
-                        </a>
-                    </li>
-                    @endcan
-                    @can('config.system')
-                    <li>
-                        <a href="{{ route('admin.configuracion.alertas') }}">
-                            <i class="ri-circle-fill circle-icon text-purple-600"></i> Alertas del Sistema
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('admin.configuracion.cache') }}">
-                            <i class="ri-circle-fill circle-icon text-cyan-600"></i> Limpiar Caché
-                        </a>
-                    </li>
-                    @endcan
-                </ul>
-            </li>
-            @endif
         </ul>
     </div>
 </aside>
-
-{{-- Panel de depuración de permisos deshabilitado --}}
-{{--
-@if(config('app.debug') && auth()->check() && (auth()->user()->isDueno() || auth()->user()->isGerente()))
-<div class="sidebar-debug" style="position: fixed; bottom: 10px; left: 10px; background: rgba(0,150,0,0.9); color: white; padding: 8px; font-size: 11px; z-index: 1000; border-radius: 5px; max-width: 250px;">
-    <strong>✅ PERMISOS ACTIVOS</strong><br>
-    <strong>Usuario:</strong> {{ auth()->user()->name }}<br>
-    <strong>Rol:</strong> {{ auth()->user()->getRoleNames()->first() }}<br>
-    <strong>Permisos:</strong> {{ count(auth()->user()->getAllPermissions()) }}<br>
-    <small style="color: #ccffcc;">🔒 Sistema de permisos funcionando</small>
-</div>
-@elseif(config('app.debug') && auth()->check())
-<div class="sidebar-debug" style="position: fixed; bottom: 10px; left: 10px; background: rgba(0,100,200,0.9); color: white; padding: 8px; font-size: 11px; z-index: 1000; border-radius: 5px; max-width: 250px;">
-    <strong>👤 {{ strtoupper(auth()->user()->getRoleNames()->first()) }}</strong><br>
-    <strong>Permisos:</strong> {{ count(auth()->user()->getAllPermissions()) }}<br>
-    <small style="color: #ccccff;">🔒 Acceso limitado por rol</small>
-</div>
-@endif
---}}

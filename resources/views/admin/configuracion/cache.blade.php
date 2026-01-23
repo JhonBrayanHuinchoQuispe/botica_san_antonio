@@ -20,7 +20,7 @@
                     </div>
                 </div>
                 <div class="card-body p-6">
-                    <!-- Información del Caché -->
+                    
                     <div class="row mb-6">
                         <div class="col-md-3">
                             <div class="card bg-light">
@@ -60,7 +60,7 @@
                         </div>
                     </div>
 
-                    <!-- Acciones de Caché -->
+                    
                     <div class="row">
                         <div class="col-md-6">
                             <div class="card border-primary">
@@ -144,7 +144,7 @@
                         </div>
                     </div>
 
-                    <!-- Configuración Automática -->
+                    
                     <div class="card mt-4">
                         <div class="card-header">
                             <h5 class="mb-0">
@@ -199,7 +199,7 @@
             </div>
         </div>
 
-        <!-- Panel de Estado -->
+        
         <div class="col-lg-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-gray-100 p-4">
@@ -227,7 +227,7 @@
                 </div>
             </div>
 
-            <!-- Información -->
+            
             <div class="card shadow-sm mt-4">
                 <div class="card-header bg-gray-100 p-4">
                     <h4 class="text-md font-semibold">Información</h4>
@@ -252,7 +252,7 @@
                 </div>
             </div>
 
-            <!-- Log de Actividades -->
+            
             <div class="card shadow-sm mt-4">
                 <div class="card-header bg-gray-100 p-4">
                     <h4 class="text-md font-semibold">Últimas Actividades</h4>
@@ -309,8 +309,7 @@ async function limpiarCache(tipo) {
                     timer: 2000,
                     showConfirmButton: false
                 });
-                
-                // Actualizar log de actividades
+
                 actualizarLogActividades(`Limpieza de ${tipoTexto[tipo]} completada`);
             } else {
                 throw new Error(data.message || 'Error al limpiar el caché');
@@ -353,8 +352,7 @@ async function optimizarSistema(tipo) {
                 timer: 2000,
                 showConfirmButton: false
             });
-            
-            // Actualizar log de actividades
+
             actualizarLogActividades(`Optimización de ${tipoTexto[tipo]} completada`);
         } else {
             throw new Error(data.message || 'Error al optimizar el sistema');
@@ -415,23 +413,20 @@ function actualizarLogActividades(mensaje) {
         <span>${mensaje}</span>
         <small class="text-muted">${fecha}</small>
     `;
-    
-    // Si es el primer elemento, remover el mensaje de "no hay actividades"
+
     if (log.children.length === 1 && log.children[0].textContent.includes('No hay actividades')) {
         log.innerHTML = '';
     }
     
     log.insertBefore(nuevaActividad, log.firstChild);
-    
-    // Mantener solo las últimas 5 actividades
+
     while (log.children.length > 5) {
         log.removeChild(log.lastChild);
     }
 }
 
-// Cargar información del sistema al iniciar
 document.addEventListener('DOMContentLoaded', function() {
-    // Aquí se puede agregar código para cargar el estado actual del sistema
+
 });
 </script>
 @endsection

@@ -9,7 +9,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
         <script>
-            // URLs absolutas basadas en el origen actual para evitar 404
+
             window.APP_BASE_URL = "'.url('/').'";
             window.APP_BASE_PATH = "'.parse_url(url('/'), PHP_URL_PATH).'";
             window.USERS_API_URL = window.APP_BASE_URL + "/admin/usuarios/api";
@@ -19,119 +19,87 @@
     ';
 @endphp
 
-<head>
+@push('head')
     <title>Gestión de Usuarios</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script>
-        // URLs absolutas para evitar 404 al recargar por AJAX
         window.USERS_API_URL = "{{ route('admin.usuarios.api') }}";
         window.USERS_BASE_URL = "{{ url('/admin/usuarios') }}";
     </script>
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/crud.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/admin/usuarios.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/admin/roles.css') }}?v={{ time() }}">
-    <!-- FontAwesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
+@endpush
 
 @section('content')
 @include('components.loading-overlay', ['id' => 'loadingOverlay', 'label' => 'Cargando datos...'])
 
-<!-- Header con estadísticas elegantes -->
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-    <!-- Total Usuarios -->
-    <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-blue-600/10 to-bg-white">
-        <div class="card-body h-full p-5">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <p class="font-medium text-neutral-900 mb-1">Total Usuarios</p>
-                    <h6 class="mb-0 text-2xl font-bold">{{ $usuarios->count() }}</h6>
-                </div>
-                <div class="w-[50px] h-[50px] bg-blue-600 rounded-full flex justify-center items-center">
-                    <iconify-icon icon="solar:users-group-two-rounded-bold-duotone" class="text-white text-2xl mb-0"></iconify-icon>
-                </div>
+<div class="reportes-metrics-grid-4">
+    
+    <div class="reportes-metric-card gold">
+        <div class="reportes-metric-icon-small">
+            <iconify-icon icon="solar:users-group-two-rounded-bold-duotone"></iconify-icon>
+        </div>
+        <div class="reportes-metric-content">
+            <div class="reportes-metric-label">Total Usuarios</div>
+            <div class="reportes-metric-value-medium">{{ $usuarios->count() }}</div>
+            <div class="reportes-metric-comparison">
+                <iconify-icon icon="heroicons:users" class="text-xs"></iconify-icon> 
+                <span>Registrados</span>
             </div>
-            <p class="font-medium text-sm text-neutral-600 mt-3 mb-0 flex items-center gap-2">
-                <span class="inline-flex items-center gap-1 text-info-600">
-                    <iconify-icon icon="heroicons:users" class="text-xs"></iconify-icon> 
-                    Registrados
-                </span>
-                Usuarios en el sistema
-            </p>
         </div>
     </div>
 
-    <!-- Usuarios Activos -->
-    <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-success-600/10 to-bg-white">
-        <div class="card-body p-5">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <p class="font-medium text-neutral-900 mb-1">Usuarios Activos</p>
-                    <h6 class="mb-0 text-2xl font-bold">{{ $usuarios->where('is_active', true)->count() }}</h6>
-                </div>
-                <div class="w-[50px] h-[50px] bg-success-600 rounded-full flex justify-center items-center">
-                    <iconify-icon icon="solar:user-check-rounded-bold-duotone" class="text-white text-2xl mb-0"></iconify-icon>
-                </div>
+    
+    <div class="reportes-metric-card teal">
+        <div class="reportes-metric-icon-small">
+            <iconify-icon icon="solar:user-check-rounded-bold-duotone"></iconify-icon>
+        </div>
+        <div class="reportes-metric-content">
+            <div class="reportes-metric-label">Usuarios Activos</div>
+            <div class="reportes-metric-value-medium">{{ $usuarios->where('is_active', true)->count() }}</div>
+            <div class="reportes-metric-comparison">
+                <iconify-icon icon="solar:check-circle-bold" class="text-xs"></iconify-icon> 
+                <span>Acceso habilitado</span>
             </div>
-            <p class="font-medium text-sm text-neutral-600 mt-3 mb-0 flex items-center gap-2">
-                <span class="inline-flex items-center gap-1 text-success-600">
-                    <iconify-icon icon="bxs:up-arrow" class="text-xs"></iconify-icon> 
-                    Activos
-                </span>
-                Usuarios con acceso habilitado
-            </p>
         </div>
     </div>
 
-    <!-- Usuarios Inactivos -->
-    <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-red-600/10 to-bg-white">
-        <div class="card-body p-5">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <p class="font-medium text-neutral-900 mb-1">Usuarios Inactivos</p>
-                    <h6 class="mb-0 text-2xl font-bold">{{ $usuarios->where('is_active', false)->count() }}</h6>
-                </div>
-                <div class="w-[50px] h-[50px] bg-red-600 rounded-full flex justify-center items-center">
-                    <iconify-icon icon="solar:user-cross-rounded-bold-duotone" class="text-white text-2xl mb-0"></iconify-icon>
-                </div>
+    
+    <div class="reportes-metric-card red">
+        <div class="reportes-metric-icon-small">
+            <iconify-icon icon="solar:user-cross-rounded-bold-duotone"></iconify-icon>
+        </div>
+        <div class="reportes-metric-content">
+            <div class="reportes-metric-label">Usuarios Inactivos</div>
+            <div class="reportes-metric-value-medium">{{ $usuarios->where('is_active', false)->count() }}</div>
+            <div class="reportes-metric-comparison">
+                <iconify-icon icon="heroicons:pause" class="text-xs"></iconify-icon> 
+                <span>Acceso suspendido</span>
             </div>
-            <p class="font-medium text-sm text-neutral-600 mt-3 mb-0 flex items-center gap-2">
-                <span class="inline-flex items-center gap-1 text-danger-600">
-                    <iconify-icon icon="heroicons:pause" class="text-xs"></iconify-icon> 
-                    Inactivos
-                </span>
-                Usuarios con acceso suspendido
-            </p>
         </div>
     </div>
 
-    <!-- Total Roles -->
-    <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-purple-600/10 to-bg-white">
-        <div class="card-body p-5">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <p class="font-medium text-neutral-900 mb-1">Total Roles</p>
-                    <h6 class="mb-0 text-2xl font-bold">{{ $roles->count() }}</h6>
-                </div>
-                <div class="w-[50px] h-[50px] bg-purple-600 rounded-full flex justify-center items-center">
-                    <iconify-icon icon="solar:shield-user-bold-duotone" class="text-white text-2xl mb-0"></iconify-icon>
-                </div>
+    
+    <div class="reportes-metric-card purple">
+        <div class="reportes-metric-icon-small">
+            <iconify-icon icon="solar:shield-user-bold-duotone"></iconify-icon>
+        </div>
+        <div class="reportes-metric-content">
+            <div class="reportes-metric-label">Total Roles</div>
+            <div class="reportes-metric-value-medium">{{ $roles->count() }}</div>
+            <div class="reportes-metric-comparison">
+                <iconify-icon icon="heroicons:shield-check" class="text-xs"></iconify-icon> 
+                <span>Configurados</span>
             </div>
-            <p class="font-medium text-sm text-neutral-600 mt-3 mb-0 flex items-center gap-2">
-                <span class="inline-flex items-center gap-1 text-purple-600">
-                    <iconify-icon icon="heroicons:shield-check" class="text-xs"></iconify-icon> 
-                    Configurados
-                </span>
-                Roles disponibles del sistema
-            </p>
         </div>
     </div>
 </div>
 
-<!-- Filtros y Controles Elegantes -->
 <div class="filter-section bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-4">
     <div class="flex flex-wrap items-center gap-4 justify-between">
-        <!-- Búsqueda Elegante -->
+        
         <div class="search-container-modern w-full sm:w-auto sm:min-w-[320px] flex-1">
             <div class="relative">
                 <input type="text" 
@@ -141,7 +109,7 @@
             </div>
         </div>
 
-        <!-- Filtros Elegantes -->
+        
         <div class="flex items-center gap-3">
             <div class="filter-group">
                 <select id="roleFilter" class="filter-select-elegant">
@@ -161,85 +129,120 @@
             </div>
         </div>
 
-        <!-- Acciones Elegantes -->
+        
         <div class="flex items-center gap-2">
             <button type="button" 
                     class="btn-action-elegant btn-export" 
                     onclick="exportUsers()"
+                    style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);"
                     title="Exportar a Excel">
-                <iconify-icon icon="solar:download-bold-duotone"></iconify-icon>
+                <iconify-icon icon="solar:download-bold-duotone" style="font-size: 1.25rem;"></iconify-icon>
                 <span>Exportar</span>
             </button>
 
             <button type="button" 
                     class="btn-action-elegant btn-primary" 
                     onclick="openCreateUserModal()"
+                    style="background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);"
                     title="Agregar Nuevo Usuario">
-                <iconify-icon icon="solar:user-plus-bold-duotone"></iconify-icon>
+                <iconify-icon icon="solar:user-plus-bold-duotone" style="font-size: 1.25rem;"></iconify-icon>
                 <span>Agregar</span>
             </button>
         </div>
     </div>
 </div>
 
-<!-- Tabla de Usuarios -->
 <div class="table-container bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
     <div class="table-responsive">
         <table class="users-table" id="usersTable">
             <thead>
                 <tr>
-                    <th>Usuario</th>
-                    <th>Email</th>
-                    <th>Roles</th>
-                    <th>Estado</th>
-                    <th>Último Acceso</th>
-                    <th>Acciones</th>
+                    <th>
+                        <div class="flex items-center gap-2">
+                            <iconify-icon icon="solar:user-bold-duotone" style="font-size: 1rem;"></iconify-icon>
+                            Usuario
+                        </div>
+                    </th>
+                    <th>
+                        <div class="flex items-center gap-2">
+                            <iconify-icon icon="solar:letter-bold-duotone" style="font-size: 1rem;"></iconify-icon>
+                            Contacto
+                        </div>
+                    </th>
+                    <th>
+                        <div class="flex items-center gap-2">
+                            <iconify-icon icon="solar:shield-user-bold-duotone" style="font-size: 1rem;"></iconify-icon>
+                            Roles
+                        </div>
+                    </th>
+                    <th style="text-align: center !important;">
+                        <div class="flex items-center justify-center gap-2">
+                            <iconify-icon icon="solar:check-circle-bold-duotone" style="font-size: 1rem;"></iconify-icon>
+                            Estado
+                        </div>
+                    </th>
+                    <th>
+                        <div class="flex items-center gap-2">
+                            <iconify-icon icon="solar:clock-circle-bold-duotone" style="font-size: 1rem;"></iconify-icon>
+                            Último Acceso
+                        </div>
+                    </th>
+                    <th style="text-align: center !important;">
+                        Acciones
+                    </th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="usuariosTableBody">
                 @forelse($usuarios as $usuario)
                 <tr data-user-id="{{ $usuario->id }}" class="user-row" data-telefono="{{ $usuario->telefono }}" data-direccion="{{ $usuario->direccion }}">
-                    <!-- Usuario -->
+                    
                     <td>
                         <div class="user-cell">
-                            <div class="user-avatar">
+                            <div class="user-avatar" style="border: 2px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                                 @if($usuario->avatar)
                                     <img src="{{ $usuario->avatar_url }}" 
                                          alt="Avatar de {{ $usuario->full_name }}">
                                 @else
-                                    <div class="avatar-placeholder">
+                                    <div class="avatar-placeholder" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
                                         {{ $usuario->initials }}
                                     </div>
                                 @endif
                             </div>
                             <div class="user-info">
-                                <div class="user-name">
+                                <div class="user-name" style="font-weight: 700; color: #1e293b; font-size: 0.95rem;">
                                     @if($usuario->nombres && $usuario->apellidos)
                                         {{ $usuario->nombres }} {{ $usuario->apellidos }}
                                     @else
                                         {{ $usuario->name }}
                                     @endif
                                 </div>
-                                <div class="user-phone">
+                                <div class="user-phone" style="font-size: 0.75rem; color: #64748b; font-weight: 600;">
+                                    <iconify-icon icon="solar:phone-bold" style="font-size: 0.8rem; margin-right: 2px;"></iconify-icon>
                                     {{ $usuario->telefono ?? 'Sin teléfono' }}
                                 </div>
                             </div>
                         </div>
                     </td>
 
-                    <!-- Email -->
+                    
                     <td>
-                        <div class="email-cell">
-                            <iconify-icon icon="heroicons:envelope" class="email-icon"></iconify-icon>
-                            {{ $usuario->email }}
+                        <div class="contact-cell">
+                            <div class="email-cell" style="font-weight: 600; color: #475569; font-size: 0.875rem; display: flex; align-items: center; gap: 4px;">
+                                <iconify-icon icon="solar:letter-bold" style="color: #64748b; font-size: 0.9rem;"></iconify-icon>
+                                {{ $usuario->email }}
+                            </div>
+                            <div class="address-cell" style="font-size: 0.75rem; color: #64748b; font-weight: 500; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+                                <iconify-icon icon="solar:map-point-bold" style="color: #94a3b8; font-size: 0.85rem;"></iconify-icon>
+                                {{ $usuario->direccion ?? '-' }}
+                            </div>
                         </div>
                     </td>
 
-                    <!-- Roles -->
+                    
                     <td>
                         <div class="roles-container">
                             @forelse($usuario->roles as $role)
-                                <span class="role-badge" style="background-color: #e53e3e20; color: #e53e3e; border-color: #e53e3e40;">
+                                <span class="role-badge" style="background-color: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 0.25rem 0.6rem; border-radius: 8px;">
                                     {{ ucfirst(str_replace('-', '/', $role->name)) }}
                                 </span>
                             @empty
@@ -248,43 +251,35 @@
                         </div>
                     </td>
 
-                    <!-- Estado -->
-                    <td>
-                        <span class="status-badge {{ $usuario->is_active ? 'status-active' : 'status-inactive' }}">
-                            <iconify-icon icon="{{ $usuario->is_active ? 'heroicons:check-circle' : 'heroicons:x-circle' }}"></iconify-icon>
+                    
+                    <td style="text-align: center;">
+                        <span class="status-badge {{ $usuario->is_active ? 'status-active' : 'status-inactive' }}" style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">
+                            <iconify-icon icon="{{ $usuario->is_active ? 'solar:check-circle-bold' : 'solar:close-circle-bold' }}"></iconify-icon>
                             {{ $usuario->is_active ? 'Activo' : 'Inactivo' }}
                         </span>
                     </td>
 
-                    <!-- Último Acceso -->
+                    
                     <td>
-                        <div class="last-login-cell">
+                        <div class="last-login-cell" style="font-size: 0.8rem; font-weight: 600; color: #64748b;">
                             @if($usuario->last_login_at)
-                                <iconify-icon icon="heroicons:clock" class="time-icon"></iconify-icon>
-                                <span>{{ $usuario->last_login_at->locale('es')->diffForHumans() }}</span>
+                                <span style="color: #1e293b;">{{ $usuario->last_login_at->locale('es')->diffForHumans() }}</span>
                             @else
-                                <span class="no-login">Nunca</span>
+                                <span class="no-login" style="font-style: italic; color: #94a3b8;">Nunca</span>
                             @endif
                         </div>
                     </td>
 
-                    <!-- Acciones -->
+                    
                     <td>
-                        <div class="action-buttons">
-                            <!-- Ver -->
-                            <button type="button" 
-                                    class="action-btn btn-view" 
-                                    onclick="viewUser({{ $usuario->id }})"
-                                    title="Ver Detalles">
-                                <iconify-icon icon="heroicons:eye"></iconify-icon>
-                            </button>
+                        <div class="action-buttons" style="justify-content: center;">
 
                             @php
                                 $isDueno = $usuario->roles->contains('name', 'dueño');
                             @endphp
 
                             @if(!$isDueno)
-                                <!-- Editar -->
+                                
                                 <button type="button" 
                                         class="action-btn btn-edit" 
                                         onclick="editUser({{ $usuario->id }})"
@@ -292,7 +287,7 @@
                                     <iconify-icon icon="heroicons:pencil"></iconify-icon>
                                 </button>
 
-                                <!-- Estado (toggle) -->
+                                
                                 @if($usuario->id !== auth()->id())
                                 <label class="toggle-switch user-toggle" title="Activar/Desactivar">
                                     <input type="checkbox" class="user-status-toggle" data-user-id="{{ $usuario->id }}" {{ $usuario->is_active ? 'checked' : '' }}>
@@ -300,7 +295,7 @@
                                 </label>
                                 @endif
 
-                                <!-- Eliminar -->
+                                
                                 @if($usuario->id !== auth()->id())
                                 <button type="button" 
                                         class="action-btn btn-delete" 
@@ -310,13 +305,13 @@
                                 </button>
                                 @endif
                             @else
-                                <!-- Botones protegidos para dueño -->
+                                
                                 <button type="button" 
                                         class="action-btn btn-protected" 
                                         title="Usuario Protegido - No se puede editar">
                                     <iconify-icon icon="heroicons:shield-check"></iconify-icon>
                                 </button>
-                                <!-- Sin control de estado para Dueño -->
+                                
                                 <button type="button" 
                                         class="action-btn btn-protected" 
                                         title="Usuario Protegido - No se puede eliminar">
@@ -343,30 +338,35 @@
                 @endforelse
             </tbody>
             
-            <!-- Skeleton loading for Usuarios -->
+            
             <tbody id="usuariosSkeletonBody" style="display:none;">
-                @for ($i = 0; $i < 5; $i++)
-                <tr class="skeleton-row-table">
-                    <!-- Usuario -->
+                @for ($i = 0; $i < 6; $i++)
+                <tr class="skeleton-row">
                     <td>
-                        <div class="user-cell">
-                            <div class="skeleton-avatar"></div>
-                            <div class="user-info" style="width: 100%;">
-                                <div class="skeleton-bar medium" style="margin-bottom: 4px;"></div>
-                                <div class="skeleton-bar short"></div>
+                        <div class="flex items-center gap-3">
+                            <div class="skeleton-bar skeleton-loader" style="width: 40px; height: 40px; border-radius: 50%;"></div>
+                            <div class="flex flex-col gap-2">
+                                <div class="skeleton-bar skeleton-loader" style="width: 140px; height: 16px;"></div>
+                                <div class="skeleton-bar skeleton-loader" style="width: 80px; height: 12px;"></div>
                             </div>
                         </div>
                     </td>
-                    <!-- Email -->
-                    <td><div class="skeleton-bar medium"></div></td>
-                    <!-- Roles -->
-                    <td><div class="skeleton-bar short"></div></td>
-                    <!-- Estado -->
-                    <td><div class="skeleton-bar short"></div></td>
-                    <!-- Ultimo Acceso -->
-                    <td><div class="skeleton-bar medium"></div></td>
-                    <!-- Acciones -->
-                    <td><div class="skeleton-bar actions"></div></td>
+                    <td>
+                        <div class="flex flex-col gap-2">
+                            <div class="skeleton-bar skeleton-loader" style="width: 180px; height: 16px;"></div>
+                            <div class="skeleton-bar skeleton-loader" style="width: 120px; height: 12px;"></div>
+                        </div>
+                    </td>
+                    <td><div class="skeleton-bar skeleton-loader" style="width: 100px; height: 24px; border-radius: 8px;"></div></td>
+                    <td><div class="skeleton-bar skeleton-loader" style="width: 80px; height: 24px; border-radius: 20px; margin: 0 auto;"></div></td>
+                    <td><div class="skeleton-bar skeleton-loader" style="width: 120px; height: 16px;"></div></td>
+                    <td>
+                        <div class="flex justify-center gap-2">
+                            <div class="skeleton-bar skeleton-loader" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                            <div class="skeleton-bar skeleton-loader" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                            <div class="skeleton-bar skeleton-loader" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                        </div>
+                    </td>
                 </tr>
                 @endfor
             </tbody>
@@ -374,10 +374,9 @@
     </div>
 </div>
 
-<!-- Modal Crear/Editar Usuario -->
 <div id="userModal" class="modal-profesional hidden">
     <div class="modal-profesional-container">
-        <!-- Header Profesional -->
+        
         <div class="header-profesional">
             <div class="header-content">
                 <div class="header-left">
@@ -395,12 +394,12 @@
             </div>
         </div>
 
-        <!-- Content -->
+        
         <div class="modal-content-profesional">
             <form id="userForm" enctype="multipart/form-data" novalidate>
                 <input type="hidden" id="userId" name="user_id">
 
-                <!-- Sección 1: Foto de Perfil (compacta) -->
+                
                 <div class="seccion-form seccion-azul">
                     
                     <div class="avatar-upload-modern">
@@ -413,7 +412,7 @@
                         <div class="avatar-controls-modern">
                             <input type="file" name="avatar" accept="image/*" id="avatarInput" style="display: none;">
                             
-                            <!-- Botones en fila cuando hay imagen -->
+                            
                             <div class="avatar-buttons-container" id="avatarButtonsContainer">
                                 <button type="button" class="btn-upload-moderno" onclick="document.getElementById('avatarInput').click()">
                                     <iconify-icon icon="solar:upload-bold-duotone"></iconify-icon>
@@ -425,7 +424,7 @@
                                 </button>
                             </div>
                             
-                            <!-- Información de formatos compacta -->
+                            
                             <div class="avatar-info">
                                 <span class="avatar-formats">Formatos: JPG, PNG, GIF (Máx. 2MB)</span>
                             </div>
@@ -433,7 +432,7 @@
                     </div>
                 </div>
 
-                <!-- Sección 2: Información Personal -->
+                
                 <div class="seccion-form seccion-verde">
                     <div class="seccion-header">
                         <div class="seccion-icon icon-verde">
@@ -480,7 +479,7 @@
                     </div>
                 </div>
 
-                <!-- Sección 3: Credenciales de Acceso -->
+                
                 <div class="seccion-form seccion-amarillo">
                     <div class="seccion-header">
                         <div class="seccion-icon icon-amarillo">
@@ -541,7 +540,7 @@
                     </div>
                 </div>
 
-                <!-- Sección 4: Asignación de Roles -->
+                
                 <div class="seccion-form seccion-morado">
                     <div class="seccion-header">
                         <div class="seccion-icon icon-morado">
@@ -631,7 +630,7 @@
                         @endforeach
                     </div>
                     
-                    <!-- Información compacta de roles -->
+                    
                     <div class="roles-info-compacta">
                         <iconify-icon icon="solar:info-circle-bold-duotone"></iconify-icon>
                         <span><strong>Tip:</strong> Puedes asignar múltiples roles. Los permisos se combinan automáticamente.</span>
@@ -641,7 +640,7 @@
             </form>
         </div>
         
-        <!-- Botones de Acción -->
+        
         <div class="acciones-footer">
             <button type="button" class="btn-accion btn-cancelar" onclick="closeUserModal()">
                 <iconify-icon icon="solar:close-circle-bold-duotone"></iconify-icon>
@@ -654,5 +653,4 @@
         </div>
     </div>
 </div>
-
 @endsection

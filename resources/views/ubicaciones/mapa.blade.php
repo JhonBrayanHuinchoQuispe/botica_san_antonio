@@ -11,9 +11,9 @@
         
         
 
-        <!-- Contenido de las Pestañas -->
+        
         <div id="tab-mapa" class="tab-content-modern">
-            <!-- Vista del Almacén Mejorada -->
+            
             <div class="warehouse-section-modern">
                 <div class="section-header-modern">
                     <div class="section-title-wrapper">
@@ -39,7 +39,7 @@
                     
                     
                     <div class="estantes-grid-premium warehouse-map">
-                        <!-- Los estantes se cargarán dinámicamente aquí -->
+                        
                         <div class="loading-placeholder text-center p-5">
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Cargando...</span>
@@ -259,7 +259,7 @@
                     </div>
                 </div>
 
-                <!-- Alerta mejorada de productos sin ubicar -->
+                
                 <div class="alerta-sin-ubicar-mejorada">
                     <div class="alerta-contenido-principal">
                         <div class="alerta-icon-principal">
@@ -433,7 +433,6 @@
     </div>
 </div>
 
-<!-- Modal Nuevo Estante -->
 <div id="modalNuevoEstante" class="modal-overlay hidden">
     <div class="modal-container">
         <div class="modal-header">
@@ -470,7 +469,7 @@
                 </div>
             </div>
             
-            <!-- Capacidad total calculada automáticamente -->
+            
             <div class="form-group">
                 <label>Capacidad Total (Se calcula automáticamente)</label>
                 <div class="capacidad-calculada-display">
@@ -499,7 +498,6 @@
     </div>
 </div>
 
-<!-- Modal Asignar Ubicación -->
 <div id="modalAsignarUbicacion" class="modal-overlay hidden">
     <div class="modal-container">
         <div class="modal-header">
@@ -527,7 +525,7 @@
                 <label>Seleccionar Estante *</label>
                 <select class="form-select" id="estanteAsignar" required>
                     <option value="">Seleccionar estante...</option>
-                    <!-- Se cargarán dinámicamente desde la API -->
+                    
                 </select>
             </div>
             
@@ -548,7 +546,6 @@
     </div>
 </div>
 
-<!-- Modal Asignación Masiva -->
 <div id="modalAsignacionMasiva" class="modal-overlay hidden">
     <div class="modal-container">
         <div class="modal-header">
@@ -605,7 +602,6 @@
     </div>
 </div>
 
-<!-- Modal Cambiar Ubicación -->
 <div id="modalCambiarUbicacion" class="modal-overlay hidden">
     <div class="modal-container">
         <div class="modal-header">
@@ -661,7 +657,6 @@
     </div>
 </div>
 
-<!-- Modal Eliminar Estante -->
 <div id="modalEliminarEstante" class="modal-eliminar-estante">
     <div class="modal-eliminar-contenido">
         <div class="modal-eliminar-header">
@@ -723,7 +718,6 @@
     </div>
 </div>
 
-<!-- Modal Editar Estante -->
 <div id="modalEditarEstante" class="modal-overlay hidden">
     <div class="modal-container">
         <div class="modal-header">
@@ -734,7 +728,7 @@
             <button class="modal-close-btn" id="btnCerrarEditarEstante">&times;</button>
         </div>
         <form id="formEditarEstante" class="modal-content" novalidate>
-            <!-- 1) Nombre del Estante -->
+            
             <div class="form-group">
                 <label for="editar_nombre_estante">Nombre del Estante</label>
                 <div class="input-group">
@@ -744,7 +738,7 @@
                 <div class="field-error" id="error_editar_nombre"></div>
             </div>
             
-            <!-- 2) Niveles y Columnas -->
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div class="form-group">
                     <label for="editar_numero_niveles">Número de Niveles</label>
@@ -764,7 +758,7 @@
                 </div>
             </div>
             
-            <!-- 3) Capacidad total calculada (solo lectura, estilo resaltado) -->
+            
             <div class="form-group">
                 <label>Capacidad Total (Calculada automáticamente)</label>
                 <div class="capacidad-calculada-display">
@@ -776,7 +770,7 @@
                 <input type="hidden" id="editar_capacidad_total" name="capacidad_total" value="20">
             </div>
             
-            <!-- 4) Ubicación en el local -->
+            
             <div class="form-group">
                 <label for="editar_ubicacion_local">Ubicación en el Local</label>
                 <div class="input-group">
@@ -795,7 +789,6 @@
     </div>
 </div>
 
-<!-- Estilos específicos del mapa -->
 <style>
     @import url("{{ asset('assets/css/ubicacion/shared/base.css') }}");
     @import url("{{ asset('assets/css/ubicacion/shared/modals.css') }}");
@@ -805,7 +798,7 @@
     @import url("{{ asset('assets/css/ubicacion/mapa/mapa.css') }}");
     @import url("{{ asset('assets/css/ubicacion/productos/tablas.css') }}");
 
-    /* CSS adicional para tipos de ubicación */
+    
     .ubicacion-badge.tipo-venta {
         background: linear-gradient(135deg, #dbeafe, #bfdbfe);
         border: 1px solid #3b82f6;
@@ -856,7 +849,7 @@
         text-align: center;
     }
 
-    /* Estilos para productos sin ubicar */
+    
     .prioridad-badge.alta {
         background: linear-gradient(135deg, #fee2e2, #fca5a5);
         border: 1px solid #ef4444;
@@ -1102,7 +1095,7 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
-    /* Header de tabla en rojo medio claro */
+    
     .tabla-productos-sin-ubicar thead tr {
         background: linear-gradient(135deg, #ef4444, #dc2626) !important;
         border: none !important;
@@ -1126,7 +1119,7 @@
         border-right: 1px solid #dc2626 !important;
     }
 
-    /* Responsive para la alerta */
+    
     @media (max-width: 768px) {
         .alerta-contenido-principal {
             flex-direction: column;
@@ -1167,7 +1160,7 @@
         }
     }
 
-    /* Estilos para modal de SweetAlert2 mejorado */
+    
     .swal2-confirm-custom {
         background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
         border: none !important;
@@ -1190,7 +1183,7 @@
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5) !important;
     }
 
-    /* Estilos para asignación masiva */
+    
     .btn-asignar-masivo-modern:disabled {
         opacity: 0.6;
         cursor: not-allowed;
@@ -1203,7 +1196,7 @@
         box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
 
-    /* Acciones del encabezado (consejos + nuevo estante) */
+    
     .section-actions-modern {
         display: flex;
         align-items: center;
@@ -1213,10 +1206,10 @@
         display: inline-flex;
         align-items: center;
         gap: .5rem;
-        padding: 0.75rem 1.25rem; /* mismo tamaño que nuevo estante */
-        background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); /* naranja muy suave */
-        color: #374151; /* gris oscuro agradable */
-        border: 1px solid #fed7aa; /* borde pastel */
+        padding: 0.75rem 1.25rem; 
+        background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); 
+        color: #374151; 
+        border: 1px solid #fed7aa; 
         border-radius: 0.5rem;
         font-weight: 600;
         font-size: 0.85rem;
@@ -1233,7 +1226,7 @@
     .btn-hint-modern:focus { outline: none; box-shadow: 0 0 0 3px rgba(253, 186, 116, 0.35); }
     .btn-hint-modern iconify-icon { font-size: 1.1rem; color: #f59e0b; }
 
-    /* Estilo específico del modal Nuevo Estante: header y título en blanco */
+    
     #modalNuevoEstante .modal-header {
         background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         color: #ffffff;
@@ -1251,10 +1244,10 @@
         border-radius: 12px;
     }
 
-    /* Espaciado más compacto en el modal Editar Estante */
+    
     #modalEditarEstante .modal-content { gap: 1rem; }
 
-    /* Header Editar Estante: verde medio y texto blanco */
+    
     #modalEditarEstante .modal-header {
         background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
         color: #ffffff;
@@ -1272,7 +1265,7 @@
         border-radius: 12px;
     }
 
-    /* Botón Guardar Cambios con el mismo verde medio */
+    
     #modalEditarEstante .btn.btn-primary {
         background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
         color: #ffffff !important;
@@ -1286,18 +1279,13 @@
     #modalEditarEstante .btn.btn-primary iconify-icon { color: #ffffff !important; }
 </style>
 
-<!-- Nota de ayuda al pie eliminada: se muestra mediante SweetAlert al pulsar 'Consejos para crear' -->
-
-<!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- JavaScript del Mapa - Estructura Modular -->
 <script src="{{ asset('assets/js/ubicacion/mapa/mapa.js') }}" defer></script>
 <script src="{{ asset('assets/js/ubicacion/mapa/modal_agregar.js') }}" defer></script>
 <script src="{{ asset('assets/js/ubicacion/productos/acciones.js') }}" defer></script>
 <script src="{{ asset('assets/js/ubicacion/productos/checkboxes.js') }}" defer></script>
 
-<!-- Scripts para exportaciones -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
@@ -1305,7 +1293,6 @@
 <script src="{{ asset('assets/js/ubicacion/productos/productos-ubicados.js') }}" defer></script>
 <script src="{{ asset('assets/js/ubicacion/productos/productos-sin-ubicar.js') }}" defer></script>
 
-<!-- Consejos para crear ubicaciones (SweetAlert) -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const btnConsejos = document.getElementById('btnConsejosUbicacion');

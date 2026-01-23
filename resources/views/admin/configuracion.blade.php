@@ -21,9 +21,8 @@
 
 @section('content')
 
-<!-- Estadísticas -->
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-    <!-- IGV Status -->
+    
     <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-primary-600/10 to-bg-white">
         <div class="card-body p-5">
             <div class="flex flex-wrap items-center justify-between gap-3">
@@ -58,7 +57,7 @@
         </div>
     </div>
 
-    <!-- Descuentos Status -->
+    
     <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-success-600/10 to-bg-white">
         <div class="card-body p-5">
             <div class="flex flex-wrap items-center justify-between gap-3">
@@ -93,7 +92,7 @@
         </div>
     </div>
 
-    <!-- Promociones Status -->
+    
     <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-warning-600/10 to-bg-white">
         <div class="card-body p-5">
             <div class="flex flex-wrap items-center justify-between gap-3">
@@ -124,7 +123,7 @@
         </div>
     </div>
 
-    <!-- Moneda -->
+    
     <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-info-600/10 to-bg-white">
         <div class="card-body p-5">
             <div class="flex flex-wrap items-center justify-between gap-3">
@@ -147,11 +146,10 @@
     </div>
 </div>
 
-<!-- Formulario de Configuración -->
 <form id="formConfiguracion" class="space-y-6">
     @csrf
     
-    <!-- Configuración del IGV -->
+    
     <div class="card shadow-none border border-gray-200 rounded-lg">
         <div class="card-header bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-t-lg p-4">
             <div class="flex items-center gap-2">
@@ -191,7 +189,7 @@
         </div>
     </div>
 
-    <!-- Configuración de Descuentos -->
+    
     <div class="card shadow-none border border-gray-200 rounded-lg">
         <div class="card-header bg-gradient-to-r from-success-600 to-success-700 text-white rounded-t-lg p-4">
             <div class="flex items-center gap-2">
@@ -241,7 +239,7 @@
         </div>
     </div>
 
-    <!-- Configuración de Promociones -->
+    
     <div class="card shadow-none border border-gray-200 rounded-lg">
         <div class="card-header bg-gradient-to-r from-warning-600 to-warning-700 text-white rounded-t-lg p-4">
             <div class="flex items-center gap-2">
@@ -263,7 +261,7 @@
         </div>
     </div>
 
-    <!-- Configuración de Comprobantes -->
+    
     <div class="card shadow-none border border-gray-200 rounded-lg">
         <div class="card-header bg-gradient-to-r from-info-600 to-info-700 text-white rounded-t-lg p-4">
             <div class="flex items-center gap-2">
@@ -303,7 +301,7 @@
         </div>
     </div>
 
-    <!-- Configuración General -->
+    
     <div class="card shadow-none border border-gray-200 rounded-lg">
         <div class="card-header bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-t-lg p-4">
             <div class="flex items-center gap-2">
@@ -352,7 +350,7 @@
         </div>
     </div>
 
-    <!-- Botones de acción -->
+    
     <div class="card shadow-none border border-gray-200 rounded-lg">
         <div class="card-body p-4">
             <div class="flex justify-end gap-3">

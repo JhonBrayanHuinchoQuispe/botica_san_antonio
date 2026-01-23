@@ -348,36 +348,7 @@
                     </div>
                 </div>
 
-                <!-- <div class="tab-content" id="pills-tabContent-six">
-                    <div class="tab-pane fade show active" id="pills-header-home" role="tabpanel" aria-labelledby="pills-header-home-tab" tabindex="0">
-                        <div>
-                            <h6 class="text-lg mb-2">Title</h6>
-                            <p class="text-secondary-light mb-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1400s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not </p>
-                            <p class="text-secondary-light mb-0">It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop</p>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="pills-header-details" role="tabpanel" aria-labelledby="pills-header-details-tab" tabindex="0">
-                        <div>
-                            <h6 class="text-lg mb-2">Title</h6>
-                            <p class="text-secondary-light mb-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1400s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not </p>
-                            <p class="text-secondary-light mb-0">It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop</p>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="pills-header-profile" role="tabpanel" aria-labelledby="pills-header-profile-tab" tabindex="0">
-                        <div>
-                            <h6 class="text-lg mb-2">Title</h6>
-                            <p class="text-secondary-light mb-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1400s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not </p>
-                            <p class="text-secondary-light mb-0">It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop</p>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="pills-header-settings" role="tabpanel" aria-labelledby="pills-header-settings-tab" tabindex="0">
-                        <div>
-                            <h6 class="text-lg mb-2">Title</h6>
-                            <p class="text-secondary-light mb-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1400s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not </p>
-                            <p class="text-secondary-light mb-0">It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop</p>
-                        </div>
-                    </div>
-                </div> -->
+                
             </div>
         </div>
 

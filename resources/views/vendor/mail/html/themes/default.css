@@ -1,4 +1,4 @@
-/* Base */
+﻿
 
 body,
 body *:not(html):not(style):not(br):not(tr):not(code) {
@@ -34,8 +34,6 @@ a {
 a img {
     border: none;
 }
-
-/* Typography */
 
 h1 {
     color: #3d4852;
@@ -74,8 +72,6 @@ img {
     max-width: 100%;
 }
 
-/* Layout */
-
 .wrapper {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
@@ -95,8 +91,6 @@ img {
     width: 100%;
 }
 
-/* Header */
-
 .header {
     padding: 25px 0;
     text-align: center;
@@ -109,15 +103,11 @@ img {
     text-decoration: none;
 }
 
-/* Logo */
-
 .logo {
     height: 75px;
     max-height: 75px;
     width: 75px;
 }
-
-/* Body */
 
 .body {
     -premailer-cellpadding: 0;
@@ -149,8 +139,6 @@ img {
     word-break: break-all;
 }
 
-/* Subcopy */
-
 .subcopy {
     border-top: 1px solid #e8e5ef;
     margin-top: 25px;
@@ -160,8 +148,6 @@ img {
 .subcopy p {
     font-size: 14px;
 }
-
-/* Footer */
 
 .footer {
     -premailer-cellpadding: 0;
@@ -183,8 +169,6 @@ img {
     color: #b0adc5;
     text-decoration: underline;
 }
-
-/* Tables */
 
 .table table {
     -premailer-cellpadding: 0;
@@ -212,8 +196,6 @@ img {
     max-width: 100vw;
     padding: 32px;
 }
-
-/* Buttons */
 
 .action {
     -premailer-cellpadding: 0;
@@ -262,8 +244,6 @@ img {
     border-top: 8px solid #e53e3e;
 }
 
-/* Panels */
-
 .panel {
     border-left: #2d3748 solid 4px;
     margin: 21px 0;
@@ -287,8 +267,6 @@ img {
     margin-bottom: 0;
     padding-bottom: 0;
 }
-
-/* Utilities */
 
 .break-all {
     word-break: break-all;

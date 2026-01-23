@@ -12,13 +12,13 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribut
 console.log('CSRF Token:', csrfToken); // Debug
 
 // Event Listeners al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('DOM cargado, inicializando gestión de usuarios...'); // Debug
     initializeUserManagement();
 });
 
 // Soporte para Turbo/Hotwire: re-inicializar al cargar cada visita
-document.addEventListener('turbo:load', function() {
+document.addEventListener('turbo:load', function () {
     console.log('turbo:load detectado, re-inicializando gestión de usuarios...');
     initializeUserManagement();
 });
@@ -51,22 +51,22 @@ function hideLoading() {
 function mostrarSkeletonInicial() {
     // Mostrar skeleton mientras se cargan los datos desde el servidor
     const skeletonBody = document.getElementById('usuariosSkeletonBody');
-    const tbody = document.querySelector('#usersTable tbody:not(#usuariosSkeletonBody)');
-    
+    const tbody = document.getElementById('usuariosTableBody');
+
     if (skeletonBody && tbody) {
         skeletonBody.style.display = 'table-row-group';
         tbody.style.display = 'none';
-        
+
         // Simular tiempo de carga y luego mostrar los datos reales
         setTimeout(() => {
             skeletonBody.style.display = 'none';
             tbody.style.display = 'table-row-group';
-        }, 500); // 500ms para que se aprecie el efecto
+        }, 800); // 800ms para que se aprecie mejor el efecto profesional
     }
 }
 
 // Función de test para verificar que las funciones están disponibles
-window.testViewUser = function(userId) {
+window.testViewUser = function (userId) {
     console.log('Test viewUser con ID:', userId);
     viewUser(userId);
 };
@@ -99,7 +99,7 @@ function setupEventListeners() {
     const userForm = document.getElementById('userForm');
     console.log('🔧 Configurando event listeners...');
     console.log('📝 Formulario encontrado:', userForm ? 'SÍ' : 'NO');
-    
+
     if (userForm) {
         userForm.addEventListener('submit', handleUserFormSubmit);
         console.log('✅ Event listener agregado al formulario');
@@ -123,7 +123,7 @@ function setupEventListeners() {
     }
 
     // Cerrar modal con escape
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             closeUserModal();
         }
@@ -132,7 +132,7 @@ function setupEventListeners() {
     // Cerrar modal al hacer clic fuera
     const modal = document.getElementById('userModal');
     if (modal) {
-        modal.addEventListener('click', function(e) {
+        modal.addEventListener('click', function (e) {
             if (e.target === modal) {
                 closeUserModal();
             }
@@ -140,7 +140,7 @@ function setupEventListeners() {
     }
 
     // Toggle de estado en la tabla de usuarios
-    document.addEventListener('change', function(e) {
+    document.addEventListener('change', function (e) {
         const toggle = e.target.closest('.user-status-toggle');
         if (toggle) {
             const userId = toggle.dataset.userId;
@@ -253,21 +253,31 @@ function clearFilters() {
 function openCreateUserModal() {
     isEditMode = false;
     currentUserId = null;
-    
+
     // Resetear formulario
     resetUserForm();
-    
+
+    // Quitar clase modo-editar si existe
+    const modalContainer = document.querySelector('.modal-profesional-container');
+    const userModal = document.getElementById('userModal');
+    if (userModal) {
+        userModal.classList.remove('modo-editar');
+    }
+    if (modalContainer) {
+        modalContainer.classList.remove('modo-editar');
+    }
+
     // Configurar modal para crear
     document.getElementById('modalTitle').textContent = 'Crear Nuevo Usuario';
     document.getElementById('modalIcon').setAttribute('icon', 'solar:user-plus-bold-duotone');
     document.getElementById('submitButtonText').textContent = 'Crear Usuario';
     document.getElementById('passwordRequired').style.display = 'inline';
     document.getElementById('confirmPasswordRequired').style.display = 'inline';
-    
+
     // Hacer contraseñas requeridas
     document.getElementById('password').required = true;
     document.getElementById('password_confirmation').required = true;
-    
+
     // Inicializar medidor de contraseña en estado vacío
     setTimeout(() => {
         const strengthBar = document.getElementById('password-strength');
@@ -278,10 +288,10 @@ function openCreateUserModal() {
             strengthText.textContent = 'Muy débil';
         }
     }, 100);
-    
+
     // Mostrar modal
-    document.getElementById('userModal').classList.remove('hidden');
-    
+    userModal.classList.remove('hidden');
+
     // Focus en primer campo
     setTimeout(() => {
         document.getElementById('nombres').focus();
@@ -301,35 +311,44 @@ async function editUser(userId) {
         });
 
         const data = await response.json();
-        
+
         if (data.success) {
             if (!data.user.can_edit) {
                 showAlert('warning', 'Usuario Protegido', 'Este usuario no puede ser modificado');
                 return;
             }
-            
+
             isEditMode = true;
             currentUserId = userId;
-            
+
             // Configurar modal para editar
             document.getElementById('modalTitle').textContent = 'Editar Usuario';
             document.getElementById('modalIcon').setAttribute('icon', 'solar:user-edit-bold-duotone');
             document.getElementById('submitButtonText').textContent = 'Actualizar Usuario';
             document.getElementById('passwordRequired').style.display = 'none';
             document.getElementById('confirmPasswordRequired').style.display = 'none';
-            
+
             // Hacer contraseñas opcionales
             document.getElementById('password').required = false;
             document.getElementById('password_confirmation').required = false;
-            
+
             // Cargar datos del usuario
             populateUserFormFromEdit(data.user);
-            
-            // Mostrar modal
+
+            // Agregar clase para cambiar color del header a verde (modo editar)
             const modal = document.getElementById('userModal');
+            const modalContainer = document.querySelector('.modal-profesional-container');
+            if (modal) {
+                modal.classList.add('modo-editar');
+            }
+            if (modalContainer) {
+                modalContainer.classList.add('modo-editar');
+            }
+
+            // Mostrar modal
             modal.classList.remove('hidden');
             hideLoading();
-            
+
             // Focus en primer campo
             setTimeout(() => {
                 document.getElementById('nombres').focus();
@@ -345,7 +364,15 @@ async function editUser(userId) {
 }
 
 function closeUserModal() {
-    document.getElementById('userModal').classList.add('hidden');
+    const modal = document.getElementById('userModal');
+    const modalContainer = document.querySelector('.modal-profesional-container');
+
+    modal.classList.add('hidden');
+    modal.classList.remove('modo-editar');
+    if (modalContainer) {
+        modalContainer.classList.remove('modo-editar');
+    }
+
     resetUserForm();
     currentUserId = null;
     isEditMode = false;
@@ -354,13 +381,13 @@ function closeUserModal() {
 function resetUserForm() {
     const form = document.getElementById('userForm');
     form.reset();
-    
+
     // Resetear avatar
     resetAvatarPreview();
-    
+
     // Limpiar errores de validación
     clearFormErrors();
-    
+
     // Resetear medidor de contraseña
     const strengthBar = document.getElementById('password-strength');
     const strengthText = document.getElementById('password-strength-text');
@@ -369,31 +396,31 @@ function resetUserForm() {
         strengthBar.style.width = '0%';
         strengthText.textContent = 'Muy débil';
     }
-    
+
     // Ocultar indicador de contraseñas coincidentes
     const matchIndicator = document.getElementById('password-match-indicator');
     if (matchIndicator) {
         matchIndicator.style.display = 'none';
     }
-    
+
     // Desmarcar roles y remover clase selected
     const roleCheckboxes = document.querySelectorAll('.role-checkbox-hidden');
     roleCheckboxes.forEach(checkbox => {
         checkbox.checked = false;
     });
-    
+
     // Remover clase selected de las cards de roles
     const roleCards = document.querySelectorAll('.role-card-moderno');
     roleCards.forEach(card => {
         card.classList.remove('selected');
     });
-    
+
     // Resetear placeholders y requerimientos de contraseña para modo crear
     const passwordField = document.getElementById('password');
     const confirmPasswordField = document.getElementById('password_confirmation');
     const passwordRequired = document.getElementById('passwordRequired');
     const confirmPasswordRequired = document.getElementById('confirmPasswordRequired');
-    
+
     if (passwordField) {
         passwordField.setAttribute('required', 'required');
         passwordField.placeholder = 'Mínimo 8 caracteres';
@@ -415,12 +442,12 @@ function resetAvatarPreview() {
     const avatarPlaceholder = document.getElementById('avatarPlaceholder');
     const removeBtn = document.getElementById('removeAvatarBtn');
     const buttonsContainer = document.getElementById('avatarButtonsContainer');
-    
+
     avatarImage.style.display = 'none';
     avatarPlaceholder.style.display = 'flex';
     removeBtn.style.display = 'none';
     avatarImage.src = '';
-    
+
     // Remover clase de imagen cuando no hay imagen
     if (buttonsContainer) {
         buttonsContainer.classList.remove('has-image');
@@ -433,7 +460,7 @@ function resetAvatarPreview() {
 async function loadUserData(userId) {
     try {
         showFormLoading(true);
-        
+
         const response = await fetch(`/admin/usuarios/${userId}`, {
             method: 'GET',
             headers: {
@@ -443,7 +470,7 @@ async function loadUserData(userId) {
         });
 
         const data = await response.json();
-        
+
         if (data.success) {
             populateUserForm(data.user);
         } else {
@@ -466,36 +493,36 @@ function populateUserForm(user) {
     document.getElementById('telefono').value = user.telefono || '';
     document.getElementById('cargo').value = user.cargo || '';
     document.getElementById('direccion').value = user.direccion || '';
-    
+
     // Avatar
     if (user.avatar) {
         const avatarImage = document.getElementById('avatarImage');
         const avatarPlaceholder = document.getElementById('avatarPlaceholder');
         const removeBtn = document.getElementById('removeAvatarBtn');
         const buttonsContainer = document.getElementById('avatarButtonsContainer');
-        
+
         avatarImage.src = `/storage/${user.avatar}`;
         avatarImage.style.display = 'block';
         avatarPlaceholder.style.display = 'none';
         removeBtn.style.display = 'flex';
-        
+
         // Agregar clase para botones en fila
         if (buttonsContainer) {
             buttonsContainer.classList.add('has-image');
         }
     }
-    
+
     // Roles
     if (user.roles && user.roles.length > 0) {
         const roleCheckboxes = document.querySelectorAll('.role-checkbox-hidden');
         const roleCards = document.querySelectorAll('.role-card-moderno');
-        
+
         roleCheckboxes.forEach(checkbox => {
             const roleValue = checkbox.value;
             const isSelected = user.roles.some(role => role.name === roleValue);
-            
+
             checkbox.checked = isSelected;
-            
+
             // Actualizar la card correspondiente
             if (isSelected) {
                 const roleCard = checkbox.closest('.role-card-moderno');
@@ -513,52 +540,52 @@ function populateUserForm(user) {
 async function handleUserFormSubmit(e) {
     e.preventDefault();
     console.log('🚀 Formulario enviado - handleUserFormSubmit ejecutado');
-    
+
     if (!validateUserForm()) {
         console.log('❌ Validación falló');
         return;
     }
-    
+
     console.log('✅ Validación pasó');
     const formData = new FormData(e.target);
-    
+
     // Agregar roles seleccionados
     const selectedRoles = Array.from(document.querySelectorAll('.role-checkbox-hidden:checked'))
         .map(checkbox => checkbox.value);
-    
+
     if (selectedRoles.length === 0) {
         showAlert('warning', 'Validación', 'Debe seleccionar al menos un rol');
         return;
     }
-    
+
     selectedRoles.forEach(roleId => {
         formData.append('roles[]', roleId);
     });
-    
+
     try {
         showFormLoading(true);
-        
+
         const base = `${getAppPrefix()}/admin/usuarios`;
         const url = isEditMode ? `${base}/${currentUserId}` : base;
         const method = isEditMode ? 'POST' : 'POST';
-        
+
         console.log('📡 Preparando petición:', {
             url: url,
             method: method,
             isEditMode: isEditMode,
             csrfToken: csrfToken ? 'Presente' : 'Ausente'
         });
-        
+
         if (isEditMode) {
             formData.append('_method', 'PUT');
         }
-        
+
         // Log de los datos del formulario
         console.log('📋 Datos del formulario:');
         for (let [key, value] of formData.entries()) {
             console.log(`  ${key}:`, value);
         }
-        
+
         const response = await fetch(url, {
             method: method,
             headers: {
@@ -567,11 +594,11 @@ async function handleUserFormSubmit(e) {
             },
             body: formData
         });
-        
+
         console.log('📨 Respuesta recibida:', response.status, response.statusText);
 
         const data = await response.json();
-        
+
         if (data.success) {
             showAlert('success', '¡Éxito!', data.message);
             // Preservar el modo y el ID antes de cerrar el modal
@@ -602,7 +629,7 @@ async function handleUserFormSubmit(e) {
                     }
                 } catch (_) {
                     // Si falla, al menos intentar actualizar estadísticas
-                    try { actualizarEstadisticasUsuarios(); } catch (e) {}
+                    try { actualizarEstadisticasUsuarios(); } catch (e) { }
                 }
             }
         } else {
@@ -626,10 +653,10 @@ async function handleUserFormSubmit(e) {
 function validateUserForm() {
     console.log('🔍 Iniciando validación del formulario...');
     clearFormErrors();
-    
+
     let isValid = true;
     const errors = {};
-    
+
     // Validar nombres
     const nombres = document.getElementById('nombres').value.trim();
     console.log('📝 Nombres:', nombres);
@@ -638,14 +665,14 @@ function validateUserForm() {
         isValid = false;
         console.log('❌ Error: Nombres vacío');
     }
-    
+
     // Validar apellidos
     const apellidos = document.getElementById('apellidos').value.trim();
     if (!apellidos) {
         errors.apellidos = 'Los apellidos son requeridos';
         isValid = false;
     }
-    
+
     // Validar email
     const email = document.getElementById('email').value.trim();
     if (!email) {
@@ -655,11 +682,11 @@ function validateUserForm() {
         errors.email = 'El formato del email no es válido';
         isValid = false;
     }
-    
+
     // Validar contraseñas solo en modo crear o si se están cambiando
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('password_confirmation').value;
-    
+
     if (!isEditMode || password) {
         if (!password) {
             errors.password = 'La contraseña es requerida';
@@ -668,13 +695,13 @@ function validateUserForm() {
             errors.password = 'La contraseña debe tener al menos 8 caracteres';
             isValid = false;
         }
-        
+
         if (password !== confirmPassword) {
             errors.password_confirmation = 'Las contraseñas no coinciden';
             isValid = false;
         }
     }
-    
+
     // Validar roles
     const selectedRoles = document.querySelectorAll('.role-checkbox-hidden:checked');
     console.log('👥 Roles seleccionados:', selectedRoles.length);
@@ -683,14 +710,14 @@ function validateUserForm() {
         isValid = false;
         console.log('❌ Error: No hay roles seleccionados');
     }
-    
+
     console.log('📊 Resultado de validación:', isValid ? 'VÁLIDO' : 'INVÁLIDO');
     console.log('📋 Errores encontrados:', errors);
-    
+
     if (!isValid) {
         showFormErrors(errors);
     }
-    
+
     return isValid;
 }
 
@@ -704,12 +731,12 @@ function showFormErrors(errors) {
         const input = document.getElementById(field);
         if (input) {
             input.classList.add('border-red-500');
-            
+
             // Crear mensaje de error
             const errorDiv = document.createElement('div');
             errorDiv.className = 'text-red-500 text-sm mt-1';
             errorDiv.textContent = Array.isArray(errors[field]) ? errors[field][0] : errors[field];
-            
+
             // Insertar después del input
             input.parentNode.appendChild(errorDiv);
         }
@@ -722,7 +749,7 @@ function clearFormErrors() {
     inputs.forEach(input => {
         input.classList.remove('border-red-500');
     });
-    
+
     // Remover mensajes de error
     const errorMessages = document.querySelectorAll('.text-red-500');
     errorMessages.forEach(msg => {
@@ -745,33 +772,33 @@ function setupAvatarUpload() {
 function handleAvatarUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     // Validar tipo de archivo
     if (!file.type.startsWith('image/')) {
         showAlert('warning', 'Archivo inválido', 'Solo se permiten archivos de imagen');
         e.target.value = '';
         return;
     }
-    
+
     // Validar tamaño (2MB)
     if (file.size > 2 * 1024 * 1024) {
         showAlert('warning', 'Archivo muy grande', 'La imagen no debe superar los 2MB');
         e.target.value = '';
         return;
     }
-    
+
     // Mostrar preview
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         const avatarImage = document.getElementById('avatarImage');
         const avatarPlaceholder = document.getElementById('avatarPlaceholder');
         const removeBtn = document.getElementById('removeAvatarBtn');
-        
+
         avatarImage.src = e.target.result;
         avatarImage.style.display = 'block';
         avatarPlaceholder.style.display = 'none';
         removeBtn.style.display = 'flex';
-        
+
         // Agregar clase para botones en fila
         const buttonsContainer = document.getElementById('avatarButtonsContainer');
         if (buttonsContainer) {
@@ -804,12 +831,12 @@ async function toggleUserStatus(userId) {
         });
 
         const data = await response.json();
-        
+
         if (data.success) {
             showAlert('success', '¡Éxito!', data.message);
             // Actualizar UI sin recargar: badge y estadísticas
             actualizarEstadoUsuarioEnTabla(userId, { is_active: data.is_active });
-            try { actualizarEstadisticasUsuarios(); } catch (e) {}
+            try { actualizarEstadisticasUsuarios(); } catch (e) { }
         } else {
             throw new Error(data.message || 'Error al cambiar el estado');
         }
@@ -845,7 +872,7 @@ async function resetUserPassword(userId) {
         });
 
         const data = await response.json();
-        
+
         if (data.success) {
             await Swal.fire({
                 title: '¡Contraseña reseteada!',
@@ -936,7 +963,7 @@ async function deleteUser(userId) {
         if (data.success) {
             showAlert('success', '¡Éxito!', data.message);
             eliminarUsuarioDeTabla(userId);
-            try { actualizarEstadisticasUsuarios(); } catch (e) {}
+            try { actualizarEstadisticasUsuarios(); } catch (e) { }
         } else {
             throw new Error(data.message || 'Error al eliminar el usuario');
         }
@@ -948,11 +975,11 @@ async function deleteUser(userId) {
 
 async function viewUser(userId) {
     console.log('viewUser llamado con ID:', userId); // Debug
-    
+
     try {
         console.log('Enviando petición AJAX...'); // Debug
         showLoading('Cargando datos...');
-        
+
         const response = await fetch(`${getAppPrefix()}/admin/usuarios/${userId}`, {
             method: 'GET',
             headers: {
@@ -963,14 +990,14 @@ async function viewUser(userId) {
         });
 
         console.log('Respuesta recibida:', response); // Debug
-        
+
         if (!response.ok) {
             throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
         }
-        
+
         const data = await response.json();
         console.log('Datos recibidos:', data); // Debug
-        
+
         if (data.success && data.user) {
             console.log('Datos válidos, abriendo modal...'); // Debug
             openViewUserModal(data.user);
@@ -1022,7 +1049,7 @@ function openViewUserModal(user) {
             `;
         }).join('')
         : '<div class="detail-box">Sin roles asignados</div>';
-    const hasAvatar = !!(user.avatar_url 
+    const hasAvatar = !!(user.avatar_url
         && /\.(png|jpe?g|gif|webp)$/i.test(user.avatar_url)
         && !/(80x80|placeholder|default)/i.test(user.avatar_url));
     const statusClass = user.is_active ? 'active' : 'inactive';
@@ -1116,13 +1143,13 @@ function openViewUserModal(user) {
 
     // Insertar modal en el DOM
     document.body.insertAdjacentHTML('beforeend', modalHtml);
-    
+
     const modal = document.getElementById('viewUserModal');
     if (modal) {
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
         // Cerrar al hacer click fuera del contenedor
-        modal.addEventListener('click', function(e) {
+        modal.addEventListener('click', function (e) {
             if (e.target && e.target.id === 'viewUserModal') {
                 closeViewUserModal();
             }
@@ -1134,7 +1161,7 @@ function closeViewUserModal() {
     const modal = document.getElementById('viewUserModal');
     if (modal) {
         modal.classList.remove('show');
-        
+
         setTimeout(() => {
             modal.remove();
             document.body.style.overflow = 'auto';
@@ -1146,48 +1173,48 @@ function closeViewUserModal() {
 function populateUserFormFromEdit(user) {
     // Datos básicos
     document.getElementById('userId').value = user.id;
-    
+
     // Llenar nombres y apellidos separados
     const nombresField = document.getElementById('nombres');
     const apellidosField = document.getElementById('apellidos');
-    
+
     if (nombresField) {
         nombresField.value = user.nombres || '';
     }
     if (apellidosField) {
         apellidosField.value = user.apellidos || '';
     }
-    
+
     // Otros campos
     document.getElementById('email').value = user.email || '';
-    
+
     const telefonoField = document.getElementById('telefono');
     if (telefonoField) {
         telefonoField.value = user.telefono || '';
     }
-    
+
     const direccionField = document.getElementById('direccion');
     if (direccionField) {
         direccionField.value = user.direccion || '';
     }
-    
+
     const cargoField = document.getElementById('cargo');
     if (cargoField) {
         cargoField.value = user.cargo || '';
     }
-    
+
     // Estado activo
     const isActiveCheckbox = document.getElementById('is_active');
     if (isActiveCheckbox) {
         isActiveCheckbox.checked = user.is_active;
     }
-    
+
     // En modo edición, hacer que la contraseña sea opcional
     const passwordField = document.getElementById('password');
     const confirmPasswordField = document.getElementById('password_confirmation');
     const passwordRequired = document.getElementById('passwordRequired');
     const confirmPasswordRequired = document.getElementById('confirmPasswordRequired');
-    
+
     if (passwordField) {
         passwordField.removeAttribute('required');
         passwordField.placeholder = 'Dejar vacío para mantener contraseña actual';
@@ -1202,39 +1229,39 @@ function populateUserFormFromEdit(user) {
     if (confirmPasswordRequired) {
         confirmPasswordRequired.style.display = 'none';
     }
-    
+
     // Limpiar roles primero
     const roleCheckboxes = document.querySelectorAll('input[name="roles[]"]');
     roleCheckboxes.forEach(checkbox => {
         checkbox.checked = false;
     });
-    
+
     // Limpiar selecciones visuales previas
     const roleCards = document.querySelectorAll('.role-card-moderno');
     roleCards.forEach(card => {
         card.classList.remove('selected');
     });
-    
+
     // Marcar roles seleccionados
     console.log('Roles del usuario para marcar:', user.roles); // Debug
-    
+
     if (user.roles && user.roles.length > 0) {
         user.roles.forEach(roleName => {
             console.log('Intentando marcar rol:', roleName); // Debug
-            
+
             // Buscar checkbox por nombre de rol
             const checkbox = document.querySelector(`input[name="roles[]"][value="${roleName}"]`);
-            
+
             if (checkbox) {
                 console.log('Marcando checkbox para rol:', roleName); // Debug
                 checkbox.checked = true;
-                
+
                 // Actualizar la UI visual de la card
                 const roleCard = checkbox.closest('.role-card-moderno');
                 if (roleCard && !roleCard.classList.contains('role-disabled')) {
                     roleCard.classList.add('selected');
                 }
-                
+
                 // Disparar evento change
                 checkbox.dispatchEvent(new Event('change', { bubbles: true }));
             } else {
@@ -1242,7 +1269,7 @@ function populateUserFormFromEdit(user) {
             }
         });
     }
-    
+
     console.log('Usuario cargado para edición:', user); // Debug
 }
 
@@ -1252,12 +1279,12 @@ function populateUserFormFromEdit(user) {
 function exportUsers() {
     const visibleUsers = usersData.filter(user => user.element.style.display !== 'none');
     const source = visibleUsers.length > 0 ? visibleUsers : usersData;
-    
+
     if (!source || source.length === 0) {
         showAlert('warning', 'Sin datos', 'No hay usuarios para exportar');
         return;
     }
-    
+
     const rows = source.map(user => [
         user.name || '',
         user.email || '',
@@ -1266,7 +1293,7 @@ function exportUsers() {
         (user.roles && user.roles.length ? user.roles.join(', ') : ''),
         user.isActive ? 'Activo' : 'Inactivo'
     ]);
-    
+
     (async () => {
         if (typeof XLSX === 'undefined') {
             const ok = await ensureXLSX();
@@ -1278,18 +1305,18 @@ function exportUsers() {
         const aoa = [];
         aoa.push(['Reporte de Usuarios']);
         aoa.push([]);
-        aoa.push(['Usuario','Email','Teléfono','Dirección','Roles','Estado']);
+        aoa.push(['Usuario', 'Email', 'Teléfono', 'Dirección', 'Roles', 'Estado']);
         rows.forEach(r => aoa.push(r));
         const ws = XLSX.utils.aoa_to_sheet(aoa);
         ws['!merges'] = [XLSX.utils.decode_range('A1:F1')];
-        ws['!cols'] = [{wch:24},{wch:30},{wch:14},{wch:30},{wch:28},{wch:12}];
+        ws['!cols'] = [{ wch: 24 }, { wch: 30 }, { wch: 14 }, { wch: 30 }, { wch: 28 }, { wch: 12 }];
         try {
             ws['A1'].s = { font: { bold: true, sz: 18 }, alignment: { horizontal: 'center' } };
-            ['A3','B3','C3','D3','E3','F3'].forEach(addr => { if (ws[addr]) ws[addr].s = { font: { bold: true } }; });
-        } catch (_) {}
+            ['A3', 'B3', 'C3', 'D3', 'E3', 'F3'].forEach(addr => { if (ws[addr]) ws[addr].s = { font: { bold: true } }; });
+        } catch (_) { }
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Usuarios');
-        const filename = 'reporte_usuarios_' + new Date().toISOString().slice(0,10) + '.xlsx';
+        const filename = 'reporte_usuarios_' + new Date().toISOString().slice(0, 10) + '.xlsx';
         XLSX.writeFile(wb, filename);
         showAlert('success', '¡Exportado!', 'El archivo Excel se ha descargado');
     })();
@@ -1316,7 +1343,7 @@ function togglePassword(inputId) {
     const input = document.getElementById(inputId);
     const button = input.nextElementSibling;
     const icon = button.querySelector('iconify-icon');
-    
+
     if (input.type === 'password') {
         input.type = 'text';
         icon.setAttribute('icon', 'heroicons:eye-slash');
@@ -1329,7 +1356,7 @@ function togglePassword(inputId) {
 function showFormLoading(show) {
     const submitBtn = document.querySelector('.btn-guardar');
     const submitText = document.getElementById('submitButtonText');
-    
+
     if (show) {
         submitBtn.disabled = true;
         submitText.textContent = 'Procesando...';
@@ -1397,9 +1424,9 @@ function setupFilters() {
 function checkPasswordStrength(password) {
     const strengthBar = document.getElementById('password-strength');
     const strengthText = document.getElementById('password-strength-text');
-    
+
     if (!strengthBar || !strengthText) return;
-    
+
     // Si la contraseña está vacía, resetear completamente
     if (!password || password.length === 0) {
         strengthBar.className = 'strength-fill';
@@ -1407,27 +1434,27 @@ function checkPasswordStrength(password) {
         strengthText.textContent = 'Muy débil';
         return;
     }
-    
+
     let strength = 0;
     let strengthClass = '';
     let strengthLabel = '';
-    
+
     // Verificar longitud (mínimo 6)
     if (password.length >= 6) strength += 1;
     if (password.length >= 10) strength += 1;
-    
+
     // Verificar mayúsculas
     if (/[A-Z]/.test(password)) strength += 1;
-    
+
     // Verificar minúsculas
     if (/[a-z]/.test(password)) strength += 1;
-    
+
     // Verificar números
     if (/[0-9]/.test(password)) strength += 1;
-    
+
     // Verificar símbolos
     if (/[^A-Za-z0-9]/.test(password)) strength += 1;
-    
+
     // Determinar nivel de fuerza
     if (strength <= 2) {
         strengthClass = 'weak';
@@ -1442,7 +1469,7 @@ function checkPasswordStrength(password) {
         strengthClass = 'very-strong';
         strengthLabel = 'Muy fuerte';
     }
-    
+
     // Aplicar estilos
     strengthBar.className = `strength-fill ${strengthClass}`;
     strengthText.textContent = strengthLabel;
@@ -1453,9 +1480,9 @@ function checkPasswordMatch() {
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('password_confirmation').value;
     const indicator = document.getElementById('password-match-indicator');
-    
+
     if (!indicator) return;
-    
+
     // Solo mostrar si ambos campos tienen contenido y coinciden
     if (confirmPassword && password && password === confirmPassword) {
         indicator.style.display = 'block';
@@ -1468,7 +1495,7 @@ function checkPasswordMatch() {
 function updateProgressBar(step) {
     const progressBar = document.getElementById('progressBar');
     if (!progressBar) return;
-    
+
     const totalSteps = 4; // Avatar, Personal, Credenciales, Roles
     const percentage = (step / totalSteps) * 100;
     progressBar.style.width = `${percentage}%`;
@@ -1480,15 +1507,15 @@ function previewAvatar(input) {
     const avatarImage = document.getElementById('avatarImage');
     const avatarPlaceholder = document.getElementById('avatarPlaceholder');
     const removeBtn = document.getElementById('removeAvatarBtn');
-    
+
     if (file) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             avatarImage.src = e.target.result;
             avatarImage.style.display = 'block';
             avatarPlaceholder.style.display = 'none';
             removeBtn.style.display = 'flex';
-            
+
             // Agregar clase para botones en fila
             const buttonsContainer = document.getElementById('avatarButtonsContainer');
             if (buttonsContainer) {
@@ -1505,13 +1532,13 @@ function removeAvatar() {
     const avatarPlaceholder = document.getElementById('avatarPlaceholder');
     const removeBtn = document.getElementById('removeAvatarBtn');
     const avatarInput = document.getElementById('avatarInput');
-    
+
     avatarImage.src = '';
     avatarImage.style.display = 'none';
     avatarPlaceholder.style.display = 'flex';
     removeBtn.style.display = 'none';
     avatarInput.value = '';
-    
+
     // Remover clase de imagen cuando no hay imagen
     const buttonsContainer = document.getElementById('avatarButtonsContainer');
     if (buttonsContainer) {
@@ -1520,37 +1547,37 @@ function removeAvatar() {
 }
 
 // Event listeners para el modal
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Avatar input
     const avatarInput = document.getElementById('avatarInput');
     if (avatarInput) {
-        avatarInput.addEventListener('change', function() {
+        avatarInput.addEventListener('change', function () {
             previewAvatar(this);
         });
     }
-    
+
     // Password strength
     const passwordInput = document.getElementById('password');
     if (passwordInput) {
-        passwordInput.addEventListener('input', function() {
+        passwordInput.addEventListener('input', function () {
             checkPasswordStrength(this.value);
             checkPasswordMatch(); // También verificar coincidencia
             updateProgressBar(3);
         });
-        
+
         // También verificar en keyup para detectar cuando se borra todo
-        passwordInput.addEventListener('keyup', function() {
+        passwordInput.addEventListener('keyup', function () {
             checkPasswordStrength(this.value);
             checkPasswordMatch();
         });
-        
+
         // Verificar cuando pierde el foco
-        passwordInput.addEventListener('blur', function() {
+        passwordInput.addEventListener('blur', function () {
             checkPasswordStrength(this.value);
             checkPasswordMatch();
         });
     }
-    
+
     // Password confirmation
     const confirmPasswordInput = document.getElementById('password_confirmation');
     if (confirmPasswordInput) {
@@ -1558,22 +1585,22 @@ document.addEventListener('DOMContentLoaded', function() {
         confirmPasswordInput.addEventListener('keyup', checkPasswordMatch);
         confirmPasswordInput.addEventListener('blur', checkPasswordMatch);
     }
-    
+
     // Form inputs para progreso
     const personalInputs = ['nombres', 'apellidos'];
     personalInputs.forEach(id => {
         const input = document.getElementById(id);
         if (input) {
-            input.addEventListener('input', function() {
+            input.addEventListener('input', function () {
                 updateProgressBar(2);
             });
         }
     });
-    
+
     // Roles selection
     const roleCheckboxes = document.querySelectorAll('.role-checkbox-hidden');
     roleCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
+        checkbox.addEventListener('change', function () {
             updateProgressBar(4);
         });
     });
@@ -1583,7 +1610,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function togglePassword(inputId) {
     const input = document.getElementById(inputId);
     const toggleIcon = document.getElementById(inputId + '-toggle-icon');
-    
+
     if (input.type === 'password') {
         input.type = 'text';
         if (toggleIcon) {
@@ -1605,15 +1632,15 @@ function togglePassword(inputId) {
 function toggleRoleSelection(roleId) {
     const card = document.querySelector(`.role-card-moderno[onclick="toggleRoleSelection(${roleId})"]`);
     const checkbox = document.getElementById(`role-${roleId}`);
-    
+
     // No permitir seleccionar roles deshabilitados
     if (card && card.classList.contains('role-disabled')) {
         return;
     }
-    
+
     if (checkbox && card && !checkbox.disabled) {
         checkbox.checked = !checkbox.checked;
-        
+
         if (checkbox.checked) {
             card.classList.add('selected');
         } else {
@@ -1627,7 +1654,7 @@ function submitUserForm() {
     console.log('🎯 submitUserForm() ejecutado');
     const form = document.getElementById('userForm');
     console.log('📝 Formulario encontrado en submitUserForm:', form ? 'SÍ' : 'NO');
-    
+
     if (form) {
         console.log('🚀 Disparando evento submit...');
         const event = new Event('submit', {
@@ -1650,86 +1677,98 @@ function submitUserForm() {
 function agregarUsuarioATabla(usuario) {
     const tbody = document.querySelector('.users-table tbody');
     if (!tbody) return;
-    
+
     // Ocultar mensaje de "no hay usuarios" si existe
     const emptyRow = tbody.querySelector('.empty-state');
     if (emptyRow) {
         emptyRow.parentElement.style.display = 'none';
     }
-    
+
     // Crear nueva fila
     const newRow = document.createElement('tr');
     newRow.className = 'user-row';
     newRow.setAttribute('data-user-id', usuario.id);
-    
+    newRow.setAttribute('data-telefono', usuario.telefono || '');
+    newRow.setAttribute('data-direccion', usuario.direccion || '');
+
     // Generar HTML de la fila
     newRow.innerHTML = `
         <td>
             <div class="user-cell">
-                <div class="user-avatar">
-                    ${usuario.avatar ? 
-                        `<img src="${usuario.avatar_url}" alt="Avatar de ${usuario.name}">` :
-                        `<div class="avatar-placeholder">${usuario.initials || usuario.name.charAt(0).toUpperCase()}</div>`
-                    }
+                <div class="user-avatar" style="border: 2px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    ${usuario.avatar ?
+            `<img src="${usuario.avatar_url}" alt="Avatar de ${usuario.name}">` :
+            `<div class="avatar-placeholder" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">${usuario.initials || (usuario.name ? usuario.name.charAt(0).toUpperCase() : 'U')}</div>`
+        }
                 </div>
                 <div class="user-info">
-                    <div class="user-name">${usuario.name}</div>
-                    <div class="user-meta">${usuario.cargo || 'Sin cargo'}</div>
+                    <div class="user-name" style="font-weight: 700; color: #1e293b; font-size: 0.95rem;">${usuario.name}</div>
+                    <div class="user-phone" style="font-size: 0.75rem; color: #64748b; font-weight: 600;">
+                        <iconify-icon icon="solar:phone-bold" style="font-size: 0.8rem; margin-right: 2px;"></iconify-icon>
+                        ${usuario.telefono || 'Sin teléfono'}
+                    </div>
                 </div>
             </div>
         </td>
         <td>
-            <div class="email-cell">${usuario.email}</div>
-        </td>
-        <td>
-            <div class="roles-cell">
-                ${usuario.roles && usuario.roles.length > 0 ? 
-                    usuario.roles.map(role => `<span class="role-badge">${role.name}</span>`).join('') :
-                    '<span class="role-badge role-badge-empty">Sin roles</span>'
-                }
+            <div class="contact-cell">
+                <div class="email-cell" style="font-weight: 600; color: #475569; font-size: 0.875rem; display: flex; align-items: center; gap: 4px;">
+                    <iconify-icon icon="solar:letter-bold" style="color: #64748b; font-size: 0.9rem;"></iconify-icon>
+                    ${usuario.email}
+                </div>
+                <div class="address-cell" style="font-size: 0.75rem; color: #64748b; font-weight: 500; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+                    <iconify-icon icon="solar:map-point-bold" style="color: #94a3b8; font-size: 0.85rem;"></iconify-icon>
+                    ${usuario.direccion || '-'}
+                </div>
             </div>
         </td>
         <td>
-            <div class="status-cell">
-                ${usuario.estado === 'activo' || usuario.is_active ? 
-                    '<span class="status-badge status-active">Activo</span>' :
-                    '<span class="status-badge status-inactive">Inactivo</span>'
-                }
+            <div class="roles-container">
+                ${usuario.roles && usuario.roles.length > 0 ?
+            usuario.roles.map(role => `<span class="role-badge" style="background-color: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 0.25rem 0.6rem; border-radius: 8px;">${role.display_name || role.name}</span>`).join('') :
+            '<span class="no-role-badge">Sin roles</span>'
+        }
+            </div>
+        </td>
+        <td style="text-align: center;">
+            <span class="status-badge ${usuario.is_active ? 'status-active' : 'status-inactive'}" style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">
+                <iconify-icon icon="${usuario.is_active ? 'solar:check-circle-bold' : 'solar:close-circle-bold'}"></iconify-icon>
+                ${usuario.is_active ? 'Activo' : 'Inactivo'}
+            </span>
+        </td>
+        <td>
+            <div class="last-login-cell" style="font-size: 0.8rem; font-weight: 600; color: #64748b;">
+                <span style="color: #1e293b;">Hace un momento</span>
             </div>
         </td>
         <td>
-            <div class="date-cell">
-                ${new Date().toLocaleDateString('es-PE')}
-            </div>
-        </td>
-        <td>
-            <div class="actions-cell">
-                <button class="action-btn action-btn-view" onclick="viewUser(${usuario.id})" title="Ver detalles">
+            <div class="action-buttons" style="justify-content: center;">
+                <button type="button" class="action-btn btn-view" onclick="viewUser(${usuario.id})" title="Ver Detalles">
                     <iconify-icon icon="heroicons:eye"></iconify-icon>
                 </button>
-                <button class="action-btn action-btn-edit" onclick="editUser(${usuario.id})" title="Editar">
+                <button type="button" class="action-btn btn-edit" onclick="editUser(${usuario.id})" title="Editar Usuario">
                     <iconify-icon icon="heroicons:pencil"></iconify-icon>
                 </button>
-                <label class="toggle-switch" title="Activar/Desactivar">
-                    <input type="checkbox" class="user-status-toggle" data-user-id="${usuario.id}" ${usuario.estado === 'activo' || usuario.is_active ? 'checked' : ''}>
+                <label class="toggle-switch user-toggle" title="Activar/Desactivar">
+                    <input type="checkbox" class="user-status-toggle" data-user-id="${usuario.id}" ${usuario.is_active ? 'checked' : ''}>
                     <span class="toggle-slider"></span>
                 </label>
-                <button class="action-btn action-btn-delete" onclick="deleteUser(${usuario.id})" title="Eliminar">
+                <button type="button" class="action-btn btn-delete" onclick="deleteUser(${usuario.id})" title="Eliminar Usuario">
                     <iconify-icon icon="heroicons:trash"></iconify-icon>
                 </button>
             </div>
         </td>
     `;
-    
+
     // Agregar la fila al final de la tabla
     tbody.appendChild(newRow);
-    
+
     // Animar la nueva fila
     newRow.style.backgroundColor = '#dcfce7';
     setTimeout(() => {
         newRow.style.backgroundColor = '';
     }, 2000);
-    
+
     // Actualizar datos locales
     loadUsersData();
 }
@@ -1739,78 +1778,102 @@ function agregarUsuarioATabla(usuario) {
  */
 function actualizarUsuarioEnTabla(userId, usuario) {
     console.log('🔄 Actualizando usuario en tabla:', userId, usuario);
-    
+
     // Buscar la fila por data-user-id
     let row = document.querySelector(`tr[data-user-id="${userId}"]`);
-    
-    // Si no se encuentra por data-user-id, buscar por el ID en la primera celda
-    if (!row) {
-        const rows = document.querySelectorAll('#usuarios-table tbody tr');
-        for (let r of rows) {
-            if (r.cells[0] && r.cells[0].textContent.trim() === userId.toString()) {
-                row = r;
-                break;
-            }
-        }
-    }
-    
+
     if (!row) {
         console.warn('❌ No se encontró la fila del usuario para actualizar:', userId);
         return;
     }
-    
+
     console.log('✅ Fila encontrada, actualizando contenido...');
-    
-    // Actualizar información del usuario
-    const userNameEl = row.querySelector('.user-name');
-    const userMetaEl = row.querySelector('.user-meta');
-    const emailEl = row.querySelector('.email-cell');
-    const avatarEl = row.querySelector('.user-avatar');
-    const rolesEl = row.querySelector('.roles-cell');
-    const statusEl = row.querySelector('.status-cell');
-    
-    if (userNameEl) userNameEl.textContent = usuario.name || '';
-    if (userMetaEl) userMetaEl.textContent = usuario.cargo || 'Sin cargo';
-    if (emailEl) emailEl.textContent = usuario.email || '';
-    
-    // Actualizar avatar
-    if (avatarEl) {
-        avatarEl.innerHTML = usuario.avatar ? 
-            `<img src="${usuario.avatar_url}" alt="Avatar de ${usuario.name}">` :
-            `<div class="avatar-placeholder">${usuario.initials || (usuario.name ? usuario.name.charAt(0).toUpperCase() : 'U')}</div>`;
+
+    // Actualizar atributos de datos
+    row.setAttribute('data-telefono', usuario.telefono || '');
+    row.setAttribute('data-direccion', usuario.direccion || '');
+
+    // Actualizar celdas
+    const cells = row.cells;
+
+    // 1. Usuario
+    const userCell = cells[0];
+    if (userCell) {
+        userCell.innerHTML = `
+            <div class="user-cell">
+                <div class="user-avatar" style="border: 2px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    ${usuario.avatar ?
+                `<img src="${usuario.avatar_url}" alt="Avatar de ${usuario.name}">` :
+                `<div class="avatar-placeholder" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">${usuario.initials || (usuario.name ? usuario.name.charAt(0).toUpperCase() : 'U')}</div>`
+            }
+                </div>
+                <div class="user-info">
+                    <div class="user-name" style="font-weight: 700; color: #1e293b; font-size: 0.95rem;">${usuario.name}</div>
+                    <div class="user-phone" style="font-size: 0.75rem; color: #64748b; font-weight: 600;">
+                        <iconify-icon icon="solar:phone-bold" style="font-size: 0.8rem; margin-right: 2px;"></iconify-icon>
+                        ${usuario.telefono || 'Sin teléfono'}
+                    </div>
+                </div>
+            </div>
+        `;
     }
-    
-    // Actualizar roles
-    if (rolesEl) {
-        rolesEl.innerHTML = usuario.roles && usuario.roles.length > 0 ? 
-            usuario.roles.map(role => `<span class="role-badge">${role.name}</span>`).join('') :
-            '<span class="role-badge role-badge-empty">Sin roles</span>';
+
+    // 2. Contacto
+    const contactCell = cells[1];
+    if (contactCell) {
+        contactCell.innerHTML = `
+            <div class="contact-cell">
+                <div class="email-cell" style="font-weight: 600; color: #475569; font-size: 0.875rem; display: flex; align-items: center; gap: 4px;">
+                    <iconify-icon icon="solar:letter-bold" style="color: #64748b; font-size: 0.9rem;"></iconify-icon>
+                    ${usuario.email}
+                </div>
+                <div class="address-cell" style="font-size: 0.75rem; color: #64748b; font-weight: 500; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+                    <iconify-icon icon="solar:map-point-bold" style="color: #94a3b8; font-size: 0.85rem;"></iconify-icon>
+                    ${usuario.direccion || '-'}
+                </div>
+            </div>
+        `;
     }
-    
-    // Actualizar estado
-    if (statusEl) {
-        const activo = (typeof usuario.estado !== 'undefined') ? (usuario.estado === 'activo' || usuario.estado === true) : !!usuario.is_active;
-        statusEl.innerHTML = activo ?
-            '<span class="status-badge status-active">Activo</span>' :
-            '<span class="status-badge status-inactive">Inactivo</span>';
+
+    // 3. Roles
+    const rolesCell = cells[2];
+    if (rolesCell) {
+        rolesCell.innerHTML = `
+            <div class="roles-container">
+                ${usuario.roles && usuario.roles.length > 0 ?
+                usuario.roles.map(role => `<span class="role-badge" style="background-color: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 0.25rem 0.6rem; border-radius: 8px;">${role.display_name || role.name}</span>`).join('') :
+                '<span class="no-role-badge">Sin roles</span>'
+            }
+            </div>
+        `;
     }
-    
-    // Actualizar toggle de estado
+
+    // 4. Estado
+    const statusCell = cells[3];
+    if (statusCell) {
+        statusCell.innerHTML = `
+            <span class="status-badge ${usuario.is_active ? 'status-active' : 'status-inactive'}" style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">
+                <iconify-icon icon="${usuario.is_active ? 'solar:check-circle-bold' : 'solar:close-circle-bold'}"></iconify-icon>
+                ${usuario.is_active ? 'Activo' : 'Inactivo'}
+            </span>
+        `;
+    }
+
+    // Actualizar toggle de estado en la última celda
     const toggle = row.querySelector('.user-status-toggle');
     if (toggle) {
-        const activo = (typeof usuario.estado !== 'undefined') ? (usuario.estado === 'activo' || usuario.estado === true) : !!usuario.is_active;
-        toggle.checked = activo;
+        toggle.checked = usuario.is_active;
     }
-    
+
     // Animar la fila actualizada
     row.style.transition = 'background-color 0.3s ease';
     row.style.backgroundColor = '#dbeafe';
     setTimeout(() => {
         row.style.backgroundColor = '';
     }, 2000);
-    
+
     console.log('✅ Usuario actualizado dinámicamente en la tabla');
-    
+
     // Actualizar datos locales
     loadUsersData();
 }
@@ -1821,27 +1884,32 @@ function actualizarUsuarioEnTabla(userId, usuario) {
 function actualizarEstadoUsuarioEnTabla(userId, usuario) {
     const row = document.querySelector(`tr[data-user-id="${userId}"]`);
     if (!row) return;
-    
+
+    const isActive = usuario.is_active;
+
     // Actualizar badge de estado
-    const statusEl = row.querySelector('.status-cell');
-    if (statusEl) {
-        statusEl.innerHTML = usuario.estado === 'activo' || usuario.is_active ? 
-            '<span class="status-badge status-active">Activo</span>' :
-            '<span class="status-badge status-inactive">Inactivo</span>';
+    const statusCell = row.cells[3];
+    if (statusCell) {
+        statusCell.innerHTML = `
+            <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}" style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">
+                <iconify-icon icon="${isActive ? 'solar:check-circle-bold' : 'solar:close-circle-bold'}"></iconify-icon>
+                ${isActive ? 'Activo' : 'Inactivo'}
+            </span>
+        `;
     }
-    
+
     // Actualizar toggle
     const toggle = row.querySelector('.user-status-toggle');
     if (toggle) {
-        toggle.checked = usuario.estado === 'activo' || usuario.is_active;
+        toggle.checked = isActive;
     }
-    
+
     // Animar la fila
     row.style.backgroundColor = '#fef3c7';
     setTimeout(() => {
         row.style.backgroundColor = '';
     }, 2000);
-    
+
     // Actualizar datos locales
     loadUsersData();
 }
@@ -1852,19 +1920,19 @@ function actualizarEstadoUsuarioEnTabla(userId, usuario) {
 function eliminarUsuarioDeTabla(userId) {
     const row = document.querySelector(`tr[data-user-id="${userId}"]`);
     if (!row) return;
-    
+
     // Animar eliminación
     row.style.backgroundColor = '#fecaca';
     row.style.transform = 'scale(0.95)';
     row.style.opacity = '0.5';
-    
+
     setTimeout(() => {
         row.remove();
-        
+
         // Verificar si quedan usuarios
         const tbody = document.querySelector('.users-table tbody');
         const remainingRows = tbody.querySelectorAll('.user-row');
-        
+
         if (remainingRows.length === 0) {
             // Mostrar mensaje de tabla vacía
             const emptyRow = document.createElement('tr');
@@ -1883,7 +1951,7 @@ function eliminarUsuarioDeTabla(userId) {
             `;
             tbody.appendChild(emptyRow);
         }
-        
+
         // Actualizar datos locales
         loadUsersData();
     }, 500);
@@ -1896,36 +1964,28 @@ function actualizarEstadisticasUsuarios() {
     // Contar usuarios actuales en la tabla
     const rows = document.querySelectorAll('.users-table tbody .user-row');
     const totalUsuarios = rows.length;
-    
+
     let activosCount = 0;
-    let conRolesCount = 0;
-    
+    let inactivosCount = 0;
+
     rows.forEach(row => {
-        // Contar activos
-        const statusBadge = row.querySelector('.status-active');
-        if (statusBadge) {
+        // Contar activos e inactivos
+        const statusActive = row.querySelector('.status-active');
+        if (statusActive) {
             activosCount++;
-        }
-        
-        // Contar con roles
-        const roleBadges = row.querySelectorAll('.role-badge:not(.role-badge-empty)');
-        if (roleBadges.length > 0) {
-            conRolesCount++;
+        } else {
+            inactivosCount++;
         }
     });
-    
-    // Actualizar valores en las estadísticas si existen
-    const statCards = document.querySelectorAll('.stat-value');
-    if (statCards[0]) statCards[0].textContent = totalUsuarios;
-    if (statCards[1]) statCards[1].textContent = activosCount;
-    if (statCards[2]) statCards[2].textContent = conRolesCount;
-    
-    // Actualizar porcentajes si existen
-    const percentageElements = document.querySelectorAll('.stat-change');
-    if (percentageElements[0] && totalUsuarios > 0) {
-        const activosPercent = Math.round((activosCount / totalUsuarios) * 100);
-        percentageElements[0].innerHTML = `<iconify-icon icon="heroicons:arrow-trending-up"></iconify-icon>+${activosPercent}% Activos`;
-    }
+
+    // Actualizar valores en las nuevas tarjetas de métricas
+    const totalCard = document.querySelector('.reportes-metric-card.gold .reportes-metric-value-medium');
+    const activosCard = document.querySelector('.reportes-metric-card.teal .reportes-metric-value-medium');
+    const inactivosCard = document.querySelector('.reportes-metric-card.red .reportes-metric-value-medium');
+
+    if (totalCard) totalCard.textContent = totalUsuarios;
+    if (activosCard) activosCard.textContent = activosCount;
+    if (inactivosCard) inactivosCard.textContent = inactivosCount;
 }
 
 /**
@@ -1937,10 +1997,10 @@ function actualizarEstadisticasUsuarios() {
 function renderUsuariosTabla(usuarios) {
     const tbody = document.querySelector('.users-table tbody');
     if (!tbody) return;
-    
+
     // Limpiar tabla
     tbody.innerHTML = '';
-    
+
     if (!usuarios || usuarios.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -1959,21 +2019,21 @@ function renderUsuariosTabla(usuarios) {
         `;
         return;
     }
-    
+
     // Renderizar cada usuario
     usuarios.forEach(usuario => {
         const row = document.createElement('tr');
         row.className = 'user-row';
         row.setAttribute('data-user-id', usuario.id);
-        
+
         row.innerHTML = `
             <td>
                 <div class="user-cell">
                     <div class="user-avatar">
-                        ${usuario.avatar ? 
-                            `<img src="${usuario.avatar_url}" alt="Avatar de ${usuario.name}">` :
-                            `<div class="avatar-placeholder">${usuario.initials || (usuario.name ? usuario.name.charAt(0).toUpperCase() : 'U')}</div>`
-                        }
+                        ${usuario.avatar ?
+                `<img src="${usuario.avatar_url}" alt="Avatar de ${usuario.name}">` :
+                `<div class="avatar-placeholder">${usuario.initials || (usuario.name ? usuario.name.charAt(0).toUpperCase() : 'U')}</div>`
+            }
                     </div>
                     <div class="user-info">
                         <div class="user-name">${usuario.name}</div>
@@ -1986,26 +2046,26 @@ function renderUsuariosTabla(usuarios) {
             </td>
             <td>
                 <div class="roles-cell">
-                    ${usuario.roles && usuario.roles.length > 0 ? 
-                        usuario.roles.map(role => `<span class="role-badge">${role.name}</span>`).join('') :
-                        '<span class="role-badge role-badge-empty">Sin roles</span>'
-                    }
+                    ${usuario.roles && usuario.roles.length > 0 ?
+                usuario.roles.map(role => `<span class="role-badge">${role.name}</span>`).join('') :
+                '<span class="role-badge role-badge-empty">Sin roles</span>'
+            }
                 </div>
             </td>
             <td>
                 <div class="status-cell">
-                    ${usuario.estado === 'activo' || usuario.is_active ? 
-                        '<span class="status-badge status-active">Activo</span>' :
-                        '<span class="status-badge status-inactive">Inactivo</span>'
-                    }
+                    ${usuario.estado === 'activo' || usuario.is_active ?
+                '<span class="status-badge status-active">Activo</span>' :
+                '<span class="status-badge status-inactive">Inactivo</span>'
+            }
                 </div>
             </td>
             <td>
                 <div class="last-access-cell">
-                    ${usuario.last_login_at ? 
-                        new Date(usuario.last_login_at).toLocaleDateString('es-PE') : 
-                        'Nunca'
-                    }
+                    ${usuario.last_login_at ?
+                new Date(usuario.last_login_at).toLocaleDateString('es-PE') :
+                'Nunca'
+            }
                 </div>
             </td>
             <td>
@@ -2026,27 +2086,27 @@ function renderUsuariosTabla(usuarios) {
                 </div>
             </td>
         `;
-        
+
         tbody.appendChild(row);
     });
-    
+
     // Actualizar datos locales
     loadUsersData();
 }
 
 async function recargarTablaUsuarios() {
     console.log('🔄 Recargando tabla de usuarios...');
-    
+
     try {
         // Mostrar skeleton loading
         const skeleton = document.getElementById('usuariosSkeleton');
         const tbody = document.querySelector('#usersTable tbody') || document.querySelector('.users-table tbody');
-        
+
         if (skeleton && tbody) {
             skeleton.style.display = 'block';
             tbody.style.display = 'none';
         }
-        
+
         // Hacer petición AJAX para obtener datos actualizados
         const apiUrl = window.USERS_API_URL || (new URL('/admin/usuarios/api', window.location.origin)).href;
         const response = await fetch(apiUrl, {
@@ -2056,23 +2116,23 @@ async function recargarTablaUsuarios() {
             }
         });
         if (!response.ok) throw new Error('Error al recargar los usuarios');
-        
+
         const data = await response.json();
         if (data.success && Array.isArray(data.data)) {
             // Renderizar tabla con los nuevos datos (clave correcta: data)
             renderUsuariosTabla(data.data);
-            
+
             // Ocultar skeleton y mostrar tabla
             if (skeleton && tbody) {
                 skeleton.style.display = 'none';
                 tbody.style.display = '';
             }
-            
+
             console.log('✅ Tabla de usuarios recargada exitosamente');
         }
     } catch (error) {
         console.error('Error al recargar tabla:', error);
-        
+
         // Ocultar skeleton en caso de error
         const skeleton = document.getElementById('usuariosSkeleton');
         const tbody = document.querySelector('#usersTable tbody') || document.querySelector('.users-table tbody');
@@ -2080,7 +2140,7 @@ async function recargarTablaUsuarios() {
             skeleton.style.display = 'none';
             tbody.style.display = '';
         }
-        
+
         // Mostrar mensaje de error
         showAlert('error', 'Error', 'No se pudo recargar la tabla de usuarios');
     }

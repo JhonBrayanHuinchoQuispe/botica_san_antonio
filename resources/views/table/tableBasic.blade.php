@@ -74,7 +74,7 @@
                         </table>
                     </div>
                 </div>
-            </div><!-- card end -->
+            </div>
         </div>
         <div class="col-span-12 lg:col-span-6">
             <div class="card border-0 overflow-hidden">
@@ -153,7 +153,7 @@
                         </table>
                     </div>
                 </div>
-            </div><!-- card end -->
+            </div>
         </div>
         <div class="col-span-12 lg:col-span-6">
             <div class="card border-0 overflow-hidden">
@@ -262,7 +262,7 @@
                         </table>
                     </div>
                 </div>
-            </div><!-- card end -->
+            </div>
         </div>
         <div class="col-span-12 lg:col-span-6">
             <div class="card border-0 overflow-hidden">
@@ -346,7 +346,7 @@
                         </table>
                     </div>
                 </div>
-            </div><!-- card end -->
+            </div>
         </div>
         <div class="col-span-12 lg:col-span-6">
             <div class="card border-0 overflow-hidden">
@@ -445,7 +445,7 @@
                         </table>
                     </div>
                 </div>
-            </div><!-- card end -->
+            </div>
         </div>
         <div class="col-span-12 lg:col-span-6">
             <div class="card border-0 overflow-hidden">
@@ -523,7 +523,7 @@
                         </table>
                     </div>
                 </div>
-            </div><!-- card end -->
+            </div>
         </div>
         <div class="col-span-12">
             <div class="card border-0 overflow-hidden">
@@ -623,7 +623,7 @@
                         </table>
                     </div>
                 </div>
-            </div><!-- card end -->
+            </div>
         </div>
     </div>
 

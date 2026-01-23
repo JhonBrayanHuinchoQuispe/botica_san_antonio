@@ -4,7 +4,7 @@
     $title='Radio';
     $subTitle = 'Components / Radio';
     $script = '<script>
-    // =============================== Upload Single Image js start here ================================================
+
     const fileInput = document.getElementById("upload-file");
     const imagePreview = document.getElementById("uploaded-img__preview");
     const uploadedImgContainer = document.querySelector(".uploaded-img");
@@ -22,9 +22,7 @@
         uploadedImgContainer.classList.add("hidden");
         fileInput.value = "";
     });
-    // =============================== Upload Single Image js End here ================================================
 
-    // ================================================ Upload Multiple image js Start here ================================================
     const fileInputMultiple = document.getElementById("upload-file-multiple");
     const uploadedImgsContainer = document.querySelector(".uploaded-imgs-container");
 
@@ -56,55 +54,39 @@
             });
         });
 
-        // Clear the file input so the same file(s) can be uploaded again if needed
         fileInputMultiple.value = "";
     });
-    // ================================================ Upload Multiple image js End here  ================================================
 
-    // ================================================ Upload image & show it\'s name js start  ================================================
     document.getElementById("file-upload-name").addEventListener("change", function(event) {
         var fileInput = event.target;
         var fileList = fileInput.files;
         var ul = document.getElementById("uploaded-img-names");
 
-        // Add show-uploaded-img-name class to the ul element if not already added
         ul.classList.add("show-uploaded-img-name");
 
-        // Append each uploaded file name as a list item with Font Awesome and Iconify icons
         for (var i = 0; i < fileList.length; i++) {
             var li = document.createElement("li");
             li.classList.add("uploaded-image-name-list", "text-primary-600", "fw-semibold", "d-flex", "align-items-center", "gap-2");
 
-            // Create the Link Iconify icon element
             var iconifyIcon = document.createElement("iconify-icon");
             iconifyIcon.setAttribute("icon", "ph:link-break-light");
             iconifyIcon.classList.add("text-xl", "text-secondary-light");
 
-            // Create the Cross Iconify icon element
             var crossIconifyIcon = document.createElement("iconify-icon");
             crossIconifyIcon.setAttribute("icon", "radix-icons:cross-2");
             crossIconifyIcon.classList.add("remove-image", "text-xl", "text-secondary-light", "text-hover-danger-600");
 
-            // Add event listener to remove the image on click
             crossIconifyIcon.addEventListener("click", (function(liToRemove) {
                 return function() {
-                    ul.removeChild(liToRemove); // Remove the corresponding list item
-                };
-            })(li)); // Pass the current list item as a parameter to the closure
-
-            // Append both icons to the list item
-            li.appendChild(iconifyIcon);
-
-            // Append the file name text to the list item
+                    ul.removeChild(liToRemove);
             li.appendChild(document.createTextNode(" " + fileList[i].name));
 
             li.appendChild(crossIconifyIcon);
 
-            // Append the list item to the unordered list
             ul.appendChild(li);
         }
     });
-    // ================================================ Upload image & show it\'s name js end ================================================
+
                 </script>';
 @endphp
 

@@ -103,7 +103,7 @@
                     </table>
                 </div>
                 <div class="table-hscroll-track"><div class="table-hscroll-thumb"></div></div>
-                    <!-- Skeleton loading for Presentaciones -->
+                    
                     <div id="presentacionesSkeleton" class="skeleton-table" style="display:none;">
                         @for ($i = 0; $i < 10; $i++)
                             <div class="skeleton-row">
@@ -119,7 +119,7 @@
                         @endfor
                     </div>
                 </div>
-                <!-- Paginación estilo Historial de Ventas -->
+                
                 <div id="presentaciones-pagination" class="historial-pagination-improved">
                     <div class="historial-pagination-info">
                         <p class="text-sm text-gray-700" id="presentaciones-pagination-info">Mostrando 0 a 0 de 0 presentaciones</p>
@@ -131,9 +131,8 @@
     </div>
 </div>
 
-<!-- Modal Agregar Presentación -->
-<div id="modalAgregarPresentacion" class="modal-presentacion-overlay" style="display:none;">
-    <div class="modal-presentacion-container">
+<div id="modalAgregarPresentacion" class="modal-presentacion-overlay z-[1050]" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div class="modal-presentacion-container z-[1050]">
         <div class="modal-presentacion-header">
             <iconify-icon icon="ic:round-add-circle"></iconify-icon>
             <span>Agregar Presentación</span>
@@ -159,9 +158,8 @@
     </div>
 </div>
 
-<!-- Modal Editar Presentación -->
-<div id="modalEditarPresentacion" class="modal-presentacion-overlay" style="display:none;">
-    <div class="modal-presentacion-container">
+<div id="modalEditarPresentacion" class="modal-presentacion-overlay z-[1050]" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div class="modal-presentacion-container z-[1050]">
         <div class="modal-presentacion-header-edit">
             <iconify-icon icon="lucide:edit"></iconify-icon>
             <span>Editar Presentación</span>
@@ -190,7 +188,7 @@
 @endsection
 
 <style>
-/* Toggle switch minimal styles */
+
 .tabla-presentaciones td { vertical-align: middle; }
 .estado-cell { text-align: center; }
 .tabla-presentaciones td[data-label="Acciones"] { display: flex; align-items: center; gap: 12px; }
@@ -200,14 +198,14 @@
 .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .2s; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
 .toggle-switch input:checked + .toggle-slider { background-color: #10b981; }
 .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
-/* Inputs con ícono (igual que Categorías) */
+
 .input-icon-group { position: relative; }
 .input-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 18px; }
 .input-with-icon { padding-left: 2.5rem; }
 </style>
 
 <style>
-/* Buscador unificado */
+
 .search-group { display:flex; align-items:center; gap:.5rem; border:1px solid #E9EDF5; border-radius:12px; padding:0 .85rem; height:44px; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,0.035); }
 .search-group:focus-within { border-color:#8b5cf6; box-shadow:0 0 0 2px rgba(139,92,246,.35); }
 .search-icon { color:#64748b; font-size:18px; }
@@ -217,14 +215,14 @@
 .registros-por-pagina-select { border:1px solid #E9EDF5; border-radius:12px; background:#fff; padding:.25rem .75rem; min-height:44px; box-shadow:0 1px 2px rgba(0,0,0,0.035); }
 .registros-por-pagina-select:focus { outline:none; border-color:#8b5cf6; box-shadow:0 0 0 2px rgba(139,92,246,.35); }
 .filtro-estado-group .registros-por-pagina-select { border:1px solid #E9EDF5; }
-/* Campos de presentación (grid y chips) */
+
 .presentacion-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 8px; }
 .form-field label { font-size:.85rem; color:#374151; display:block; margin-bottom:6px; }
 .form-field .hint { color:#6b7280; font-size:.75rem; }
 .chips { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
 .chip { padding: 4px 8px; font-size:.75rem; border-radius:9999px; background:#f1f5f9; color:#374151; border:1px solid #e5e7eb; display:inline-flex; align-items:center; gap:6px; }
 .chip iconify-icon { font-size:16px; color:#64748b; }
-/* Skeleton loading (Presentaciones) */
+
 .skeleton-table { padding: 8px 0; }
  .skeleton-row { display:grid; grid-template-columns: 64px 1fr 2fr 140px 170px; gap: 16px; align-items:center; padding: 14px 10px; border-bottom: 1px solid #f1f5f9; }
 .skeleton-bar { display:block; height: 16px; border-radius: 8px; background: linear-gradient(90deg, #e5e7eb 25%, #f1f5f9 37%, #e5e7eb 63%); background-size: 400% 100%; animation: skeleton-shimmer 1.2s ease-in-out infinite; }
@@ -235,7 +233,7 @@
 .skeleton-dot { width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(90deg, #e5e7eb 25%, #f1f5f9 37%, #e5e7eb 63%); background-size: 400% 100%; animation: skeleton-shimmer 1.2s ease-in-out infinite; justify-self:start; }
 @keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .skeleton-bar, .skeleton-dot { animation: none; } }
-/* Estado badges y descripción con icono */
+
 .estado-badge { display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .6rem; border-radius:9999px; font-weight:600; font-size:.85rem; }
 .estado-badge .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
 .estado-badge-activo { background:#d1fae5; color:#059669; }
@@ -244,7 +242,7 @@
 .estado-badge-inactivo .dot { background:#ef4444; }
 .desc-with-icon { display:inline-flex; align-items:center; gap:.4rem; color:#374151; }
 .desc-icon { color:#64748b; font-size:18px; }
-/* Scroll horizontal personalizado bajo la tabla */
+
 .table-hscroll-track{height:10px;background:#e5e7eb;border-radius:9999px;margin-top:10px;position:relative;display:none;width:100%}
 .table-hscroll-thumb{height:10px;background:#9ca3af;border-radius:9999px;width:60px;position:absolute;left:0}
 .table-hscroll{scrollbar-width:none}
@@ -252,11 +250,11 @@
 </style>
 
 <script>
-    // Inyectar datos del servidor a JavaScript para una carga inicial rápida
+
     window.presentacionesIniciales = @json($presentaciones ?? []);
     document.addEventListener('DOMContentLoaded', () => {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        // Mostrar/ocultar botón limpiar del buscador
+
         const buscarInput = document.getElementById('buscarPresentacion');
         const clearBtn = document.getElementById('clearBuscarPresentacion');
         if (buscarInput && clearBtn) {
@@ -315,7 +313,6 @@
     });
 </script>
 
-<!-- Overlay de carga para edición -->
 <style>
 .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.6); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 9999; }
 .loading-overlay .loading-spinner {
@@ -353,7 +350,7 @@
     'label' => 'Cargando datos...'
 ])
 <style>
-/* Paginación estilo historial (rojo) */
+
 .historial-pagination-improved { padding: 1.5rem 2rem; border-top: 1px solid #e5e7eb; display:flex; justify-content:between; align-items:center; gap:1rem; background:white; }
 .historial-pagination-info { flex:1; }
 .historial-pagination-controls { display:flex; align-items:center; gap:.5rem; }

@@ -41,7 +41,7 @@
                         </div>
                     </div>
                 </div>
-            </div><!-- card end -->
+            </div>
             <div class="card border-0 mt-6">
                 <div class="card-header">
                     <h6 class="text-lg font-semibold mb-0">Input Group</h6>
@@ -102,7 +102,7 @@
                         </div>
                     </div>
                 </div>
-            </div><!-- card end -->
+            </div>
         </div>
         <div class="md:col-span-6 col-span-12">
             <div class="card border-0">
@@ -125,7 +125,7 @@
                         </div>
                     </div>
                 </div>
-            </div><!-- card end -->
+            </div>
             <div class="card border-0 mt-6">
                 <div class="card-header">
                     <h6 class="text-lg font-semibold mb-0">File Input Sizing</h6>
@@ -146,7 +146,7 @@
                         </div>
                     </div>
                 </div>
-            </div><!-- card end -->
+            </div>
             <div class="card border-0 mt-6">
                 <div class="card-header">
                     <h6 class="text-lg font-semibold mb-0">Custom Forms</h6>

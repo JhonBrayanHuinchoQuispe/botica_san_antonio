@@ -9,15 +9,14 @@
     height: 100%;
     background: #ffffff !important;
     z-index: 9999;
-    display: none;
+    display: none !important;
     justify-content: center;
     align-items: center;
-    transition: all 0.2s ease-out; /* ⚡ Más rápido: 0.2s en lugar de 0.3s */
+    transition: all 0.2s ease-out;
     opacity: 0;
     visibility: hidden;
-    /* ⚡ Optimización GPU */
     will-change: opacity, transform, visibility;
-    transform: translateZ(0); /* Force hardware acceleration */
+    transform: translateZ(0);
     pointer-events: none;
 }
 

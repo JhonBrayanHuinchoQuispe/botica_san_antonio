@@ -16,18 +16,18 @@
 <div class="estante-detalle-page">
     <div class="card">
         <div class="card-body">
-            <!-- Botón de Volver -->
+            
             <a href="{{ route('ubicaciones.mapa') }}" class="btn-action btn-back">
                 <iconify-icon icon="solar:arrow-left-linear"></iconify-icon>
                 <span>Volver al Mapa</span>
             </a>
 
-            <!-- Encabezado -->
+            
             <div class="page-header">
                 <h1>{{ $estante->nombre }}</h1>
             </div>
 
-            <!-- Foto del Estante -->
+            
             <div class="foto-container" style="background-image: url('{{ $estante->foto_url }}');">
                 <div class="foto-overlay">
                     <button class="btn-action-foto">
@@ -37,7 +37,7 @@
                 </div>
             </div>
 
-            <!-- Barra de acciones de niveles -->
+            
             <div class="niveles-actions-header">
                 <button class="btn-action btn-edit">
                     <iconify-icon icon="solar:pen-new-square-bold-duotone"></iconify-icon>
@@ -45,7 +45,7 @@
                 </button>
             </div>
 
-            <!-- Niveles del Estante -->
+            
             <div class="niveles-container">
                 @if(isset($estante->niveles) && count($estante->niveles) > 0)
                     @foreach($estante->niveles as $nivel)
@@ -60,7 +60,7 @@
                             <div class="productos-grid">
                                 @foreach($nivel->productos as $producto)
                                     @if($producto->nombre)
-                                        <!-- Card de Producto -->
+                                        
                                         <div class="producto-card">
                                             <div class="producto-info">
                                                 <h4 class="producto-nombre">{{ $producto->nombre }}</h4>
@@ -77,7 +77,7 @@
                                             </div>
                                         </div>
                                     @else
-                                        <!-- Card de Espacio Vacío -->
+                                        
                                         <div class="producto-card empty-slot">
                                             <iconify-icon icon="solar:archive-minimalistic-linear"></iconify-icon>
                                             <p>Espacio Vacío</p>

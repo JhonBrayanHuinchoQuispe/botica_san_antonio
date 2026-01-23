@@ -16,7 +16,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <!-- Estadísticas -->
+                    
                     <div class="row mb-4">
                         <div class="col-lg-3 col-6">
                             <div class="small-box bg-info">
@@ -64,7 +64,7 @@
                         </div>
                     </div>
 
-                    <!-- Filtros -->
+                    
                     <div class="row mb-3">
                         <div class="col-md-3">
                             <label for="filtro-fecha-desde">Desde:</label>
@@ -92,7 +92,7 @@
                         </div>
                     </div>
 
-                    <!-- Tabla de comprobantes -->
+                    
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped" id="tabla-comprobantes">
                             <thead>
@@ -108,7 +108,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Los datos se cargan via AJAX -->
+                                
                             </tbody>
                         </table>
                     </div>
@@ -118,7 +118,6 @@
     </div>
 </div>
 
-<!-- Modal para ver detalles -->
 <div class="modal fade" id="modalDetalles" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -129,7 +128,7 @@
                 </button>
             </div>
             <div class="modal-body" id="contenido-detalles">
-                <!-- Contenido cargado dinámicamente -->
+                
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
@@ -185,17 +184,15 @@ $(document).ready(function() {
         ],
         order: [[0, 'desc']],
         language: {
-            url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json'
+            url: '
         }
     });
 
-    // Aplicar filtros
     $('#aplicarFiltros').click(function() {
         tabla.ajax.reload();
         cargarEstadisticas();
     });
 
-    // Actualizar estados
     $('#actualizarEstados').click(function() {
         let btn = $(this);
         btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Actualizando...');
@@ -220,7 +217,6 @@ $(document).ready(function() {
         });
     });
 
-    // Ver detalles
     $(document).on('click', '.btn-detalles', function() {
         let ventaId = $(this).data('venta-id');
         
@@ -234,7 +230,6 @@ $(document).ready(function() {
         });
     });
 
-    // Verificar estado individual
     $(document).on('click', '.btn-verificar', function() {
         let btn = $(this);
         let ventaId = btn.data('venta-id');
@@ -261,7 +256,6 @@ $(document).ready(function() {
         });
     });
 
-    // Regenerar comprobante
     $(document).on('click', '.btn-regenerar', function() {
         if (!confirm('¿Está seguro de regenerar este comprobante?')) return;
         
@@ -290,7 +284,6 @@ $(document).ready(function() {
         });
     });
 
-    // Cargar estadísticas iniciales
     cargarEstadisticas();
 
     function cargarEstadisticas() {

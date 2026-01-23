@@ -30,7 +30,7 @@
                     </p>
                 </div>
                 
-                <!-- Mensaje de éxito -->
+                
                 @if (session('status'))
                     <div class="alert alert-success" role="alert">
                         <i class="fas fa-check-circle me-2"></i>
@@ -85,13 +85,11 @@
             const submitBtn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
             const btnLoading = document.getElementById('btnLoading');
-            
-            // Deshabilitar botón y mostrar spinner
+
             submitBtn.disabled = true;
             btnText.style.display = 'none';
             btnLoading.style.display = 'inline';
-            
-            // Cambiar cursor
+
             submitBtn.style.cursor = 'wait';
         });
     </script>

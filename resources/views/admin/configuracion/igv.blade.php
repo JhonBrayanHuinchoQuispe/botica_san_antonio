@@ -45,7 +45,6 @@
     background: #f8fafc;
 }
 
-/* Caret sólo para selects, no para inputs */
 select.form-control-modern {
     appearance: none;
     -webkit-appearance: none;
@@ -139,7 +138,7 @@ select.form-control-modern:active {
                     <form id="formConfiguracionIgv" onsubmit="guardarConfiguracionIgv(event)">
                         @csrf
                         <div class="space-y-8 max-w-6xl">
-                            <!-- Primera fila: Estado y Porcentaje -->
+                            
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">
@@ -173,7 +172,7 @@ select.form-control-modern:active {
                                 </div>
                             </div>
 
-                            <!-- Segunda fila: Nombre del impuesto -->
+                            
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">
@@ -191,7 +190,7 @@ select.form-control-modern:active {
                                     </div>
                                 </div>
 
-                                <!-- Mostrar IGV en Tickets (derecha) -->
+                                
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">
                                         <iconify-icon icon="solar:ticket-bold-duotone" class="text-lg mr-2"></iconify-icon>
@@ -263,9 +262,8 @@ async function guardarConfiguracionIgv(event) {
     }
 }
 
-// Inicializar formulario
 document.addEventListener('DOMContentLoaded', function() {
-    // Formulario listo
+
 });
 </script>
 @endsection

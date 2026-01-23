@@ -227,7 +227,7 @@
         }
         
         .print-button {
-            display: none; /* Ocultar botón de imprimir */
+            display: none; 
         }
     </style>
 </head>
@@ -235,7 +235,7 @@
 
     
     <div class="ticket-container">
-        <!-- Header -->
+        
         <div class="header">
             @php
                 $logoSrc = !empty($configuracion) && !empty($configuracion->logo_empresa)
@@ -257,7 +257,7 @@
             <div class="company-info">{{ strtoupper($emailEmpresa) }}</div>
         </div>
         
-        <!-- Ticket Info -->
+        
         <div class="ticket-info">
             <div class="ticket-title">BOLETA SIMPLE</div>
             <div class="ticket-number">N° {{ $venta->numero_venta }}</div>
@@ -299,7 +299,7 @@
             </div>
         </div>
         
-        <!-- Items -->
+        
         <div class="items-section">
             <table class="items-table">
                 <colgroup>
@@ -329,7 +329,7 @@
             </table>
         </div>
         
-        <!-- Totals -->
+        
         <div class="totals-section">
             @php
                 $subTotal = isset($venta->subtotal) ? (float)$venta->subtotal : (isset($venta->total) ? (float)$venta->total : 0);
@@ -357,7 +357,7 @@
             </div>
         </div>
         
-        <!-- Payment Info -->
+        
         @if($venta->metodo_pago)
         <div style="text-align: left; margin-top: 8px; font-size: 12px;">
             <strong>Met. Pago:</strong> {{ ucfirst($venta->metodo_pago) }}
@@ -373,7 +373,7 @@
         </div>
         @endif
         
-        <!-- Footer -->
+        
         <div class="footer">
             <div style="font-weight: 700; font-size: 12px;">¡Gracias por su compra!</div>
             <div style="margin-top: 8px; font-size: 12px; border-top: 1px dashed #000; padding-top: 5px;">

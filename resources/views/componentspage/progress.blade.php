@@ -3,22 +3,19 @@
     $title='Progress Bar';
     $subTitle = 'Components / Progress Bar';
     $script = '<script>
-    // Floating progress bar
+
     $(".progress-wrapper").each(function() {
         var percentage = $(this).attr("data-perc");
         var floatingLabel = $(this).find(".floating-label");
 
-        // Set CSS variable to be used in keyframes
         floatingLabel.css("--left-percentage", percentage);
 
-        // Trigger reflow to restart animation
-        floatingLabel[0].offsetWidth; // Force reflow
+        floatingLabel[0].offsetWidth;
         floatingLabel.css("animation-name", "none");
-        floatingLabel.css("left", percentage); // Ensure final position is correct
+        floatingLabel.css("left", percentage);
         floatingLabel.css("animation-name", "animateFloatingLabel");
     });
 
-    // Semi Circle progress bar
     $(".progressBar").each(function() {
         var $bar = $(this).find(".circleBar");
         var $val = $(this).find(".barNumber");
@@ -33,13 +30,7 @@
             easing: "swing",
             step: function(p) {
                 $bar.css({
-                    transform: "rotate(" + (45 + (p * 1.8)) + "deg)", // 100%=180° so: ° = % * 1.8
-                    // 45 is to add the needed rotation to have the green borders at the bottom
-                });
-                $val.text(p | 0);
-            }
-        });
-    });
+                    transform: "rotate(" + (45 + (p * 1.8)) + "deg)",
     </script>';
 
 @endphp

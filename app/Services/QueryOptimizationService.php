@@ -24,8 +24,8 @@ class QueryOptimizationService
                 $qq->where('nombre', 'like', $like)
                    ->orWhere('categoria', 'like', $like)
                    ->orWhere('marca', 'like', $like)
-                   ->orWhere('concentracion', 'like', $like)
-                   ->orWhere('presentacion', 'like', $like);
+                   ->orWhere('concentracion', 'like', $like);
+                   // REMOVIDO: ->orWhere('presentacion', 'like', $like);
                 if (Schema::hasColumn('productos', 'codigo_barras')) {
                     $qq->orWhere('codigo_barras', 'like', $like);
                 }
@@ -196,10 +196,11 @@ class QueryOptimizationService
             ->where('productos.stock_actual', '>', 0)
             ->select([
                 'productos.id', 'productos.nombre', 'productos.codigo_barras',
-                'productos.concentracion', 'productos.presentacion', 'productos.precio_venta',
+                'productos.concentracion', 'productos.precio_venta',
+                // REMOVIDO: 'productos.presentacion',
                 'productos.stock_actual', 'productos.imagen', 'productos.ubicacion_almacen',
                 'productos.categoria', 'productos.marca', 'productos.fecha_vencimiento',
-                'productos.estado', DB::raw('v.total_vendido')
+                DB::raw('v.total_vendido')
             ])
             ->orderByDesc('v.total_vendido')
             ->limit($limite)

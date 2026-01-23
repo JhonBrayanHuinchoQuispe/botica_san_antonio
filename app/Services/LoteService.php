@@ -160,6 +160,10 @@ class LoteService
         $lotes = ProductoUbicacion::where('producto_id', $productoId)
             ->where('estado_lote', ProductoUbicacion::ESTADO_ACTIVO)
             ->where('cantidad', '>', 0)
+            ->where(function($query) {
+                $query->whereNull('fecha_vencimiento')
+                      ->orWhere('fecha_vencimiento', '>=', now()->toDateString());
+            })
             ->orderBy('fecha_vencimiento', 'asc') // FIFO: primero los que vencen antes
             ->orderBy('fecha_ingreso', 'asc')    // En caso de misma fecha, primero los más antiguos
             ->get();
@@ -219,6 +223,11 @@ class LoteService
                 // Validar que el lote esté activo para la venta
                 if ($lote->estado_lote !== ProductoUbicacion::ESTADO_ACTIVO) {
                     throw new \Exception("El lote seleccionado no está activo para venta. Estado actual: {$lote->estado_lote}");
+                }
+
+                // BLOQUEO ESTRICTO: Validar fecha de vencimiento
+                if ($lote->fecha_vencimiento && $lote->fecha_vencimiento->isPast()) {
+                    throw new \Exception("¡BLOQUEO DE SEGURIDAD! El lote {$lote->lote} ya venció el {$lote->fecha_vencimiento->format('d/m/Y')}. No se puede vender por normativa sanitaria.");
                 }
                 
                 if ($lote->cantidad < $cantidad) {

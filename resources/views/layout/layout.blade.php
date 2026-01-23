@@ -1,20 +1,14 @@
-<!-- meta tags and other links -->
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
-
-<!-- ⚡ PRELOAD RECURSOS CRÍTICOS PARA VELOCIDAD MÁXIMA -->
-<link rel="preload" href="{{ asset('assets/images/logotipo.png') }}" as="image" type="image/png">
-<link rel="preload" href="{{ asset('assets/css/preloader.css') }}" as="style">
-<link rel="preload" href="{{ asset('assets/js/app.js') }}" as="script">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://code.iconify.design">
-
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
 <x-head />
-
-
 <body class="bg-neutral-100" data-turbo="true">
-
-    <!-- 🔇 Silenciar logs de consola globalmente (mantener errores) -->
+    <div id="preloader">
+        <div class="preloader-content">
+            <img src="{{ asset('assets/images/logotipo.png') }}" alt="logo" loading="eager" decoding="sync">
+            <div class="loading-text">Botica San Antonio</div>
+        </div>
+    </div>
+    
     <script>
         (function(){
             var noop = function(){};
@@ -24,21 +18,10 @@
                 console.debug = noop;
                 console.warn = noop;
             } catch(e) {}
-            // Mantener console.error para errores reales
         })();
     </script>
 
-    <!-- ⚡ PRELOADER GLOBAL: oculto por defecto, se muestra sólo si se necesita -->
-    <div id="preloader">
-        <div class="preloader-content">
-            <img src="{{ asset('assets/images/logotipo.png') }}" alt="logo" loading="eager" decoding="sync">
-            <div class="loading-text">Botica San Antonio</div>
-        </div>
-    </div>
-
-    <!-- ⚡ SCRIPT PRINCIPAL - Manejo del ocultamiento del preloader -->
     <script>
-        // 🧠 MANEJO GLOBAL DEL OCULTAMIENTO
         (function() {
             const preloader = document.getElementById('preloader');
             if (!preloader) return;
@@ -61,36 +44,30 @@
                         preloader.remove();
                     }
                 }, 300);
-                // Silenciado: log de ocultamiento del preloader
             }
-            
-            // Ocultar cuando esté listo
+
             function checkAndHide() {
                 const elapsedTime = performance.now() - startTime;
-                const minShowTime = 600; // Tiempo mínimo visible global
-                const remainingTime = Math.max(0, minShowTime - elapsedTime);
-                setTimeout(hidePreloader, remainingTime);
+                const minShowTime = 600;
+                
+                if (document.readyState === 'complete') {
+                    const remainingTime = Math.max(0, minShowTime - elapsedTime);
+                    setTimeout(hidePreloader, remainingTime);
+                }
             }
-            
-            // Triggers para ocultar
+
             if (document.readyState === 'complete') {
                 checkAndHide();
-            } else if (document.readyState === 'interactive') {
-                // DOM listo pero recursos pendientes
-                setTimeout(checkAndHide, 150);
             } else {
-                document.addEventListener('DOMContentLoaded', () => {
-                    setTimeout(checkAndHide, 200);
-                }, { once: true });
-                
                 window.addEventListener('load', checkAndHide, { once: true });
+                document.addEventListener('DOMContentLoaded', () => {
+                    setTimeout(checkAndHide, 1500);
+                }, { once: true });
             }
-            
-            // Fallback de seguridad global
+
             const maxShowTime = 6000;
             setTimeout(() => {
                 if (!isHidden) {
-                    // Silenciado: log de timeout del preloader
                     hidePreloader();
                 }
             }, maxShowTime);
@@ -115,25 +92,18 @@
             } catch(e) {}
         })();
     </script>
-                
-    <main class="dashboard-main {{ request()->cookie('sidebar_collapsed') === '1' ? 'active' : '' }}">
 
+    <main class="dashboard-main {{ request()->cookie('sidebar_collapsed') === '1' ? 'active' : '' }}">
         <x-navbar />
         <div class="dashboard-main-body">
-            
             <x-breadcrumb title='{{ isset($title) ? $title : "" }}' subTitle='{{ isset($subTitle) ? $subTitle : "" }}' />
-
             @yield('content')
-        
         </div>
         <x-footer />
-
     </main>
 
-    <!-- 🔔 Sistema de Notificaciones en Tiempo Real -->
     <script src="{{ asset('assets/js/notifications/notifications.js') }}" defer></script>
     
-    <!-- 🔌 Echo + Pusher (CDN) para tiempo real -->
     <script>
         window.__ECHO_CONFIG__ = {
             key: "{{ config('broadcasting.connections.pusher.key') }}",
@@ -147,14 +117,11 @@
     <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.0/dist/echo.iife.js" defer></script>
     <script src="{{ asset('assets/js/realtime/echo-init.js') }}" defer></script>
     
-    <!-- ⚡ OPTIMIZADOR DE RENDIMIENTO GLOBAL -->
     <script src="{{ asset('assets/js/performance-optimizer.js') }}" defer></script>
     
     <x-script  script='{!! isset($script) ? $script : "" !!}' />
     
-    <!-- ⚡ Carga diferida de Iconify para no bloquear -->
     <script>
-        // Cargar Iconify después de que todo esté listo para máxima velocidad
         window.addEventListener('load', function() {
             const script = document.createElement('script');
             script.src = 'https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js';
@@ -164,14 +131,11 @@
         });
     </script>
 
-    <!-- 🔔 Web Push: solicitar permiso en la primera interacción y suscribir -->
     <script>
         (function(){
             var vapid = "{{ config('services.push.vapid_public') }}";
             if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
-            if (!vapid) return; // aún no activado
-
-            // Garantizar registro del SW
+            if (!vapid) return;
             navigator.serviceWorker.register('/sw.js').catch(function(){});
 
             function urlBase64ToUint8Array(base64String) {
@@ -206,7 +170,6 @@
                 } catch(e) {}
             }
 
-            // Primera interacción del usuario dispara la solicitud de permiso
             var once = function(){
                 window.removeEventListener('click', once);
                 window.removeEventListener('keydown', once);
@@ -218,9 +181,5 @@
             window.addEventListener('touchstart', once, { once: true });
         })();
     </script>
-
-
 </body>
-
 </html>
-<!-- Panel de pruebas eliminado para producción -->

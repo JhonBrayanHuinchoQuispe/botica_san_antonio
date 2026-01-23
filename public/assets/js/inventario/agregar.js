@@ -346,8 +346,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Helpers para editar: cargar selects
+    // COMENTADO: Ya no cargamos presentaciones del catálogo antiguo
     async function cargarPresentacionesEnSelectEditar(valorSeleccionado = '') {
+        /*
         try {
             const res = await fetch('/inventario/presentacion/api');
             const data = await res.json();
@@ -361,6 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         } catch(e) { console.error(e); }
+        */
     }
 
     async function cargarProveedoresEditarSeguro(valorSeleccionado = '', nombreProveedor = '') {
@@ -470,12 +472,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 'edit-codigo_barras': producto.codigo_barras,
                 'edit-stock_actual': producto.stock_actual,
                 'edit-stock_minimo': producto.stock_minimo,
-                'edit-precio_compra': producto.precio_compra,
-                'edit-precio_venta': producto.precio_venta,
-                'edit-fecha_fabricacion': producto.fecha_fabricacion || '',
+                'precio_compra_base_edit': producto.precio_compra,
+                'precio_venta_base_edit': producto.precio_venta,
                 'edit-fecha_vencimiento': producto.fecha_vencimiento || ''
             };
-            Object.entries(campos).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val ?? ''; });
+            Object.entries(campos).forEach(([id, val]) => { 
+                const el = document.getElementById(id); 
+                if (el) {
+                    el.value = val ?? '';
+                    // Disparar evento input para cálculos automáticos
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
 
             // Selects - await all async operations
             await Promise.all([

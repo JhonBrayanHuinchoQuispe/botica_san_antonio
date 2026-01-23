@@ -4,86 +4,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const buscarProductoInput = document.getElementById('buscar-producto');
     const productoIdInput = document.getElementById('producto-id');
     const resultadosContainer = document.getElementById('resultados-busqueda');
-    // Proveedor (solo selección)
     const proveedorSelect = document.getElementById('proveedor-select');
-    const btnProcesar = document.getElementById('btn-procesar-entrada');
     const btnRegistrar = document.getElementById('btn-registrar-entrada');
+    const btnLimpiarTodo = document.getElementById('btn-limpiar-todo');
     const btnLimpiarProducto = document.getElementById('btn-limpiar-producto');
 
-    // Configuración de búsqueda
-    let timeoutBusqueda = null;
-    let productoSeleccionado = null;
+    // Elementos de precios y stock
+    const inputCantidad = document.getElementById('input-cantidad');
+    const inputPrecioCompra = document.getElementById('input-precio-compra');
+    const inputPrecioVenta = document.getElementById('input-precio-venta');
+    const stockActualEl = document.getElementById('preview-stock-actual');
+    const stockNuevoEl = document.getElementById('preview-stock-nuevo');
 
-    // Inicializar eventos
-    if (buscarProductoInput) {
-        buscarProductoInput.addEventListener('input', manejarBusquedaProducto);
-        buscarProductoInput.addEventListener('focus', mostrarResultados);
-    }
-
-    if (proveedorSelect) {
-        proveedorSelect.addEventListener('change', validarFormulario);
-    }
-
-    if (btnLimpiarProducto) {
-        btnLimpiarProducto.addEventListener('click', limpiarProductoSeleccionado);
-    }
-
-    if (form) {
-        form.addEventListener('submit', procesarEntrada);
-        // Agregar event listeners para validación en tiempo real
-        form.addEventListener('input', validarFormulario);
-        form.addEventListener('change', validarFormulario);
-        // Recalcular vista previa de stock
-        form.addEventListener('input', actualizarPreviewStock);
-        form.addEventListener('change', actualizarPreviewStock);
-        // Set min on date field to today
-        const fechaInput = document.querySelector('input[name="fecha_vencimiento"]');
-        if (fechaInput) {
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth()+1).padStart(2,'0');
-            const dd = String(today.getDate()).padStart(2,'0');
-            fechaInput.min = `${yyyy}-${mm}-${dd}`;
-        }
-    }
-
-    // Validación inicial
-    validarFormulario();
-    
-    // Ocultar botón limpiar inicialmente
-    ocultarBotonLimpiar();
-
-    // Función para manejar la búsqueda de productos
-    function manejarBusquedaProducto(e) {
-        const termino = e.target.value.trim();
-        
-        // Mostrar/ocultar botón limpiar basado en si hay texto
-        if (termino.length > 0) {
-            mostrarBotonLimpiar();
-        } else {
-            ocultarBotonLimpiar();
-        }
-        
-        // Limpiar timeout anterior
-        if (timeoutBusqueda) {
-            clearTimeout(timeoutBusqueda);
-        }
-
-        if (termino.length < 2) {
-            ocultarResultados();
-            limpiarSeleccion();
-            return;
-        }
-
-        // Debounce para evitar muchas peticiones
-        timeoutBusqueda = setTimeout(() => {
-            buscarProductos(termino);
-        }, 300);
-    }
-
-    let lotesActivos = [];
-
-    // Elementos del DOM para lotes
+    // Elementos de Lote
     const checkLoteExistente = document.getElementById('check-lote-existente');
     const inputLoteTexto = document.getElementById('input-lote-texto');
     const containerLoteNuevo = document.getElementById('container-lote-nuevo');
@@ -92,687 +25,527 @@ document.addEventListener('DOMContentLoaded', function() {
     const inputFechaVencimiento = document.getElementById('input-fecha-vencimiento');
     const existingLoteIdInput = document.getElementById('existing-lote-id');
 
-    // Inicializar estado de campos de lote
-    if (checkLoteExistente) {
-        checkLoteExistente.addEventListener('change', toggleModoLote);
-        checkLoteExistente.disabled = true; // Deshabilitado hasta que se seleccione producto
-        checkLoteExistente.parentElement.title = "Seleccione un producto primero";
+    // Elementos de Presentaciones y Footer
+    const containerInferior = document.getElementById('container-inferior');
+    const sectionPresentaciones = document.getElementById('section-presentaciones');
+    const listaPresentaciones = document.getElementById('lista-presentaciones-precios');
+
+    // Estado global
+    let timeoutBusqueda = null;
+    let productoSeleccionado = null;
+    let lotesActivos = [];
+    let presentacionesCache = [];
+    let productosBusqueda = [];
+
+    // --- INICIALIZACIÓN ---
+
+    if (buscarProductoInput) {
+        buscarProductoInput.addEventListener('input', manejarBusquedaProducto);
+        buscarProductoInput.addEventListener('focus', () => {
+            if (resultadosContainer && resultadosContainer.innerHTML.trim()) {
+                resultadosContainer.style.display = 'block';
+            }
+        });
     }
 
-    if (selectLote) {
-        selectLote.addEventListener('change', alSeleccionarLote);
+    if (btnLimpiarProducto) {
+        btnLimpiarProducto.addEventListener('click', limpiarProductoSeleccionado);
     }
 
-    // Función para alternar entre escribir lote nuevo o seleccionar existente
-    function toggleModoLote() {
-        if (!checkLoteExistente || !inputLoteTexto || !containerLoteSelect || !selectLote) return;
-
-        if (checkLoteExistente.checked) {
-            // Modo: Seleccionar existente
-            if (containerLoteNuevo) containerLoteNuevo.style.display = 'none';
-            inputLoteTexto.style.display = 'none'; // Fallback
-            inputLoteTexto.removeAttribute('name');
-            inputLoteTexto.disabled = true;
-
-            containerLoteSelect.style.display = 'block';
-            selectLote.setAttribute('name', 'lote');
-            selectLote.disabled = false;
-            
-            // Si hay un lote seleccionado, actualizar fecha
-            alSeleccionarLote();
-        } else {
-            // Modo: Nuevo lote
-            if (containerLoteNuevo) containerLoteNuevo.style.display = 'block';
-            inputLoteTexto.style.display = 'block'; // Fallback
-            inputLoteTexto.setAttribute('name', 'lote');
-            inputLoteTexto.disabled = false;
-
-            containerLoteSelect.style.display = 'none';
-            selectLote.removeAttribute('name');
-            selectLote.disabled = true;
-            
-            // Limpiar ID de lote existente
-            if (existingLoteIdInput) {
-                existingLoteIdInput.value = '';
-                existingLoteIdInput.disabled = true;
-            }
-            
-            // Habilitar fecha de vencimiento y limpiar si no se ha escrito nada manualmente
-            if (inputFechaVencimiento) {
-                inputFechaVencimiento.readOnly = false;
-                inputFechaVencimiento.value = '';
-                inputFechaVencimiento.classList.remove('bg-gray-100');
-            }
-        }
-        validarFormulario();
+    if (btnLimpiarTodo) {
+        btnLimpiarTodo.addEventListener('click', () => {
+            Swal.fire({
+                title: '¿Limpiar todo?',
+                text: "Se borrarán todos los datos ingresados en el formulario",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e53e3e',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Sí, limpiar',
+                cancelButtonText: 'No, cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.reset();
+                    limpiarProductoSeleccionado();
+                }
+            });
+        });
     }
 
-    // Función al cambiar selección de lote
-    function alSeleccionarLote() {
-        const loteCodigo = selectLote.value;
-        if (!loteCodigo || !lotesActivos.length) {
-            // Si no hay lote seleccionado, limpiar fecha pero mantener readonly si estamos en modo select
-            if (inputFechaVencimiento) inputFechaVencimiento.value = '';
-            if (existingLoteIdInput) {
-                existingLoteIdInput.value = '';
-                existingLoteIdInput.disabled = true;
-            }
+    if (form) {
+        form.addEventListener('submit', procesarEntrada);
+        form.addEventListener('input', validarFormulario);
+        form.addEventListener('change', validarFormulario);
+        if (inputCantidad) inputCantidad.addEventListener('input', actualizarPreviewStock);
+    }
+
+    if (inputPrecioVenta) {
+        inputPrecioVenta.addEventListener('input', actualizarPrecioUnidadTabla);
+    }
+
+    // --- LÓGICA DE BÚSQUEDA (DISEÑO BONITO RESTAURADO) ---
+
+    function manejarBusquedaProducto(e) {
+        const termino = e.target.value.trim();
+        if (termino.length > 0) btnLimpiarProducto.style.display = 'flex';
+        else btnLimpiarProducto.style.display = 'none';
+        
+        if (timeoutBusqueda) clearTimeout(timeoutBusqueda);
+
+        if (termino.length < 2) {
+            resultadosContainer.style.display = 'none';
             return;
         }
 
-        const loteData = lotesActivos.find(l => l.lote === loteCodigo);
-        if (loteData) {
-            if (existingLoteIdInput) {
-                existingLoteIdInput.value = loteData.id;
-                existingLoteIdInput.disabled = false;
-            }
-
-            if (inputFechaVencimiento) {
-                // Formatear fecha para input date (YYYY-MM-DD)
-                const fecha = loteData.fecha_vencimiento.split('T')[0];
-                inputFechaVencimiento.value = fecha;
-                inputFechaVencimiento.readOnly = true;
-                inputFechaVencimiento.classList.add('bg-gray-100');
-            }
-        }
+        timeoutBusqueda = setTimeout(() => buscarProductos(termino), 300);
     }
 
-    // Función para obtener lotes activos
-    async function obtenerLotesActivos(productoId) {
-        try {
-            if (!checkLoteExistente) return;
-
-            // Resetear estado
-            lotesActivos = [];
-            selectLote.innerHTML = '<option value="">Seleccionar lote...</option>';
-            checkLoteExistente.checked = false;
-            checkLoteExistente.disabled = true;
-            toggleModoLote();
-
-            const response = await fetch(`/api/compras/productos/${productoId}/lotes-activos`);
-            const data = await response.json();
-
-            if (data.success && data.lotes && data.lotes.length > 0) {
-                lotesActivos = data.lotes;
-                checkLoteExistente.disabled = false;
-                
-                // Poblar select
-                data.lotes.forEach(l => {
-                    const option = document.createElement('option');
-                    option.value = l.lote;
-                    
-                    // Formatear fecha para mostrar bonito (DD/MM/YYYY)
-                    let fechaVencimiento = 'Sin fecha';
-                    if (l.fecha_vencimiento) {
-                        try {
-                            const fecha = new Date(l.fecha_vencimiento);
-                            const dia = fecha.getUTCDate().toString().padStart(2, '0');
-                            const mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0');
-                            const anio = fecha.getUTCFullYear();
-                            fechaVencimiento = `${dia}/${mes}/${anio}`;
-                        } catch (e) {
-                            console.error('Error al formatear fecha lote:', e);
-                            fechaVencimiento = l.fecha_vencimiento.split('T')[0];
-                        }
-                    }
-                    
-                    option.textContent = `${l.lote} - Vence: ${fechaVencimiento}`;
-                    selectLote.appendChild(option);
-                });
-            } else {
-                // Si no hay lotes activos, mantener deshabilitado el checkbox
-                checkLoteExistente.disabled = true;
-                checkLoteExistente.parentElement.title = "No hay lotes activos para este producto";
-            }
-        } catch (error) {
-            console.error('Error al obtener lotes:', error);
-        }
-    }
-
-    // Función para buscar productos
     async function buscarProductos(termino) {
         try {
-            console.log('Buscando productos con término:', termino);
-            
-            const response = await fetch(`/api/compras/buscar-productos?q=${encodeURIComponent(termino)}`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Error response:', errorText);
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
-            }
-
+            const response = await fetch(`/api/compras/buscar-productos?q=${encodeURIComponent(termino)}`);
             const data = await response.json();
-            console.log('Datos recibidos:', data);
-            
-            if (data.success === false) {
-                throw new Error(data.message || 'Error en la búsqueda');
+            if (data.success) {
+                productosBusqueda = data.productos || [];
+                renderizarResultadosBusqueda(productosBusqueda);
             }
-            
-            mostrarResultadosBusqueda(data.productos || []);
         } catch (error) {
-            console.error('Error completo al buscar productos:', error);
-            mostrarMensajeError(`Error al buscar productos: ${error.message}`);
+            console.error('Error al buscar productos:', error);
         }
     }
 
-    // Función para mostrar resultados de búsqueda con autocompletado inteligente
-    function mostrarResultadosBusqueda(productos) {
+    function renderizarResultadosBusqueda(productos) {
         if (!resultadosContainer) return;
-
         if (productos.length === 0) {
             resultadosContainer.innerHTML = '<div class="compras-no-resultados">No se encontraron productos</div>';
             resultadosContainer.style.display = 'block';
             return;
         }
 
-        // Guardar productos en sessionStorage para acceso posterior
-        sessionStorage.setItem('ultimosBusquedaProductos', JSON.stringify(productos));
-
-        const html = productos.map(producto => {
-            // Determinar clases CSS según los estados aplicables
+        resultadosContainer.innerHTML = productos.map(producto => {
             let claseEstado = '';
-            let iconosEstado = [];
-            let textosEstado = [];
+            let iconoEstado = '';
+            let textoEstado = '';
 
-            // Procesar todos los estados aplicables
             if (producto.estados_aplicables && Array.isArray(producto.estados_aplicables)) {
-                producto.estados_aplicables.forEach(estado => {
-                    switch(estado.toLowerCase()) {
-                        case 'agotado':
-                            claseEstado += ' stock-agotado';
-                            iconosEstado.push('⚠️');
-                            textosEstado.push('Agotado');
-                            break;
-                        case 'bajo stock':
-                            claseEstado += ' stock-bajo';
-                            iconosEstado.push('⚡');
-                            textosEstado.push('Bajo Stock');
-                            break;
-                        case 'por vencer':
-                            claseEstado += ' proximo-vencimiento';
-                            iconosEstado.push('⏰');
-                            textosEstado.push('Por Vencer');
-                            break;
-                        case 'vencido':
-                            claseEstado += ' vencido';
-                            iconosEstado.push('❌');
-                            textosEstado.push('Vencido');
-                            break;
-                        case 'normal':
-                            // No agregar clases especiales para estado normal
-                            break;
-                    }
-                });
+                if (producto.estados_aplicables.some(e => e.toLowerCase().includes('agotado'))) {
+                    claseEstado = 'stock-agotado'; iconoEstado = '⚠️'; textoEstado = 'Agotado';
+                } else if (producto.estados_aplicables.some(e => e.toLowerCase().includes('bajo'))) {
+                    claseEstado = 'stock-bajo'; iconoEstado = '⚡'; textoEstado = 'Bajo Stock';
+                } else if (producto.estados_aplicables.some(e => e.toLowerCase().includes('vencer'))) {
+                    claseEstado = 'proximo-vencimiento'; iconoEstado = '⏰'; textoEstado = 'Por Vencer';
+                }
             }
-
-            // Unir iconos y textos
-            const iconoEstado = iconosEstado.join(' ');
-            const textoEstado = textosEstado.join(' - ');
 
             const esSugerido = producto.sugerido ? 'sugerido' : '';
             const iconoSugerido = producto.sugerido ? '⭐' : '';
 
             return `
-                <div class="compras-resultado-item ${claseEstado} ${esSugerido}" data-producto-id="${producto.id}">
+                <div class="compras-resultado-item ${claseEstado} ${esSugerido}" onclick="window.seleccionarProductoDeLista(${producto.id})">
                     <div class="compras-resultado-info">
                         <div class="compras-resultado-nombre">
                             ${iconoSugerido} ${producto.nombre}
-                            ${iconoEstado ? `<span class="estado-icono">${iconoEstado}</span>` : ''}
+                            ${iconoEstado ? `<span class="estado-badge ${claseEstado}">${iconoEstado} ${textoEstado}</span>` : ''}
                         </div>
                         <div class="compras-resultado-detalles">
-                            ${producto.presentacion} - ${producto.concentracion}
+                            <span class="concentracion-text">${producto.concentracion || ''}</span>
                             <span class="compras-stock ${claseEstado}">Stock: ${producto.stock_actual}</span>
                             ${producto.lote ? `<span class="compras-lote">Lote: ${producto.lote}</span>` : ''}
                         </div>
-                        ${textoEstado ? `<div class="compras-estado-texto">${textoEstado}</div>` : ''}
                         <div class="compras-historial">Última entrada: ${producto.texto_ultima_entrada}</div>
                     </div>
                     <div class="compras-resultado-precio">S/. ${parseFloat(producto.precio_venta || 0).toFixed(2)}</div>
                 </div>
             `;
         }).join('');
-
-        resultadosContainer.innerHTML = html;
         resultadosContainer.style.display = 'block';
-
-        // Agregar eventos de click a los resultados
-        resultadosContainer.querySelectorAll('.compras-resultado-item').forEach(item => {
-            item.addEventListener('click', () => seleccionarProducto(item));
-        });
     }
 
-    // Función para seleccionar un producto
-    function seleccionarProducto(item) {
-        const productoId = item.dataset.productoId;
+    window.seleccionarProductoDeLista = function(id) {
+        const producto = productosBusqueda.find(p => p.id == id);
+        if (!producto) return;
+
+        productoSeleccionado = producto;
+        buscarProductoInput.value = producto.nombre;
+        productoIdInput.value = producto.id;
+        resultadosContainer.style.display = 'none';
+        btnLimpiarProducto.style.display = 'flex';
+
+        // Placeholders de precios
+        if (inputPrecioCompra) inputPrecioCompra.placeholder = `Actual: S/. ${parseFloat(producto.precio_compra || 0).toFixed(2)}`;
+        if (inputPrecioVenta) inputPrecioVenta.placeholder = `Actual: S/. ${parseFloat(producto.precio_venta || 0).toFixed(2)}`;
+
+        actualizarPreviewStock();
+        if (containerInferior) containerInferior.style.display = 'block';
+        cargarPresentaciones(id);
+        obtenerLotesActivos(id);
+        validarFormulario();
+    };
+
+    function limpiarProductoSeleccionado() {
+        buscarProductoInput.value = '';
+        productoIdInput.value = '';
+        productoSeleccionado = null;
+        btnLimpiarProducto.style.display = 'none';
+        resultadosContainer.innerHTML = '';
+        resultadosContainer.style.display = 'none';
+
+        // Limpiar Lotes
+        lotesActivos = [];
+        selectLote.innerHTML = '<option value="">Seleccionar lote...</option>';
+        checkLoteExistente.checked = false;
+        checkLoteExistente.disabled = true;
+        toggleModoLote();
+
+        // Limpiar Presentaciones
+        presentacionesCache = [];
+        if (containerInferior) containerInferior.style.display = 'none';
+        listaPresentaciones.innerHTML = '';
+
+        actualizarPreviewStock();
+        validarFormulario();
+    }
+
+    // --- LÓGICA DE LOTES ---
+
+    if (checkLoteExistente) checkLoteExistente.addEventListener('change', toggleModoLote);
+    if (selectLote) selectLote.addEventListener('change', alSeleccionarLote);
+
+    function toggleModoLote() {
+        const esExistente = checkLoteExistente.checked;
+        containerLoteNuevo.style.display = esExistente ? 'none' : 'block';
+        containerLoteSelect.style.display = esExistente ? 'block' : 'none';
+        inputLoteTexto.disabled = esExistente;
+        selectLote.disabled = !esExistente;
+        existingLoteIdInput.disabled = !esExistente;
+        if (inputFechaVencimiento) inputFechaVencimiento.readOnly = esExistente;
+        if (proveedorSelect) proveedorSelect.style.pointerEvents = esExistente ? 'none' : 'auto';
+
+        if (!esExistente) {
+            inputLoteTexto.value = '';
+            inputFechaVencimiento.value = '';
+            proveedorSelect.value = '';
+            existingLoteIdInput.value = '';
+            if (inputPrecioCompra) { inputPrecioCompra.value = ''; inputPrecioCompra.readOnly = false; }
+            if (inputPrecioVenta) { inputPrecioVenta.value = ''; inputPrecioVenta.readOnly = false; }
+            // Re-renderizar presentaciones como editables
+            if (presentacionesCache.length > 0) renderizarPresentaciones(presentacionesCache, false);
+        } else {
+            alSeleccionarLote();
+        }
+        validarFormulario();
+    }
+
+    function alSeleccionarLote() {
+        const loteCodigo = selectLote.value;
+        if (!loteCodigo) {
+            inputFechaVencimiento.value = '';
+            proveedorSelect.value = '';
+            existingLoteIdInput.value = '';
+            return;
+        }
+
+        const lote = lotesActivos.find(l => l.lote === loteCodigo);
+        if (lote) {
+            existingLoteIdInput.value = lote.id;
+            inputFechaVencimiento.value = lote.fecha_vencimiento ? lote.fecha_vencimiento.split('T')[0] : '';
+            proveedorSelect.value = lote.proveedor_id || '';
+            if (inputPrecioCompra) { inputPrecioCompra.value = lote.precio_compra_lote || ''; inputPrecioCompra.readOnly = true; }
+            if (inputPrecioVenta) { inputPrecioVenta.value = lote.precio_venta_lote || ''; inputPrecioVenta.readOnly = true; }
+
+            // Re-renderizar presentaciones como solo lectura para lotes existentes
+            if (presentacionesCache.length > 0) renderizarPresentaciones(presentacionesCache, true);
+
+            if (lote.presentaciones_precios) {
+                lote.presentaciones_precios.forEach(pp => {
+                    const tr = document.querySelector(`tr[data-pres-id="${pp.producto_presentacion_id}"]`);
+                    if (tr) {
+                        const inputPrecio = tr.querySelector('.input-precio-table');
+                        if (inputPrecio) inputPrecio.value = pp.precio_venta;
+                        
+                        const inputUnidades = tr.querySelector('.input-pres-unidades');
+                        if (inputUnidades && pp.unidades_por_presentacion) {
+                            inputUnidades.value = pp.unidades_por_presentacion;
+                        }
+                    }
+                });
+            }
+            actualizarPrecioUnidadTabla();
+        }
+        validarFormulario();
+    }
+
+    async function obtenerLotesActivos(productoId) {
+        try {
+            const response = await fetch(`/api/compras/productos/${productoId}/lotes-activos`);
+            const data = await response.json();
+            if (data.success && data.lotes && data.lotes.length > 0) {
+                lotesActivos = data.lotes;
+                checkLoteExistente.disabled = false;
+                selectLote.innerHTML = '<option value="">Seleccionar lote...</option>' + 
+                    data.lotes.map(l => `<option value="${l.lote}">${l.lote} (Stock: ${l.cantidad})</option>`).join('');
+            } else {
+                checkLoteExistente.disabled = true;
+                checkLoteExistente.checked = false;
+                toggleModoLote();
+            }
+        } catch (error) { console.error('Error al obtener lotes:', error); }
+    }
+
+    // --- LÓGICA DE PRESENTACIONES ---
+
+    async function cargarPresentaciones(productoId) {
+        try {
+            console.log('Cargando presentaciones para producto:', productoId);
+            
+            // Si el contenedor inferior no está visible, lo mostramos
+            if (containerInferior) containerInferior.style.display = 'block';
+
+            listaPresentaciones.innerHTML = `
+                <tr>
+                    <td colspan="3" class="py-8 text-center">
+                        <div class="flex items-center justify-center gap-2 text-slate-400">
+                            <iconify-icon icon="line-md:loading-twotone-loop" style="font-size: 24px;"></iconify-icon>
+                            <span class="text-sm font-medium">Buscando presentaciones...</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            const response = await fetch(`/inventario/producto/presentaciones/api/${productoId}`);
+            const data = await response.json();
+            
+            console.log('Respuesta API Presentaciones:', data);
+            
+            // EXTRAER PRESENTACIONES CORRECTAMENTE
+            let presentaciones = [];
+            if (data.data) presentaciones = data.data;
+            else if (data.presentaciones) presentaciones = data.presentaciones;
+            else if (Array.isArray(data)) presentaciones = data;
+
+            if (presentaciones && presentaciones.length > 0) {
+                presentacionesCache = presentaciones;
+                const esReadOnly = checkLoteExistente && checkLoteExistente.checked;
+                renderizarPresentaciones(presentaciones, esReadOnly);
+                if (sectionPresentaciones) sectionPresentaciones.style.display = 'block';
+            } else {
+                console.log('No se encontraron presentaciones para este producto');
+                presentacionesCache = [];
+                if (sectionPresentaciones) sectionPresentaciones.style.display = 'block';
+                listaPresentaciones.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="py-8 text-center">
+                            <div class="flex flex-col items-center gap-2 text-slate-400">
+                                <iconify-icon icon="solar:info-circle-bold-duotone" style="font-size: 32px;"></iconify-icon>
+                                <span class="text-sm font-medium">Este producto no tiene presentaciones configuradas.</span>
+                                <span class="text-[11px]">Solo se registrará el stock en unidades base.</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        } catch (error) { 
+            console.error('Error al cargar presentaciones:', error);
+            if (sectionPresentaciones) sectionPresentaciones.style.display = 'none';
+        }
+    }
+
+    function renderizarPresentaciones(presentaciones, isReadOnly = false) {
+        // Toggle badge obligatorio
+        const badgeObligatorio = document.querySelector('.badge-obligatorio');
+        if (badgeObligatorio) {
+            if (isReadOnly) {
+                badgeObligatorio.style.display = 'none';
+            } else {
+                badgeObligatorio.style.display = 'inline-block';
+            }
+        }
+
+        listaPresentaciones.innerHTML = presentaciones.map(pres => {
+            const nombre = pres.nombre_presentacion || pres.nombre || 'Sin nombre';
+            const unidades = pres.unidades_por_presentacion || pres.cantidad_unidades || 1;
+            const precio = pres.precio_venta_presentacion || pres.precio || 0;
+            
+            const isUnidad = nombre.toLowerCase() === 'unidad';
+            const disableField = isReadOnly || isUnidad;
+            
+            return `
+                <tr data-pres-id="${pres.id}" data-unidades-base="${unidades}">
+                    <td class="py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-lg ${isUnidad ? 'bg-blue-50 text-blue-500' : 'bg-slate-50 text-slate-400'}">
+                                <iconify-icon icon="${isUnidad ? 'solar:box-bold' : 'solar:box-minimalistic-bold'}" 
+                                              class="icon-presentation-blue" style="font-size: 20px;"></iconify-icon>
+                            </div>
+                            <div class="font-bold text-slate-700 text-[15px]">${nombre}</div>
+                        </div>
+                    </td>
+                    <td class="py-4">
+                        <div class="flex items-center justify-center gap-2">
+                            ${!disableField ? `
+                                <button type="button" class="unit-control-btn" onclick="window.cambiarUnidadesPres(${pres.id}, -1)">
+                                    <iconify-icon icon="solar:minus-circle-bold"></iconify-icon>
+                                </button>
+                            ` : ''}
+                            <input type="number" name="presentaciones_unidades[${pres.id}]" 
+                                   id="pres_unidades_${pres.id}"
+                                   class="input-unit-blue" 
+                                   value="${unidades}" 
+                                   ${disableField ? 'readonly tabindex="-1"' : ''} 
+                                   min="1" required
+                                   oninput="window.recalcularPreciosPres()">
+                            ${!disableField ? `
+                                <button type="button" class="unit-control-btn" onclick="window.cambiarUnidadesPres(${pres.id}, 1)">
+                                    <iconify-icon icon="solar:add-circle-bold"></iconify-icon>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                    <td class="py-4">
+                        <div class="flex flex-col items-end">
+                            <div class="flex items-center justify-end gap-1 text-emerald-500 font-bold bg-emerald-50 px-3 py-1 rounded-lg">
+                                <span class="text-sm">S/</span>
+                                <input type="number" step="0.01" name="presentaciones[${pres.id}]" 
+                                       id="pres_precio_${pres.id}"
+                                       class="input-minimalist price-text w-24 text-right bg-transparent border-none font-bold text-emerald-600" 
+                                       value="${parseFloat(precio).toFixed(2)}" 
+                                       placeholder="0.00" 
+                                       ${disableField ? 'readonly tabindex="-1"' : ''} 
+                                       oninput="window.actualizarGananciaManual(${pres.id})"
+                                       required>
+                            </div>
+                            <span class="ganancia-tag" id="ganancia_pres_${pres.id}">Ganancia: S/ 0.00</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
         
-        // Obtener datos adicionales del producto desde el dataset o buscar en los resultados
-        const productos = JSON.parse(sessionStorage.getItem('ultimosBusquedaProductos') || '[]');
-        const producto = productos.find(p => p.id == productoId);
-        
-        // Obtener el nombre limpio desde los datos originales (sin íconos ni espacios extra)
-        const nombreProducto = producto ? producto.nombre : item.querySelector('.compras-resultado-nombre').textContent.replace(/⭐|⚠️|⚡|⏰/g, '').trim();
-        const precioVenta = item.querySelector('.compras-resultado-precio').textContent.replace('S/. ', '');
-        
-        // Guardar producto seleccionado
-        productoSeleccionado = {
-            id: productoId,
-            nombre: nombreProducto,
-            precio_compra: producto ? producto.precio_compra : null,
-            precio_venta: producto ? producto.precio_venta : precioVenta
+        // Exponer funciones globalmente
+        window.cambiarUnidadesPres = function(id, delta) {
+            const input = document.getElementById(`pres_unidades_${id}`);
+            if (input && !input.readOnly) {
+                const newVal = Math.max(1, parseInt(input.value || 1) + delta);
+                input.value = newVal;
+                window.recalcularPreciosPres();
+            }
         };
 
-        // Actualizar campos con el nombre limpio
-        buscarProductoInput.value = nombreProducto;
-        productoIdInput.value = productoId;
+        window.recalcularPreciosPres = function() {
+            const precioVentaBase = parseFloat(inputPrecioVenta.value || 0);
+            const precioCompraBase = parseFloat(inputPrecioCompra.value || 0);
 
-        // Actualizar placeholders de precios
-        const precioCompraInput = document.querySelector('input[name="precio_compra"]');
-        const precioVentaInput = document.querySelector('input[name="precio_venta"]');
-        
-        if (precioCompraInput && productoSeleccionado.precio_compra) {
-            precioCompraInput.placeholder = `Precio actual: S/. ${parseFloat(productoSeleccionado.precio_compra).toFixed(2)}`;
-        }
-        
-        if (precioVentaInput && productoSeleccionado.precio_venta) {
-            precioVentaInput.placeholder = `Precio actual: S/. ${parseFloat(productoSeleccionado.precio_venta).toFixed(2)}`;
-        }
+            document.querySelectorAll('#lista-presentaciones-precios tr').forEach(row => {
+                const presId = row.dataset.presId;
+                const unidades = parseInt(document.getElementById(`pres_unidades_${presId}`).value || 1);
+                const inputPrecio = document.getElementById(`pres_precio_${presId}`);
+                const tagGanancia = document.getElementById(`ganancia_pres_${presId}`);
+                const isUnidad = row.querySelector('.font-bold').innerText.toLowerCase() === 'unidad';
 
-        // Ocultar resultados
-        ocultarResultados();
-        
-        // Validar formulario después de seleccionar producto
-        validarFormulario();
-
-        // Obtener stock actual desde API y actualizar preview
-        actualizarPreviewStock(true);
-
-        // Obtener lotes activos para posible selección
-        obtenerLotesActivos(productoId);
-    }
-
-    // Función para mostrar resultados
-    function mostrarResultados() {
-        if (resultadosContainer && resultadosContainer.innerHTML.trim()) {
-            resultadosContainer.style.display = 'block';
-        }
-    }
-
-    // Función para ocultar resultados
-    function ocultarResultados() {
-        if (resultadosContainer) {
-            resultadosContainer.style.display = 'none';
-        }
-    }
-
-    // (Proveedor) Sin autocompletar: no se necesita mostrar/ocultar resultados
-
-    // Función para limpiar selección
-    function limpiarSeleccion() {
-        productoSeleccionado = null;
-        if (productoIdInput) {
-            productoIdInput.value = '';
-        }
-        // Proveedor select no requiere limpieza explícita aquí
-        
-        // Resetear placeholders de precios (vacíos cuando no hay producto seleccionado)
-        const precioCompraInput = document.querySelector('input[name="precio_compra"]');
-        const precioVentaInput = document.querySelector('input[name="precio_venta"]');
-        
-        if (precioCompraInput) {
-            precioCompraInput.placeholder = '';
-        }
-        
-        if (precioVentaInput) {
-            precioVentaInput.placeholder = '';
-        }
-        
-        // Ocultar botón limpiar
-        ocultarBotonLimpiar();
-        
-        // Resetear lotes
-        if (typeof checkLoteExistente !== 'undefined' && checkLoteExistente) {
-            checkLoteExistente.checked = false;
-            checkLoteExistente.disabled = true;
-            if (typeof toggleModoLote === 'function') toggleModoLote();
-        }
-        if (typeof lotesActivos !== 'undefined') lotesActivos = [];
-        if (typeof selectLote !== 'undefined' && selectLote) selectLote.innerHTML = '<option value="">Seleccionar lote...</option>';
-        if (typeof inputLoteTexto !== 'undefined' && inputLoteTexto) inputLoteTexto.value = '';
-        if (typeof inputFechaVencimiento !== 'undefined' && inputFechaVencimiento) inputFechaVencimiento.value = '';
-        if (typeof existingLoteIdInput !== 'undefined' && existingLoteIdInput) {
-            existingLoteIdInput.value = '';
-            existingLoteIdInput.disabled = true;
-        }
-
-        // Validar formulario después de limpiar
-        validarFormulario();
-    }
-
-    // Función para mostrar el botón limpiar
-    function mostrarBotonLimpiar() {
-        if (btnLimpiarProducto) {
-            btnLimpiarProducto.style.display = 'flex';
-        }
-    }
-
-    // Función para ocultar el botón limpiar
-    function ocultarBotonLimpiar() {
-        if (btnLimpiarProducto) {
-            btnLimpiarProducto.style.display = 'none';
-        }
-    }
-
-    // Función para limpiar producto seleccionado (botón X)
-    function limpiarProductoSeleccionado() {
-        // Limpiar el campo de búsqueda
-        if (buscarProductoInput) {
-            buscarProductoInput.value = '';
-        }
-        
-        // Limpiar la selección
-        limpiarSeleccion();
-        
-        // Ocultar resultados
-        ocultarResultados();
-        
-        // Enfocar el campo de búsqueda
-        if (buscarProductoInput) {
-            buscarProductoInput.focus();
-        }
-    }
-
-    // Función para validar el formulario en tiempo real
-    function validarFormulario() {
-        if (!btnRegistrar) return;
-
-        // Obtener valores de los campos obligatorios
-        const productoId = document.getElementById('producto-id')?.value || '';
-        const proveedorId = document.getElementById('proveedor-select')?.value || '';
-        const cantidad = document.querySelector('input[name="cantidad"]')?.value || '';
-        
-        // Obtener valor del lote (puede ser input o select, buscamos el que tenga el name="lote")
-        const campoLote = document.querySelector('[name="lote"]');
-        const lote = campoLote?.value || '';
-        
-        const fechaVencimiento = document.querySelector('input[name="fecha_vencimiento"]')?.value || '';
-
-        // Validación de lote duplicado
-        let loteDuplicado = false;
-        const inputLoteTexto = document.getElementById('input-lote-texto');
-        const checkLoteExistente = document.getElementById('check-lote-existente');
-        
-        // Solo validar duplicados si estamos en modo "nuevo lote" y hay texto escrito
-        if (checkLoteExistente && !checkLoteExistente.checked && inputLoteTexto && inputLoteTexto.value.trim() !== '') {
-            const nombreLote = inputLoteTexto.value.trim();
-            // Verificar si ya existe en la lista de lotes activos
-            if (typeof lotesActivos !== 'undefined' && lotesActivos.length > 0) {
-                const existe = lotesActivos.some(l => l.lote.toLowerCase() === nombreLote.toLowerCase());
-                if (existe) {
-                    loteDuplicado = true;
-                    mostrarErrorLote('Este lote ya existe. Seleccione "Seleccionar existente" o use otro código.');
-                } else {
-                    ocultarErrorLote();
+                if (isUnidad) {
+                    inputPrecio.value = precioVentaBase.toFixed(2);
+                } else if (!inputPrecio.readOnly && precioVentaBase > 0) {
+                    // Autocalcular sugerido basado en unidades
+                    inputPrecio.value = (precioVentaBase * unidades).toFixed(2);
                 }
-            }
-        } else {
-            // Si cambiamos a modo selección o borramos el texto, ocultar error
-            ocultarErrorLote();
-        }
 
-        // Verificar que los campos obligatorios estén completos y validos
-        const formularioValido = productoId.trim() !== '' && 
-                                proveedorId.trim() !== '' && 
-                                cantidad.trim() !== '' && 
-                                parseFloat(cantidad) > 0 &&
-                                lote.trim() !== '' &&
-                                fechaVencimiento.trim() !== '' &&
-                                !loteDuplicado;
+                // Calcular ganancia
+                const precioVentaPres = parseFloat(inputPrecio.value || 0);
+                const costoTotalPres = precioCompraBase * unidades;
+                const ganancia = (precioVentaPres - costoTotalPres).toFixed(2);
+                
+                if (tagGanancia) {
+                    tagGanancia.innerText = `Ganancia: S/ ${ganancia}`;
+                    tagGanancia.style.color = ganancia > 0 ? '#10b981' : '#ef4444';
+                }
+            });
+        };
 
-        // Habilitar o deshabilitar el botón
-        btnRegistrar.disabled = !formularioValido;
-    }
-
-    // Helpers para mostrar/ocultar error de lote
-    function mostrarErrorLote(mensaje) {
-        let errorDiv = document.getElementById('error-lote-duplicado');
-        const container = document.getElementById('container-lote-nuevo');
-        
-        if (!errorDiv && container) {
-            errorDiv = document.createElement('div');
-            errorDiv.id = 'error-lote-duplicado';
-            errorDiv.className = 'compras-hint-simple';
-            errorDiv.style.color = '#dc2626'; // Rojo de error
-            errorDiv.style.fontWeight = '600';
-            errorDiv.style.marginTop = '4px';
-            container.appendChild(errorDiv);
-        }
-        
-        if (errorDiv) {
-            errorDiv.innerHTML = `<iconify-icon icon="solar:danger-circle-bold" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>${mensaje}`;
-            errorDiv.style.display = 'block';
+        window.actualizarGananciaManual = function(id) {
+            const precioCompraBase = parseFloat(inputPrecioCompra.value || 0);
+            const unidades = parseInt(document.getElementById(`pres_unidades_${id}`).value || 1);
+            const inputPrecio = document.getElementById(`pres_precio_${id}`);
+            const tagGanancia = document.getElementById(`ganancia_pres_${id}`);
             
-            // También marcar el input con borde rojo
-            const input = document.getElementById('input-lote-texto');
-            if (input) {
-                input.style.borderColor = '#dc2626';
-                input.style.backgroundColor = '#fef2f2';
+            const precioVentaPres = parseFloat(inputPrecio.value || 0);
+            const costoTotalPres = precioCompraBase * unidades;
+            const ganancia = (precioVentaPres - costoTotalPres).toFixed(2);
+            
+            if (tagGanancia) {
+                tagGanancia.innerText = `Ganancia: S/ ${ganancia}`;
+                tagGanancia.style.color = ganancia > 0 ? '#10b981' : '#ef4444';
             }
-        }
-    }
+        };
 
-    function ocultarErrorLote() {
-        const errorDiv = document.getElementById('error-lote-duplicado');
-        if (errorDiv) {
-            errorDiv.style.display = 'none';
-        }
+        // Escuchar cambios en precios base
+        inputPrecioVenta.removeEventListener('input', window.recalcularPreciosPres);
+        inputPrecioVenta.addEventListener('input', window.recalcularPreciosPres);
         
-        // Restaurar borde del input
-        const input = document.getElementById('input-lote-texto');
-        if (input) {
-            input.style.borderColor = '';
-            input.style.backgroundColor = '';
+        inputPrecioCompra.removeEventListener('input', window.recalcularPreciosPres);
+        inputPrecioCompra.addEventListener('input', window.recalcularPreciosPres);
+
+        actualizarPrecioUnidadTabla();
+        window.recalcularPreciosPres();
+    }
+
+    function actualizarPrecioUnidadTabla() {
+        const precio = inputPrecioVenta.value || (productoSeleccionado ? productoSeleccionado.precio_venta : '');
+        const trs = Array.from(document.querySelectorAll('#lista-presentaciones-precios tr'));
+        const trUnidad = trs.find(tr => {
+            const span = tr.querySelector('td .font-bold');
+            return span && span.textContent.toLowerCase().includes('unidad');
+        });
+        if (trUnidad) {
+            const input = trUnidad.querySelector('.price-text');
+            if (input) input.value = precio;
         }
     }
 
-    // Función para procesar entrada de mercadería
+    function actualizarPreviewStock() {
+        if (!stockActualEl || !stockNuevoEl) return;
+        const stockActual = productoSeleccionado ? parseInt(productoSeleccionado.stock_actual || 0) : 0;
+        const cantidad = parseInt(inputCantidad.value) || 0;
+        stockActualEl.textContent = productoSeleccionado ? stockActual : '—';
+        stockNuevoEl.textContent = productoSeleccionado && cantidad > 0 ? stockActual + cantidad : '—';
+    }
+
+    function validarFormulario() {
+        if (!productoIdInput || !proveedorSelect || !inputCantidad || !btnRegistrar) return;
+
+        const pId = productoIdInput.value;
+        const provId = proveedorSelect.value;
+        const cant = inputCantidad.value;
+        const esExistente = checkLoteExistente ? checkLoteExistente.checked : false;
+        
+        let loteValido = false;
+        if (esExistente) {
+            loteValido = selectLote && selectLote.value !== '';
+        } else {
+            const inputLote = document.getElementById('input-lote-texto');
+            loteValido = inputLote && inputLote.value.trim() !== '';
+        }
+
+        const venc = inputFechaVencimiento ? inputFechaVencimiento.value : '';
+        
+        const esValido = (pId && provId && cant > 0 && loteValido && venc);
+        if (btnRegistrar) btnRegistrar.disabled = !esValido;
+    }
+
     async function procesarEntrada(e) {
         e.preventDefault();
-
-        // Mostrar overlay de carga (estilo reutilizado)
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) overlay.style.display = 'flex';
-
-        // Validaciones adicionales del frontend
-        const cantidad = parseFloat(document.querySelector('input[name="cantidad"]')?.value || 0);
-        const precioCompra = parseFloat(document.querySelector('input[name="precio_compra"]')?.value || 0);
-        const precioVenta = parseFloat(document.querySelector('input[name="precio_venta"]')?.value || 0);
-        // Campo de fecha de vencimiento removido temporalmente
-        const fechaVencimiento = null;
-
-        // Validar cantidad
-        if (cantidad <= 0 || cantidad > 999999) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Cantidad inválida',
-                text: 'La cantidad debe ser mayor a 0 y menor a 999,999'
-            });
-            return;
-        }
-
-        // Validar precios si se proporcionan
-        if (precioCompra > 0 && precioVenta > 0 && precioVenta <= precioCompra) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Precios inválidos',
-                text: 'El precio de venta debe ser mayor al precio de compra'
-            });
-            return;
-        }
-
-        // Validación de fecha de vencimiento deshabilitada temporalmente
-
+        const formData = new FormData(form);
         try {
-            const formData = new FormData(form);
-            const token = document.querySelector('meta[name="csrf-token"]').content;
-
             const response = await fetch('/compras/procesar', {
                 method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': token,
-                    'Accept': 'application/json'
-                },
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' },
                 body: formData
             });
-
             const data = await response.json();
-
-            if (response.ok && data.success) {
-                // Ocultar overlay
-                if (overlay) overlay.style.display = 'none';
-
-                // Mostrar solo el check y el título. Autocierre.
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Entrada procesada!',
-                    showConfirmButton: false,
-                    showCancelButton: false,
-                    timer: 1800,
-                    timerProgressBar: true
-                }).then(() => {
-                    // Disparar evento personalizado para notificar actualización de productos
-                    const evento = new CustomEvent('productoActualizado', {
-                        detail: {
-                            tipo: 'entrada_mercaderia',
-                            producto_id: productoSeleccionado.id,
-                            timestamp: Date.now()
-                        }
-                    });
-                    window.dispatchEvent(evento);
-                    
-                    // También usar localStorage para comunicación entre ventanas/pestañas
-                    localStorage.setItem('producto_actualizado', JSON.stringify({
-                        tipo: 'entrada_mercaderia',
-                        producto_id: productoSeleccionado.id,
-                        timestamp: Date.now()
-                    }));
-                    
-                    // Limpiar formulario y estado UI
-                    form.reset();
-                    limpiarSeleccion();
-                    buscarProductoInput.value = '';
-                    ocultarResultados();
-                    // Limpiar resultados previos y cache de búsqueda
-                    if (resultadosContainer) {
-                        resultadosContainer.innerHTML = '';
-                        resultadosContainer.style.display = 'none';
-                    }
-                    sessionStorage.removeItem('ultimosBusquedaProductos');
-                    // Reset vista previa de stock
-                    const stockActualEl = document.getElementById('preview-stock-actual');
-                    const stockNuevoEl = document.getElementById('preview-stock-nuevo');
-                    if (stockActualEl) stockActualEl.textContent = '—';
-                    if (stockNuevoEl) stockNuevoEl.textContent = '—';
-                    // Enfocar campo producto para nueva entrada
-                    if (buscarProductoInput) buscarProductoInput.focus();
-                });
-            } else {
-                if (overlay) overlay.style.display = 'none';
-                // Manejar errores de validación del servidor
-                if (response.status === 422 && data.errors) {
-                    // Errores de validación específicos
-                    const errores = Object.values(data.errors).flat();
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Datos inválidos',
-                        html: `<ul style="text-align: left;">${errores.map(error => `<li>${error}</li>`).join('')}</ul>`
-                    });
-                } else {
-                    // Otros errores
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: data.message || 'Error al procesar la entrada'
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            const overlay = document.getElementById('loadingOverlay');
-            if (overlay) overlay.style.display = 'none';
-            Swal.fire({
-                icon: 'error',
-                title: 'Error de conexión',
-                text: 'No se pudo conectar con el servidor. Verifique su conexión a internet.'
-            });
-        }
+            if (data.success) {
+                Swal.fire({ icon: 'success', title: '¡Entrada procesada!', timer: 1500, showConfirmButton: false });
+                form.reset(); limpiarProductoSeleccionado();
+            } else { Swal.fire({ icon: 'error', title: 'Error', text: data.message }); }
+        } catch (error) { console.error('Error:', error); }
     }
 
-    // Vista previa: stock actual y nuevo
-    async function actualizarPreviewStock(forceFetch = false) {
-        const stockActualEl = document.getElementById('preview-stock-actual');
-        const stockNuevoEl = document.getElementById('preview-stock-nuevo');
-        if (!stockActualEl || !stockNuevoEl) return;
-
-        let stockActual = null;
-        if (productoSeleccionado && (forceFetch || stockActualEl.textContent === '—')) {
-            try {
-                const res = await fetch(`/api/productos/${productoSeleccionado.id}/informacion-stock`);
-                const data = await res.json();
-                if (data.success !== false) {
-                    // data may be raw producto or wrapped
-                    const p = data.data || data.producto || data;
-                    stockActual = parseInt(p.stock_actual ?? 0, 10);
-                }
-            } catch (err) {
-                console.warn('No se pudo obtener stock actual', err);
-            }
-        }
-        if (stockActual === null) {
-            // fallback: intentar leer de resultados previos almacenados
-            const productos = JSON.parse(sessionStorage.getItem('ultimosBusquedaProductos') || '[]');
-            const p = productos.find(x => x.id == (productoSeleccionado?.id));
-            stockActual = parseInt(p?.stock_actual ?? 0, 10);
-        }
-
-        const cantidad = parseInt(document.querySelector('input[name="cantidad"]')?.value || 0, 10);
-        stockActualEl.textContent = Number.isFinite(stockActual) ? `${stockActual}` : '—';
-        stockNuevoEl.textContent = Number.isFinite(stockActual) && Number.isFinite(cantidad) && cantidad > 0 ? `${stockActual + cantidad}` : '—';
-    }
-
-    // Proveedor sin autocompletar: eliminar lógica de búsqueda y selección por lista emergente
-
-    // Función para mostrar mensaje de error
-    function mostrarMensajeError(mensaje) {
-        if (resultadosContainer) {
-            resultadosContainer.innerHTML = `<div class="compras-error">${mensaje}</div>`;
-            resultadosContainer.style.display = 'block';
-        }
-    }
-
-    // Cerrar resultados al hacer click fuera
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.compras-busqueda-container')) {
-            ocultarResultados();
-        }
-    });
-
-    // Manejar teclas en el input de búsqueda
-    if (buscarProductoInput) {
-        buscarProductoInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                ocultarResultados();
-            }
-        });
-    }
+    document.addEventListener('click', (e) => { if (!e.target.closest('.compras-busqueda-container')) resultadosContainer.style.display = 'none'; });
 });

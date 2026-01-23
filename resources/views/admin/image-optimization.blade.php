@@ -19,7 +19,7 @@
                     </button>
                 </div>
                 <div class="card-body">
-                    <!-- Estadísticas Generales -->
+                    
                     <div class="row mb-4" id="estadisticas-container">
                         <div class="col-md-3">
                             <div class="info-box bg-info">
@@ -59,7 +59,7 @@
                         </div>
                     </div>
 
-                    <!-- Acciones Principales -->
+                    
                     <div class="row mb-4">
                         <div class="col-12">
                             <div class="card">
@@ -102,7 +102,7 @@
                         </div>
                     </div>
 
-                    <!-- Progreso de Operaciones -->
+                    
                     <div class="row mb-4" id="progress-container" style="display: none;">
                         <div class="col-12">
                             <div class="card">
@@ -120,7 +120,7 @@
                         </div>
                     </div>
 
-                    <!-- Resultados -->
+                    
                     <div class="row" id="results-container" style="display: none;">
                         <div class="col-12">
                             <div class="card">
@@ -128,13 +128,13 @@
                                     <h5 class="card-title mb-0">Resultados de la Operación</h5>
                                 </div>
                                 <div class="card-body" id="results-content">
-                                    <!-- Los resultados se cargarán aquí -->
+                                    
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Imágenes Pesadas -->
+                    
                     <div class="row" id="heavy-images-container" style="display: none;">
                         <div class="col-12">
                             <div class="card">
@@ -154,7 +154,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody id="heavy-images-tbody">
-                                                <!-- Las imágenes pesadas se cargarán aquí -->
+                                                
                                             </tbody>
                                         </table>
                                     </div>
@@ -163,7 +163,7 @@
                         </div>
                     </div>
 
-                    <!-- Recomendaciones -->
+                    
                     <div class="row" id="recommendations-container" style="display: none;">
                         <div class="col-12">
                             <div class="card">
@@ -175,7 +175,7 @@
                                 </div>
                                 <div class="card-body">
                                     <ul id="recommendations-list" class="list-unstyled">
-                                        <!-- Las recomendaciones se cargarán aquí -->
+                                        
                                     </ul>
                                 </div>
                             </div>
@@ -203,7 +203,7 @@ class ImageOptimizationManager {
     }
 
     setupEventListeners() {
-        // Event listeners para los botones ya están definidos en onclick
+
     }
 
     async cargarEstadisticas() {
@@ -299,8 +299,7 @@ class ImageOptimizationManager {
             
             if (data.success) {
                 this.mostrarResultados('Optimización Completada', data.data, 'success');
-                this.cargarEstadisticas(); // Recargar estadísticas
-            } else {
+                this.cargarEstadisticas();
                 this.mostrarError('Error en la optimización: ' + data.message);
             }
         } catch (error) {
@@ -425,21 +424,19 @@ class ImageOptimizationManager {
     }
 
     mostrarCargando(mensaje) {
-        // Implementar indicador de carga si es necesario
+
     }
 
     ocultarCargando() {
-        // Ocultar indicador de carga
+
     }
 
     mostrarError(mensaje) {
         alert('Error: ' + mensaje);
     }
 
-    // Se reemplazó el modal Bootstrap por window.confirm para evitar dependencias
 }
 
-// Funciones globales para los botones
 let imageOptimizer;
 
 document.addEventListener('DOMContentLoaded', function() {

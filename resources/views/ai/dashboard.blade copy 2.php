@@ -149,8 +149,6 @@
                 return h + ':' + m + ' ' + ap;
             }
 
-            // (el bloque de historial ya está definido arriba)
-
             function addUser(text){
                 var wrap = document.createElement('div');
                 wrap.className = 'ia-msg ia-msg-user';

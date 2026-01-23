@@ -3,11 +3,11 @@
     $title='Videos';
     $subTitle = 'Components / Videos';
     $script ='<script>
-                    // ========================= magnific Popup Icon Js Start =====================
+
                     $(".magnific-video").magnificPopup({
                         type: "iframe"
                     });
-                    // ========================= magnific Popup Icon Js End =====================
+
                </script>';
 @endphp
 

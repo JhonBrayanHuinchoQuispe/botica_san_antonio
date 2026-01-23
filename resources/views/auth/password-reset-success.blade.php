@@ -8,7 +8,7 @@
 </head>
 <body>
     <script>
-        // Feedback breve sin animaciones y redirección automática al login
+
         Swal.fire({
             icon: 'success',
             title: '¡Contraseña Restablecida!',

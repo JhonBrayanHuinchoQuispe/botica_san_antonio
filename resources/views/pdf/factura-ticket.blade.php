@@ -198,7 +198,7 @@
     </style>
 </head>
 <body>
-    <!-- Company Header -->
+    
     <div class="company-header">
         <div class="company-name">{{ $company->razon_social }}</div>
         <div class="company-ruc">RUC: {{ $company->ruc }}</div>
@@ -210,13 +210,13 @@
         </div>
     </div>
 
-    <!-- Document Info -->
+    
     <div class="document-info">
         <div class="document-type">FACTURA ELECTRÓNICA</div>
         <div class="document-number">{{ $invoice->serie }}-{{ $invoice->numero }}</div>
     </div>
 
-    <!-- Date and Currency -->
+    
     <div class="section">
         <div class="center">
             <strong>Fecha:</strong> {{ \Carbon\Carbon::parse($invoice->fecha_emision)->format('d/m/Y H:i') }}<br>
@@ -224,7 +224,7 @@
         </div>
     </div>
 
-    <!-- Client Information -->
+    
     <div class="section client-info">
         <div class="bold center">DATOS DEL CLIENTE</div>
         <div class="client-row">
@@ -240,7 +240,7 @@
         @endif
     </div>
 
-    <!-- Items -->
+    
     <div class="section">
         <div class="items-header center">DETALLE DE PRODUCTOS/SERVICIOS</div>
         @foreach($invoice->details as $detail)
@@ -263,7 +263,7 @@
         @endforeach
     </div>
 
-    <!-- Totals -->
+    
     <div class="section totals">
         @if($invoice->total_operaciones_gravadas > 0)
         <div class="total-row">
@@ -314,7 +314,7 @@
         </div>
     </div>
 
-    <!-- QR Code and Hash -->
+    
     @if($invoice->qr || $invoice->hash)
     <div class="section qr-section">
         @if($invoice->qr)
@@ -330,7 +330,7 @@
     </div>
     @endif
 
-    <!-- Footer -->
+    
     <div class="section footer-info">
         <div class="bold">Representación impresa de la</div>
         <div class="bold">Factura Electrónica</div>

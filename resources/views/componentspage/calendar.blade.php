@@ -5,7 +5,7 @@
     $script = '<script src="' . asset('assets/js/full-calendar.js') . '"></script>
                <script src="' . asset('assets/js/flatpickr.js') . '"></script>
                  <script>
-                 // Flat pickr or date picker js 
+
                  function getDatePicker(receiveID) {
                      flatpickr(receiveID, {
                          enableTime: true,
@@ -231,7 +231,7 @@
             </div>
         </div>
 
-        <!-- Modal Add Event -->
+        
         <div id="popup-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
             <div class="rounded-2xl bg-white max-w-[800px] w-full">
                 <div class="py-4 px-6 border-b border-neutral-200 flex items-center justify-between">
@@ -324,7 +324,7 @@
             </div>
         </div>
 
-        <!-- View Details Event -->
+        
         <div id="view-popup-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
             <div class="rounded-2xl bg-white max-w-[600px] w-full">
                 <div class="py-4 px-6 border-b border-neutral-200 flex items-center justify-between">
@@ -364,7 +364,7 @@
             </div>
         </div>
 
-        <!-- Edit Modal Event -->
+        
         <div id="edit-popup-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
             <div class="rounded-2xl bg-white max-w-[800px] w-full">
                 <div class="py-4 px-6 border-b border-neutral-200 flex items-center justify-between">
@@ -457,7 +457,7 @@
             </div>
         </div>
 
-        <!-- Delete Modal Event -->
+        
         <div id="delete-popup-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
             <div class="rounded-2xl bg-white max-w-[400px] w-full">
                 <div class="p-6 text-center">

@@ -10,6 +10,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Exports\VentasReporteExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class VentaController extends Controller
 {
@@ -371,10 +373,10 @@ class VentaController extends Controller
     public function reportes(Request $request)
     {
         // Adaptar a nuevas claves: hoy, ultimos7, mes, anual
-        $periodo = $request->get('periodo', 'mes');
+        $periodo = $request->get('periodo', 'hoy'); // Cambiado de 'mes' a 'hoy'
         $mapaViejo = [ 'dia' => 'hoy', 'semana' => 'ultimos7', 'año' => 'anual' ];
         if (isset($mapaViejo[$periodo])) { $periodo = $mapaViejo[$periodo]; }
-        if (!in_array($periodo, ['hoy', 'ultimos7', 'mes', 'anual'])) { $periodo = 'mes'; }
+        if (!in_array($periodo, ['hoy', 'ayer', 'ultimos7', 'ultimos30', 'mes', 'anual', 'personalizado'])) { $periodo = 'hoy'; }
 
         // Obtener datos según el período
         $datos = $this->obtenerDatosReporte($periodo);
@@ -782,7 +784,7 @@ class VentaController extends Controller
                 'productos.nombre',
                 'productos.marca',
                 'productos.concentracion',
-                'productos.presentacion',
+                // 'productos.presentacion', // REMOVIDO: La columna presentacion ya no existe
                 'productos.categoria',
                 DB::raw('SUM(venta_detalles.cantidad) as cantidad_total'),
                 DB::raw('SUM(venta_detalles.subtotal) as total_vendido'),
@@ -795,7 +797,7 @@ class VentaController extends Controller
                     $q->where('usuario_id', $usuarioId);
                 }
             })
-            ->groupBy('venta_detalles.producto_id', 'productos.nombre', 'productos.marca', 'productos.concentracion', 'productos.presentacion', 'productos.categoria')
+            ->groupBy('venta_detalles.producto_id', 'productos.nombre', 'productos.marca', 'productos.concentracion', 'productos.categoria')
             ->orderByDesc('cantidad_total')
             ->get();
 
@@ -969,6 +971,94 @@ class VentaController extends Controller
                 'success' => false,
                 'message' => 'Error al obtener el detalle de la venta'
             ], 404);
+        }
+    }
+
+    /**
+     * Exportar reporte de ventas a Excel con formato profesional (Triple Fallback)
+     */
+    public function exportarReporte(Request $request)
+    {
+        try {
+            \Log::info('Iniciando exportación de reporte profesional', $request->all());
+            
+            $periodo = $request->get('periodo', 'mes');
+            $fechaInicioStr = $request->get('fecha_inicio');
+            $fechaFinStr = $request->get('fecha_fin');
+            $usuarioId = $request->get('usuario_id');
+            $tipo = $request->get('tipo', 'detallado');
+            
+            // Determinar fechas según el período
+            if ($periodo === 'personalizado' && $fechaInicioStr && $fechaFinStr) {
+                $fechaInicio = Carbon::parse($fechaInicioStr)->startOfDay();
+                $fechaFin = Carbon::parse($fechaFinStr)->endOfDay();
+            } else {
+                switch ($periodo) {
+                    case 'hoy':
+                        $fechaInicio = Carbon::today();
+                        $fechaFin = Carbon::today()->endOfDay();
+                        break;
+                    case 'ayer':
+                        $fechaInicio = Carbon::yesterday()->startOfDay();
+                        $fechaFin = Carbon::yesterday()->endOfDay();
+                        break;
+                    case 'ultimos7':
+                        $fechaInicio = Carbon::now()->subDays(6)->startOfDay();
+                        $fechaFin = Carbon::now()->endOfDay();
+                        break;
+                    case 'ultimos30':
+                        $fechaInicio = Carbon::now()->subDays(29)->startOfDay();
+                        $fechaFin = Carbon::now()->endOfDay();
+                        break;
+                    case 'anual':
+                        $fechaInicio = Carbon::now()->startOfYear();
+                        $fechaFin = Carbon::now()->endOfYear();
+                        break;
+                    case 'mes':
+                    default:
+                        $fechaInicio = Carbon::now()->startOfMonth();
+                        $fechaFin = Carbon::now()->endOfMonth();
+                        break;
+                }
+            }
+            
+            // Obtener datos para el reporte
+            $datos = $this->obtenerDatosReporte($periodo, $fechaInicio, $fechaFin, $usuarioId);
+            
+            // Si el tipo es detallado, necesitamos la lista de ventas individuales
+            if ($tipo === 'detallado') {
+                $queryVentas = Venta::with(['cliente', 'usuario'])
+                    ->whereIn('estado', ['completada', 'parcialmente_devuelta'])
+                    ->whereBetween('fecha_venta', [$fechaInicio, $fechaFin]);
+                    
+                if ($usuarioId) {
+                    $queryVentas->where('usuario_id', $usuarioId);
+                }
+                
+                $ventas = $queryVentas->orderBy('fecha_venta', 'desc')->get();
+                $datos['ventas_lista'] = $ventas;
+            }
+
+            // Generar nombre de archivo (.xls para mayor compatibilidad con el método manual HTML)
+            $nombreArchivo = 'Reporte_Ventas_' . $fechaInicio->format('dmY') . '_' . $fechaFin->format('dmY') . '.xls';
+            
+            \Log::info('Exportando usando método manual HTML (BOM)', ['archivo' => $nombreArchivo]);
+            
+            $html = view('admin.reportes.ventas-excel-template', compact('datos', 'tipo'))->render();
+            $bom = chr(239) . chr(187) . chr(191);
+            
+            return response($bom . $html)
+                ->header('Content-Type', 'application/vnd.ms-excel; charset=utf-8')
+                ->header('Content-Disposition', 'attachment; filename="' . $nombreArchivo . '"');
+            
+        } catch (\Throwable $e) {
+            \Log::error('Error al exportar reporte de ventas', [
+                'mensaje' => $e->getMessage(),
+                'linea' => $e->getLine(),
+                'archivo' => $e->getFile()
+            ]);
+            
+            return redirect()->back()->with('error', 'Error al generar el reporte: ' . $e->getMessage());
         }
     }
 }

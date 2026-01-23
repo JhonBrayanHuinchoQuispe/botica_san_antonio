@@ -30,7 +30,7 @@
                     </p>
                 </div>
                 
-                <!-- Mensaje de error -->
+                
                 @if ($errors->any())
                     <div class="alert alert-danger" role="alert">
                         <i class="fas fa-exclamation-circle me-2"></i>
@@ -63,7 +63,7 @@
                         </button>
                     </div>
                     
-                    <!-- Indicador de fortaleza de contraseña -->
+                    
                     <div class="password-strength mb-3" id="passwordStrength" style="display: none;">
                         <div class="strength-bar">
                             <div class="strength-fill" id="strengthFill"></div>
@@ -125,13 +125,11 @@
             const btnText = document.getElementById('btnText');
             const btnLoading = document.getElementById('btnLoading');
 
-            // Función para verificar requisitos de contraseña (solo longitud mínima)
             function checkPasswordRequirements(password) {
                 const requirements = {
                     length: password.length >= 6
                 };
 
-                // Actualizar indicador visual solo para longitud
                 const lengthElement = document.getElementById('req-length');
                 if (lengthElement) {
                     const icon = lengthElement.querySelector('i');
@@ -150,31 +148,17 @@
                 return requirements;
             }
 
-            // Función para calcular fortaleza de contraseña
             function calculatePasswordStrength(password) {
                 if (password.length === 0) return 0;
                 
                 let score = 0;
-                
-                // Puntuación basada en longitud
+
                 if (password.length >= 6) score += 30;
                 if (password.length >= 8) score += 20;
                 if (password.length >= 12) score += 20;
-                
-                // Bonificaciones por complejidad (opcionales)
-                if (/[A-Z]/.test(password)) score += 10; // Mayúscula
-                if (/[a-z]/.test(password)) score += 10; // Minúscula
-                if (/\d/.test(password)) score += 10; // Número
-                if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 10; // Carácter especial
-                
-                return Math.min(100, score);
-            }
 
-            function updatePasswordStrength() {
-                const password = passwordField.value;
-                const strength = calculatePasswordStrength(password);
-                
-                // Actualizar barra de progreso
+                if (/[A-Z]/.test(password)) score += 10;
+                if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 10;
                 const strengthFill = document.querySelector('.strength-fill');
                 const strengthText = document.getElementById('strengthText');
                 
@@ -194,12 +178,10 @@
                     strengthText.textContent = 'Fuerte';
                     strengthText.className = 'strength-text text-success';
                 }
-                
-                // Validar botón después de actualizar la fortaleza
+
                 checkPasswordMatch();
             }
 
-            // Evento para verificar fortaleza de contraseña
             passwordField.addEventListener('input', function() {
                 const password = this.value;
                 
@@ -212,15 +194,12 @@
                 }
             });
 
-            // Verificar coincidencia de contraseñas
             function checkPasswordMatch() {
                 const password = passwordField.value;
                 const confirmPassword = confirmField.value;
-                
-                // Verificar que la contraseña tenga al menos 6 caracteres
+
                 const hasMinLength = password.length >= 6;
-                
-                // Verificar que las contraseñas coincidan
+
                 const passwordsMatch = password === confirmPassword;
                 
                 if (confirmPassword && !passwordsMatch) {
@@ -230,15 +209,13 @@
                     confirmField.setCustomValidity('');
                     confirmField.classList.remove('is-invalid');
                 }
-                
-                // Habilitar botón solo si tiene mínimo 6 caracteres y las contraseñas coinciden
+
                 submitBtn.disabled = !hasMinLength || !passwordsMatch || !confirmPassword;
             }
 
             confirmField.addEventListener('input', checkPasswordMatch);
             passwordField.addEventListener('input', checkPasswordMatch);
 
-            // Manejar envío del formulario
             resetForm.addEventListener('submit', function() {
                 submitBtn.disabled = true;
                 btnText.style.display = 'none';

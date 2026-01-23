@@ -6,11 +6,11 @@
 
 @section('content')
 <div class="pos-container">
-    <!-- CONTENIDO PRINCIPAL -->
+    
     <div class="pos-main">
-        <!-- PANEL IZQUIERDO - PRODUCTOS -->
+        
         <div class="pos-left-panel">
-            <!-- BÚSQUEDA Y FILTROS -->
+            
             <div class="pos-search-section">
                 <div class="pos-search-container">
                     <div class="pos-search-bar">
@@ -25,7 +25,7 @@
                         </button>
                     </div>
                     
-                    <!-- FILTROS CON CONTADORES -->
+                    
                     <div class="pos-filters-buttons">
                         <button class="pos-filter-btn active" data-filtro="" onclick="cambiarFiltro('', this)">
                             <iconify-icon icon="solar:list-bold-duotone"></iconify-icon>
@@ -37,14 +37,14 @@
                             <span>Por vencer</span>
                             <span class="filter-counter" id="contadorPorVencer">0</span>
                         </button>
-                        <!-- Botón de alternativas eliminado -->
+                        
                     </div>
                 </div>
                 
 
             </div>
 
-            <!-- PRODUCTOS MÁS VENDIDOS / RESULTADOS -->
+            
             <div class="pos-productos-section">
                 <div class="pos-productos-header">
                     <h3 class="pos-productos-title" id="productosTitulo">
@@ -56,19 +56,19 @@
                     </div>
                 </div>
                 
-                <!-- GRID DE PRODUCTOS -->
+                
                 <div id="productosGrid" class="pos-productos-grid">
-                    <!-- Los productos se cargarán aquí -->
+                    
                 </div>
                 
-                <!-- Sección de alternativas eliminada -->
+                
             </div>
         </div>
 
-        <!-- PANEL DERECHO - RESUMEN Y CARRITO -->
+        
         <div class="pos-right-panel">
             <div class="pos-resumen-container">
-                <!-- CARRITO COMPACTO FARMACIA -->
+                
                 <div class="pos-carrito-farmacia">
                     <div class="pos-carrito-header-compacto">
                         <h3><iconify-icon icon="solar:cart-large-2-bold-duotone"></iconify-icon> Carrito <span id="contadorProductos">(0)</span></h3>
@@ -85,9 +85,9 @@
                     </div>
                 </div>
 
-                <!-- RESUMEN COMPACTO -->
+                
                 <div class="pos-resumen-compacto">
-                    <!-- CLIENTE POR DNI -->
+                    
                     <div class="pos-cliente-dni" style="margin-bottom: 12px;">
                         <label class="pos-toggle-switch" style="align-items:center;">
                             <input type="checkbox" id="toggleDniCliente">
@@ -115,7 +115,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- TOGGLE AZUL DE DESCUENTO - ANTES DEL SUBTOTAL -->
+                    
                     <div class="pos-descuento-toggle-azul">
                         <label class="pos-toggle-switch">
                             <input type="checkbox" id="conDescuento" onchange="toggleDescuento()">
@@ -124,7 +124,7 @@
                         </label>
                     </div>
 
-                    <!-- SECCIÓN DE DESCUENTO INTEGRADA - DESPUÉS DEL TOGGLE -->
+                    
                     <div class="pos-descuento-inline" id="seccionDescuento" style="display: none !important; visibility: hidden; height: 0; margin: 0; padding: 0; overflow: hidden;">
                         <div class="descuento-controles">
                             <div class="descuento-tipo-selector">
@@ -173,7 +173,7 @@
                         </div>
                     </div>
 
-                    <!-- PAGO RÁPIDO -->
+                    
                     <div class="pos-pago-rapido">
                         <div class="pos-metodos-compactos">
                             <button class="pos-metodo-rapido active" data-metodo="efectivo">
@@ -205,7 +205,7 @@
                         </div>
                     </div>
 
-                    <!-- BOTONES DE COMPROBANTES -->
+                    
                     <div class="pos-botones-comprobantes">
                         <button id="btnBoleta" 
                                 class="pos-btn-comprobante pos-btn-boleta" 
@@ -231,7 +231,6 @@
     </div>
 </div>
 
-<!-- LOADING OVERLAY - OCULTO POR DEFECTO -->
 <div id="posLoading" class="pos-loading" style="display: none; opacity: 0; visibility: hidden;">
     <div class="pos-loading-content">
         <div class="pos-spinner"></div>
@@ -239,9 +238,8 @@
     </div>
 </div>
 
-<!-- Modal Selector de Lotes para POS -->
-<div id="modalSelectorLotesPOS" class="modal-overlay fixed inset-0 hidden items-center justify-center z-[60]" style="display:none; background: rgba(0,0,0,0.5);">
-    <div class="modal-container bg-white mx-auto rounded-2xl shadow-2xl z-[60] overflow-hidden w-full max-w-2xl">
+<div id="modalSelectorLotesPOS" class="modal-overlay fixed inset-0 hidden items-center justify-center z-[1060]" style="display:none; background: rgba(0,0,0,0.5);">
+    <div class="modal-container bg-white mx-auto rounded-2xl shadow-2xl z-[1060] overflow-hidden w-full max-w-2xl">
         <div class="modal-header px-6 py-5 border-b flex justify-between items-center" style="background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);">
             <div class="flex items-center gap-3">
                 <iconify-icon icon="lucide:package" class="text-red-800 text-2xl"></iconify-icon>
@@ -269,7 +267,7 @@
                         </tr>
                     </thead>
                     <tbody id="selectorLotesBodyPOS" class="divide-y divide-gray-100">
-                        <!-- Lotes se cargan aquí dinámicamente -->
+                        
                     </tbody>
                 </table>
             </div>
@@ -284,7 +282,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 <style>
-/* Estilos personalizados para SweetAlert */
+
 .swal-popup-custom {
     border-radius: 20px !important;
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25) !important;
@@ -335,13 +333,11 @@
     box-shadow: 0 6px 20px 0 rgba(107, 114, 128, 0.6) !important;
 }
 
-/* Asegurar que todos los botones de SweetAlert sean siempre visibles */
 .swal2-actions button {
     opacity: 1 !important;
     visibility: visible !important;
 }
 
-/* Animación de pulso para elementos destacados */
 @keyframes pulse-success {
     0% { transform: scale(1); }
     50% { transform: scale(1.05); }

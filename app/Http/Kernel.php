@@ -36,7 +36,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \App\Http\Middleware\UpdateUserActivity::class,
+            \App\Http\Middleware\TrackUserActivity::class, // Rastrear inactividad de 30+ minutos
             \App\Http\Middleware\ValidateInputMiddleware::class,
         ],
 

@@ -24,7 +24,7 @@
                     <h3>Verificar Código</h3>
                 </div>
                 
-                <!-- Mensaje de error -->
+                
                 @if ($errors->any())
                     <div class="alert alert-danger" role="alert">
                         <i class="fas fa-exclamation-circle me-2"></i>
@@ -34,7 +34,7 @@
                     </div>
                 @endif
 
-                <!-- Mensaje dinámico de código enviado -->
+                
                 <div class="alert alert-success" role="alert" id="codeMessage">
                     <i class="fas fa-check-circle me-2"></i>
                     <span id="messageText">Te hemos enviado un código de verificación a tu email.</span>
@@ -75,7 +75,7 @@
                         </button>
                     </div>
                     
-                    <!-- Contador y opción de reenvío -->
+                    
                     <div class="text-center mb-3" id="resendSection">
                         <div id="countdownSection" style="display: block;">
                             <p class="text-muted mb-2">
@@ -119,8 +119,7 @@
             const countdownElement = document.getElementById('countdown');
             const countdownSection = document.getElementById('countdownSection');
             const resendOption = document.getElementById('resendOption');
-            
-            // Contador de 30 segundos (para pruebas - cambiar a 180 para producción)
+
             let timeLeft = 30;
             let countdownTimer;
             
@@ -139,29 +138,24 @@
                     timeLeft--;
                 }, 1000);
             }
-            
-            // Iniciar contador al cargar la página
+
             startCountdown();
 
-            // Función para actualizar el código completo
             function updateFullCode() {
                 let code = '';
                 codeInputs.forEach(input => {
                     code += input.value;
                 });
                 fullCodeInput.value = code;
-                
-                // Habilitar/deshabilitar botón según si el código está completo
+
                 submitBtn.disabled = code.length !== 6;
             }
 
-            // Configurar eventos para cada input de dígito
             codeInputs.forEach((input, index) => {
                 input.addEventListener('input', function(e) {
-                    // Solo permitir números
+
                     this.value = this.value.replace(/[^0-9]/g, '');
-                    
-                    // Mover al siguiente input si se ingresó un dígito
+
                     if (this.value.length === 1 && index < codeInputs.length - 1) {
                         codeInputs[index + 1].focus();
                     }
@@ -170,12 +164,11 @@
                 });
 
                 input.addEventListener('keydown', function(e) {
-                    // Mover al input anterior con backspace
+
                     if (e.key === 'Backspace' && this.value === '' && index > 0) {
                         codeInputs[index - 1].focus();
                     }
-                    
-                    // Enviar formulario con Enter si el código está completo
+
                     if (e.key === 'Enter' && fullCodeInput.value.length === 6) {
                         verifyForm.submit();
                     }
@@ -197,10 +190,8 @@
                 });
             });
 
-            // Enfocar el primer input al cargar
             codeInputs[0].focus();
 
-            // Manejar envío del formulario de verificación
             verifyForm.addEventListener('submit', function() {
                 submitBtn.disabled = true;
                 btnText.style.display = 'none';
@@ -208,20 +199,17 @@
                 submitBtn.style.cursor = 'wait';
             });
 
-            // Función para reenviar código
             window.resendCode = function() {
                 const resendBtn = document.getElementById('resend-btn');
                 const originalText = resendBtn.innerHTML;
                 const messageText = document.getElementById('messageText');
                 const codeMessage = document.getElementById('codeMessage');
-                
-                // Deshabilitar botón y mostrar loading
+
                 resendBtn.disabled = true;
                 resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Reenviando...';
                 
                 console.log('Iniciando reenvío de código...');
-                
-                // Usar fetch para enviar la solicitud AJAX
+
                 fetch('{{ route("password.resend-code") }}', {
                     method: 'POST',
                     headers: {
@@ -241,22 +229,19 @@
                     console.log('Datos de respuesta:', data);
                     
                     if (data.success) {
-                        // Actualizar el mensaje de éxito
+
                         messageText.textContent = 'Te hemos reenviado un código de verificación a tu email.';
-                        
-                        // Agregar efecto visual al mensaje
+
                         codeMessage.style.animation = 'pulse 0.5s ease-in-out';
                         setTimeout(() => {
                             codeMessage.style.animation = '';
                         }, 500);
-                        
-                        // Reiniciar el contador
+
                         timeLeft = 30;
                         countdownSection.style.display = 'block';
                         resendOption.style.display = 'none';
                         startCountdown();
-                        
-                        // Limpiar los campos de código
+
                         codeInputs.forEach(input => {
                             input.value = '';
                         });
@@ -264,7 +249,7 @@
                         codeInputs[0].focus();
                         
                     } else {
-                        // Mostrar mensaje de error en el mismo lugar
+
                         messageText.textContent = 'Error al reenviar el código. ' + (data.message || 'Inténtalo más tarde.');
                         codeMessage.className = 'alert alert-danger';
                         codeMessage.querySelector('i').className = 'fas fa-exclamation-circle me-2';
@@ -272,13 +257,13 @@
                 })
                 .catch(error => {
                     console.error('Error en la solicitud:', error);
-                    // Mostrar mensaje de error en el mismo lugar
+
                     messageText.textContent = 'Error de conexión. Por favor, intenta nuevamente.';
                     codeMessage.className = 'alert alert-danger';
                     codeMessage.querySelector('i').className = 'fas fa-exclamation-circle me-2';
                 })
                 .finally(() => {
-                    // Restaurar el botón
+
                     resendBtn.disabled = false;
                     resendBtn.innerHTML = originalText;
                 });

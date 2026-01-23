@@ -340,6 +340,34 @@ class ProductoApiController extends Controller
 
             $product = Producto::create($data);
 
+            // --- MANEJO DE PRESENTACIONES ---
+            if ($request->has('presentaciones')) {
+                $presentaciones = $request->input('presentaciones');
+                $presentacionesUnidades = $request->input('presentaciones_unidades', []);
+                
+                // Si viene como JSON string (desde multipart), decodificar
+                if (is_string($presentaciones)) {
+                    $presentaciones = json_decode($presentaciones, true);
+                }
+                if (is_string($presentacionesUnidades)) {
+                    $presentacionesUnidades = json_decode($presentacionesUnidades, true);
+                }
+
+                if (is_array($presentaciones)) {
+                    foreach ($presentaciones as $nombre => $precio_venta) {
+                        $unidades = isset($presentacionesUnidades[$nombre]) ? (int)$presentacionesUnidades[$nombre] : 1;
+                        
+                        \App\Models\ProductoPresentacion::create([
+                            'producto_id' => $product->id,
+                            'nombre_presentacion' => $nombre,
+                            'unidades_por_presentacion' => $unidades,
+                            'precio_venta_presentacion' => $precio_venta,
+                        ]);
+                    }
+                    $product->update(['tiene_presentaciones' => 1]);
+                }
+            }
+
             // --- CREACIÓN AUTOMÁTICA DE LOTE INICIAL ---
             // Si el producto se crea con stock > 0, debemos registrar el lote físico
             if ($product->stock_actual > 0) {
@@ -659,8 +687,10 @@ class ProductoApiController extends Controller
                 'precio_compra' => 'nullable|numeric|min:0',
                 'precio_venta' => 'nullable|numeric|min:0',
                 'lote' => 'nullable|string|max:255',
-                'fecha_vencimiento' => 'nullable|date|after:today',
+                'fecha_vencimiento' => 'nullable|date',
                 'observaciones' => 'nullable|string|max:255',
+                'presentaciones' => 'nullable|array',
+                'presentaciones_unidades' => 'nullable|array',
             ]);
             
             if ($validator->fails()) {
@@ -711,6 +741,7 @@ class ProductoApiController extends Controller
             }
             $ubicacionId = $ubicacionDefault ? $ubicacionDefault->id : null;
             
+            $lote = null;
             // Si hay lote y ubicación, registrar en ProductoUbicacion
             if ($ubicacionId) {
                 // Usar lote proporcionado o intentar obtener del producto
@@ -726,15 +757,15 @@ class ProductoApiController extends Controller
                         $loteQuery->where('fecha_vencimiento', $fechaVenc);
                     }
                     
-                    $loteExistente = $loteQuery->first();
+                    $lote = $loteQuery->first();
 
-                    if ($loteExistente) {
-                        $loteExistente->cantidad += (int) $validated['quantity'];
-                        if (isset($validated['precio_compra'])) $loteExistente->precio_compra_lote = $validated['precio_compra'];
-                        if (isset($validated['precio_venta'])) $loteExistente->precio_venta_lote = $validated['precio_venta'];
-                        $loteExistente->save();
+                    if ($lote) {
+                        $lote->cantidad += (int) $validated['quantity'];
+                        if (isset($validated['precio_compra'])) $lote->precio_compra_lote = $validated['precio_compra'];
+                        if (isset($validated['precio_venta'])) $lote->precio_venta_lote = $validated['precio_venta'];
+                        $lote->save();
                     } else {
-                        \App\Models\ProductoUbicacion::create([
+                        $lote = \App\Models\ProductoUbicacion::create([
                             'producto_id' => $product->id,
                             'ubicacion_id' => $ubicacionId,
                             'cantidad' => (int) $validated['quantity'],
@@ -756,6 +787,70 @@ class ProductoApiController extends Controller
             // ---------------------------------------------
             
             $product->save();
+
+            // --- MANEJO DE PRESENTACIONES ---
+            if ($request->has('presentaciones') && $lote) {
+                $unidadesModificadas = $request->input('presentaciones_unidades', []);
+                $hasLotePresTable = \Illuminate\Support\Facades\Schema::hasTable('lote_presentaciones');
+                
+                // Asegurarnos de usar el precio de venta principal para la unidad
+                $mainPrecioVenta = $validated['precio_venta'] ?? $product->precio_venta;
+                
+                foreach ($request->presentaciones as $presentacion_id => $precio_venta) {
+                    // Obtener unidades para esta presentación
+                    $unidades = isset($unidadesModificadas[$presentacion_id]) ? (int)$unidadesModificadas[$presentacion_id] : 0;
+                    
+                    // REGLA DE ORO: Si es la unidad (1 unidad o ID temporal 0), 
+                    // forzamos el precio de venta principal para evitar inconsistencias
+                    if ($unidades == 1 || $presentacion_id == "0") {
+                        $precio_venta = $mainPrecioVenta;
+                    }
+
+                    if ($precio_venta > 0) {
+                        // Si es la presentación base (unidades == 1) o ID es 0, sincronizar con el producto principal
+                        if ($presentacion_id == "0" || $unidades == 1) {
+                            $product->update([
+                                'precio_venta' => $precio_venta,
+                                'precio_compra' => $validated['precio_compra'] ?? $product->precio_compra
+                            ]);
+                            
+                            $lote->update([
+                                'precio_venta_lote' => $precio_venta,
+                                'precio_compra_lote' => $validated['precio_compra'] ?? $lote->precio_compra_lote
+                            ]);
+                            
+                            // Si es ID "0", no hay registro en producto_presentaciones que actualizar
+                            if ($presentacion_id == "0") continue;
+                        }
+
+                        // Actualizar la tabla global de presentaciones del producto 
+                        \DB::table('producto_presentaciones')
+                            ->where('id', $presentacion_id)
+                            ->update([
+                                'precio_venta_presentacion' => $precio_venta,
+                                'unidades_por_presentacion' => $unidades > 0 ? $unidades : 1,
+                                'updated_at' => now()
+                            ]);
+
+                        // Guardar o actualizar el registro específico para este lote
+                        if ($hasLotePresTable) {
+                            \DB::table('lote_presentaciones')->updateOrInsert(
+                                [
+                                    'producto_ubicacion_id' => $lote->id,
+                                    'producto_presentacion_id' => $presentacion_id,
+                                ],
+                                [
+                                    'precio_venta' => $precio_venta,
+                                    'unidades_por_presentacion' => $unidades > 0 ? $unidades : 1,
+                                    'updated_at' => now(),
+                                    'created_at' => now(),
+                                ]
+                            );
+                        }
+                    }
+                }
+            }
+            // ---------------------------------------------
             
             // Registrar historial de entrada de mercadería
             try {
@@ -796,7 +891,7 @@ class ProductoApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al agregar stock',
+                'message' => 'Error al agregar stock: ' . $e->getMessage(),
                 'error' => $e->getMessage()
             ], 500);
         }

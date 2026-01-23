@@ -13,7 +13,7 @@
             <h6 class="text-lg font-semibold mb-0">Metrics</h6>
         </div>
         <div class="card-body p-6 flex flex-col gap-6">
-            <!-- AI Widgets Start -->
+            
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-6">
                 <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-cyan-600/10 to-bg-white">
                     <div class="card-body p-5">
@@ -31,7 +31,7 @@
                             Last 30 days users
                         </p>
                     </div>
-                </div><!-- card end -->
+                </div>
                 <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-purple-600/10 to-bg-white">
                     <div class="card-body p-5">
                         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -48,7 +48,7 @@
                             Last 30 days subscription
                         </p>
                     </div>
-                </div><!-- card end -->
+                </div>
                 <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-blue-600/10 to-bg-white">
                     <div class="card-body p-5">
                         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -65,7 +65,7 @@
                             Last 30 days users
                         </p>
                     </div>
-                </div><!-- card end -->
+                </div>
                 <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-success-600/10 to-bg-white">
                     <div class="card-body p-5">
                         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -82,7 +82,7 @@
                             Last 30 days income
                         </p>
                     </div>
-                </div><!-- card end -->
+                </div>
                 <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-red-600/10 to-bg-white">
                     <div class="card-body p-5">
                         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -99,10 +99,10 @@
                             Last 30 days expense
                         </p>
                     </div>
-                </div><!-- card end -->
+                </div>
             </div>
-            <!-- AI Widgets Start -->
-            <!-- CRM Widgets Start -->
+            
+            
             <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6">
                 <div class="card px-4 py-5 shadow-2 rounded-lg border-gray-200 h-full bg-gradient-to-l from-primary-600/10 to-bg-white">
                     <div class="card-body p-0">
@@ -180,8 +180,8 @@
                     </div>
                 </div>
             </div>
-            <!-- CRM Widgets Start -->
-            <!-- Ecommerce Widgets Start -->
+            
+            
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border border-neutral-200">
                 <div class="card-body p-6 h-full flex flex-col sm:border-r border-r-0 border-neutral-200 last:border-r-0 border-b lg:border-b-0">
                     <div class="flex flex-wrap items-center justify-between gap-1 mb-0.5">
@@ -232,8 +232,8 @@
                     <p class="text-sm mb-0 mt-3">Increase by  <span class="bg-success-100 px-1 py-0.5 rounded-sm font-medium text-success-600 text-sm">+$10k</span> this week</p>
                 </div>
             </div>
-            <!-- Ecommerce Widgets End -->
-            <!-- Crypto Widgets Start -->
+            
+            
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-6">
                 <div class="card shadow-none border-gray-200 bg-gradient-to-l from-warning-600/10 to-bg-white">
                     <div class="card-body p-5">
@@ -326,11 +326,11 @@
                     </div>
                 </div>
             </div>
-            <!-- Crypto Widgets End -->
+            
         </div>
     </div>
 
-    <!-- Widgets Start -->
+    
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 mt-6">
         <div class="col-span-12 xl:col-span-12 2xl:col-span-6">
             <div class="card h-full rounded-lg border-0">
@@ -486,7 +486,7 @@
             </div>
         </div>
 
-        <!-- Client Payment Status Start -->
+        
         <div class="col-span-12 xl:col-span-6 2xl:col-span-4">
             <div class="card h-full rounded-lg border-0">
                 <div class="card-body p-6">
@@ -513,8 +513,8 @@
                 </div>
             </div>
         </div>
-        <!-- Client Payment Status End -->
-        <!-- Earning Static start -->
+        
+        
         <div class="col-span-12 xl:col-span-6 2xl:col-span-8">
             <div class="card h-full rounded-lg border-0">
                 <div class="card-body p-6">
@@ -569,8 +569,8 @@
                 </div>
             </div>
         </div>
-        <!-- Earning Static End -->
-        <!-- Users Overview Start -->
+        
+        
         <div class="col-span-12 xl:col-span-6 2xl:col-span-4">
             <div class="card h-full rounded-lg border-0 overflow-hidden">
                 <div class="card-body p-6">
@@ -606,8 +606,8 @@
                 </div>
             </div>
         </div>
-        <!-- Users Overview End -->
-        <!-- Recent Orders Start -->
+        
+        
         <div class="col-span-12 xl:col-span-6 2xl:col-span-4">
             <div class="card h-full border-0 rounded-lg">
                 <div class="card-body p-6">
@@ -626,8 +626,8 @@
                 </div>
             </div>
         </div>
-        <!-- Recent Orders End -->
-        <!-- Statistics Start -->
+        
+        
         <div class="col-span-12 xl:col-span-6 2xl:col-span-4">
             <div class="card h-full rounded-lg border-0">
                 <div class="card-body p-6">
@@ -666,9 +666,9 @@
                 </div>
             </div>
         </div>
-        <!-- Statistics End -->
+        
 
     </div>
-    <!-- Widgets End -->
+    
 
 @endsection

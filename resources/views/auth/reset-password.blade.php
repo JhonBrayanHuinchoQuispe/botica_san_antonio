@@ -33,10 +33,10 @@
     <form method="POST" action="{{ route('password.store') }}">
         @csrf
 
-                    <!-- Token de restablecimiento -->
+                    
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
-                    <!-- Email -->
+                    
                     <div class="input-container">
                         <i class="fas fa-envelope input-icon"></i>
                         <input type="email" class="form-control input-field @error('email') is-invalid @enderror" 
@@ -48,7 +48,7 @@
                         @enderror
         </div>
 
-                    <!-- Nueva Contraseña -->
+                    
                     <div class="input-container">
                         <i class="fas fa-lock input-icon"></i>
                         <input type="password" class="form-control input-field @error('password') is-invalid @enderror" 
@@ -63,7 +63,7 @@
                         @enderror
         </div>
 
-                    <!-- Confirmar Contraseña -->
+                    
                     <div class="input-container">
                         <i class="fas fa-lock input-icon"></i>
                         <input type="password" class="form-control input-field @error('password_confirmation') is-invalid @enderror" 
@@ -78,7 +78,7 @@
                         @enderror
                     </div>
                     
-                    <!-- Indicador de fuerza de contraseña -->
+                    
                     <div class="password-strength mb-3" id="passwordStrength" style="display: none;">
                         <div class="strength-bar">
                             <div class="strength-fill" id="strengthFill"></div>
@@ -112,23 +112,21 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Spinner para el formulario
+
         document.querySelector('form').addEventListener('submit', function() {
             const resetBtn = document.getElementById('resetBtn');
             const resetBtnText = document.getElementById('resetBtnText');
             const resetBtnLoading = document.getElementById('resetBtnLoading');
-            
-            // Deshabilitar botón y mostrar spinner
+
             resetBtn.disabled = true;
             resetBtnText.style.display = 'none';
             resetBtnLoading.style.display = 'inline';
-            
-            // Cambiar cursor
+
             resetBtn.style.cursor = 'wait';
         });
     </script>
     <script>
-        // Función para mostrar/ocultar contraseña
+
         function togglePassword(fieldId) {
             const field = document.getElementById(fieldId);
             const icon = document.getElementById('toggleIcon' + fieldId.charAt(0).toUpperCase() + fieldId.slice(1));
@@ -141,8 +139,7 @@
                 icon.className = 'fa fa-eye-slash';
             }
         }
-        
-        // Indicador de fuerza de contraseña
+
         document.getElementById('password').addEventListener('input', function() {
             const password = this.value;
             const strengthDiv = document.getElementById('passwordStrength');
@@ -159,8 +156,7 @@
             let strength = 0;
             let text = '';
             let color = '';
-            
-            // Calcular fuerza
+
             if (password.length >= 8) strength++;
             if (/[a-z]/.test(password)) strength++;
             if (/[A-Z]/.test(password)) strength++;
@@ -222,7 +218,7 @@
             font-weight: 500;
         }
         
-        /* CSS Responsivo */
+        
         @media (max-width: 767.98px) {
             body {
                 overflow-y: auto;

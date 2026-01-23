@@ -8,27 +8,319 @@
     ';
 @endphp
 
-<head>
+@push('head')
     <title>Historial de Ventas</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/ventas/ventas.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-
-@push('head')
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <style>
-/* Estilos mejorados para historial de ventas */
-.historial-venta-number {
-    font-weight: 600;
-    color: #374151;
-    font-size: 0.95rem;
+
+.historial-table thead, 
+.historial-table thead tr, 
+.historial-table thead th {
+    background-color: #f8fafc !important;
+    background: #f8fafc !important;
+    color: #475569 !important;
 }
 
-.historial-sunat-code {
-    font-size: 0.8rem;
-    color: #6b7280;
-    margin-top: 2px;
+.historial-table thead th {
+    border-bottom: 2px solid #e2e8f0 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.05em !important;
+    padding: 1rem 0.75rem !important;
+    text-align: center !important;
+}
+
+.historial-table thead th:first-child {
+    text-align: left !important;
+    padding-left: 1.5rem !important;
+}
+
+.reportes-metrics-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.reportes-metric-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.reportes-metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+}
+
+.reportes-metric-icon-small {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+}
+
+.reportes-metric-content {
+    flex: 1;
+}
+
+.reportes-metric-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 0.15rem;
+}
+
+.reportes-metric-value-medium {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0;
+}
+
+.reportes-metric-comparison {
+    font-size: 0.65rem;
+    margin-top: 0.15rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+}
+
+.reportes-metric-card.gold { border-left: 3px solid #eab308; }
+.reportes-metric-card.gold .reportes-metric-icon-small { background: rgba(234, 179, 8, 0.1); color: #a16207; }
+.reportes-metric-card.gold .reportes-metric-comparison { color: #a16207; }
+
+.reportes-metric-card.teal { border-left: 3px solid #14b8a6; }
+.reportes-metric-card.teal .reportes-metric-icon-small { background: rgba(20, 184, 166, 0.1); color: #0f766e; }
+.reportes-metric-card.teal .reportes-metric-comparison { color: #0f766e; }
+
+.reportes-metric-card.purple { border-left: 3px solid #8b5cf6; }
+.reportes-metric-card.purple .reportes-metric-icon-small { background: rgba(139, 92, 246, 0.1); color: #6d28d9; }
+.reportes-metric-card.purple .reportes-metric-comparison { color: #6d28d9; }
+
+.reportes-metric-card.red { border-left: 3px solid #ef4444; }
+.reportes-metric-card.red .reportes-metric-icon-small { background: rgba(239, 68, 68, 0.1); color: #b91c1c; }
+.reportes-metric-card.red .reportes-metric-comparison { color: #b91c1c; }
+
+.presentacion-item-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin: 2px;
+    border: 1px solid transparent;
+}
+
+.pres-unidad { background: #eff6ff; color: #2563eb; border-color: #dbeafe; }
+.pres-blister { background: #f5f3ff; color: #7c3aed; border-color: #ede9fe; }
+.pres-caja { background: #fff7ed; color: #ea580c; border-color: #ffedd5; }
+.pres-generico { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
+
+.price-total-green {
+    color: #10b981 !important;
+    font-weight: 700 !important;
+    font-size: 1.05rem !important;
+}
+
+.vuelto-label {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 500;
+    display: block;
+    margin-top: 1px;
+}
+
+.historial-row {
+    transition: all 0.2s ease;
+}
+
+.historial-row:not(.venta-anulada-row):not(.venta-parcial-row):hover {
+    background-color: #f8fafc !important;
+}
+
+.historial-row td {
+    padding: 1rem !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    vertical-align: middle !important;
+    text-align: center;
+}
+
+.historial-row td:first-child {
+    text-align: left;
+    padding-left: 1.5rem !important;
+}
+
+.detail-content {
+    padding: 0 !important;
+    background: #f8fafc;
+}
+
+.status-badge-premium {
+    padding: 0.35rem 0.7rem;
+    border-radius: 99px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.status-paid {
+    background: rgba(16, 185, 129, 0.08);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.status-returned {
+    background: rgba(239, 68, 68, 0.08);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.status-partial {
+    background: rgba(245, 158, 11, 0.08);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.15);
+}
+
+.venta-anulada-row {
+    background-color: rgba(239, 68, 68, 0.03) !important;
+}
+.venta-anulada-row:hover {
+    background-color: rgba(239, 68, 68, 0.05) !important;
+}
+
+.venta-parcial-row {
+    background-color: rgba(245, 158, 11, 0.03) !important;
+}
+.venta-parcial-row:hover {
+    background-color: rgba(245, 158, 11, 0.05) !important;
+}
+
+.total-tachado {
+    text-decoration: line-through;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    margin-right: 4px;
+}
+
+.historial-btn-limpiar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.5rem 1.25rem;
+    background: #f1f5f9;
+    color: #475569;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+}
+.historial-btn-limpiar:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+    transform: translateY(-1px);
+}
+.historial-btn-limpiar iconify-icon {
+    font-size: 1.1rem;
+}
+
+@keyframes shimmer {
+    0% { background-position: -468px 0; }
+    100% { background-position: 468px 0; }
+}
+
+.skeleton-loading {
+    background: #f6f7f8;
+    background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+    background-repeat: no-repeat;
+    background-size: 800px 104px;
+    display: inline-block;
+    position: relative;
+    animation: shimmer 1s linear infinite forwards;
+    border-radius: 4px;
+}
+
+.skeleton-text { height: 12px; width: 100%; margin: 4px 0; }
+.skeleton-badge { height: 24px; width: 80px; border-radius: 12px; }
+.skeleton-circle { height: 32px; width: 32px; border-radius: 50%; }
+
+.historial-actions-improved button {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.historial-actions-improved .action-btn-view {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.08) 100%) !important;
+    color: #2563eb !important;
+    border: 1px solid rgba(59, 130, 246, 0.15) !important;
+}
+
+.historial-actions-improved .action-btn-view:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.15) 100%) !important;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.historial-actions-improved .action-btn-print {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%) !important;
+    color: #059669 !important;
+    border: 1px solid rgba(16, 185, 129, 0.15) !important;
+}
+
+.historial-actions-improved .action-btn-print:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%) !important;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.historial-table-container-improved {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.historial-hscroll-track { height: 8px; background: #f1f5f9; border-radius: 9999px; margin: 8px 1.5rem; position: relative; width: calc(100% - 3rem); display: none; }
+.historial-hscroll-thumb { height: 8px; background: #cbd5e1; border-radius: 9999px; width: 60px; position: absolute; left: 0; cursor: pointer; transition: background 0.2s; }
+.historial-hscroll-thumb:hover { background: #94a3b8; }
+.historial-hscroll { scrollbar-width: none; }
+.historial-hscroll::-webkit-scrollbar { display: none; }
+
+.historial-venta-number {
+    font-weight: 500;
+    color: #64748b;
+    font-size: 0.85rem;
 }
 
 .historial-price-total {
@@ -37,280 +329,6 @@
     font-size: 1.1rem;
 }
 
-.historial-user-simple {
-    font-weight: 500;
-    color: #374151;
-}
-
-.historial-actions-improved {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.action-btn-primary, .action-btn-secondary {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: none;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-.action-btn-primary {
-    background: #eef5ff;
-    color: #1e56cf;
-    border: 1px solid #cfe0ff;
-    box-shadow: none;
-}
-
-.action-btn-primary:hover {
-    background: #e7f0ff;
-    border-color: #bcd4ff;
-}
-
-.action-btn-secondary {
-    background: #eaf7ee;
-    color: #0a7c4a;
-    border: 1px solid #bfe7cf;
-    box-shadow: none;
-}
-
-.action-btn-secondary:hover {
-    background: #e3f4e9;
-    border-color: #a9dcc0;
-}
-
-.action-btn-primary .material-icons,
-.action-btn-secondary .material-icons {
-    font-size: 16px;
-}
-
-/* Asegurar que los botones siempre sean visibles */
-.historial-actions-improved button {
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-/* Indicador de estado devuelto */
-.estado-devuelto {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-    color: #dc2626;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 12px;
-    border: 1px solid #fca5a5;
-    margin-left: 8px;
-}
-
-.estado-devuelto .material-icons {
-    font-size: 14px;
-}
-
-/* Indicador de estado parcialmente devuelto */
-.estado-parcialmente-devuelto {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: linear-gradient(135deg, #fef3e2 0%, #fed7aa 100%);
-    color: #ea580c;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 12px;
-    border: 1px solid #fdba74;
-    margin-left: 8px;
-}
-
-.estado-parcialmente-devuelto .material-icons {
-    font-size: 14px;
-}
-
-/* Estilo para filas de ventas devueltas */
-.venta-devuelta {
-    background-color: #fef2f2 !important;
-    border-left: 4px solid #dc2626 !important;
-}
-
-/* Estilo para filas de ventas parcialmente devueltas */
-.venta-parcialmente-devuelta {
-    background-color: #fef3e2 !important;
-    border-left: 4px solid #ea580c !important;
-}
-
-/* Información de devolución en el historial */
-.devolucion-info {
-    font-size: 0.8rem;
-    color: #6b7280;
-    margin-top: 2px;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.devolucion-info .devolucion-detalle {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.devolucion-info .material-icons {
-    font-size: 12px;
-}
-
-.monto-devuelto {
-    color: #dc2626;
-    font-weight: 600;
-}
-
-.productos-devueltos {
-    color: #ea580c;
-    font-weight: 500;
-}
-
-/* Estilos para el modal de detalle de venta */
-.swal-popup-detail {
-    border-radius: 16px !important;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
-}
-
-.swal-popup-detail .material-icons {
-    font-size: 18px;
-    vertical-align: middle;
-}
-
-/* Mejorar botones en devoluciones */
-.historial-actions button,
-.action-btn-primary,
-.action-btn-secondary {
-    opacity: 1 !important;
-    visibility: visible !important;
-    display: inline-flex !important;
-}
-
-/* Estilo especial para botones de devoluciones */
-.devoluciones-actions button {
-    opacity: 1 !important;
-    visibility: visible !important;
-    background: transparent !important;
-    border: 1px solid !important;
-    border-radius: 8px !important;
-    padding: 8px 16px !important;
-    font-weight: 500 !important;
-    transition: all 0.2s ease !important;
-}
-
-.btn-buscar-venta {
-    border-color: #3b82f6 !important;
-    color: #3b82f6 !important;
-}
-
-.btn-buscar-venta:hover {
-    background: #3b82f6 !important;
-    color: white !important;
-}
-
-.btn-procesar-devolucion {
-    border-color: #059669 !important;
-    color: #059669 !important;
-}
-
-.btn-procesar-devolucion:hover {
-    background: #059669 !important;
-    color: white !important;
-}
-
-/* Estados de devolución */
-.estado-devuelto, .estado-parcialmente-devuelto {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-left: 8px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.estado-devuelto {
-    background: #fee2e2;
-    color: #dc2626;
-}
-
-.estado-parcialmente-devuelto {
-    background: #fef3c7;
-    color: #d97706;
-}
-
-/* Venta completamente devuelta - Efecto tachado */
-.venta-devuelta-completa {
-    opacity: 0.7;
-    position: relative;
-}
-
-.venta-devuelta-completa::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: 2px;
-    background: #dc2626;
-    transform: translateY(-50%);
-    opacity: 0.8;
-    z-index: 1;
-}
-
-.venta-devuelta-completa td {
-    text-decoration: line-through;
-    color: #9ca3af !important;
-}
-
-.venta-devuelta-completa .historial-price-total {
-    text-decoration: line-through;
-    color: #9ca3af !important;
-}
-
-/* Venta parcialmente devuelta */
-.venta-parcialmente-devuelta {
-    background: #fffbeb;
-    border-left: 4px solid #f59e0b;
-}
-
-/* Asegurar que el botón Ver no se tache nunca */
-.venta-devuelta-completa .historial-actions-improved button,
-.venta-parcialmente-devuelta .historial-actions-improved button {
-    text-decoration: none !important;
-    opacity: 1 !important;
-}
-
-.venta-devuelta-completa td:not(:last-child) {
-    text-decoration: line-through;
-    opacity: 0.6;
-}
-
-.venta-parcialmente-devuelta td {
-    opacity: 0.9;
-}
-
-/* Excepciones para elementos que no deben tacharse */
-.venta-devuelta-completa .historial-badge,
-.venta-devuelta-completa .historial-sale-info span,
-.venta-devuelta-completa .historial-price-total span {
-    text-decoration: none !important;
-}
-
-/* Badges estilo pastel (similar a lista de productos) */
 .historial-badge {
     display: inline-flex;
     align-items: center;
@@ -326,105 +344,136 @@
     background: #eef2f7;
     color: #374151;
 }
-.historial-badge-success { background: #eaf7ee; color: #0a7c4a; border-color: #bfe7cf; }
-.historial-badge-info { background: #eaf1ff; color: #1e56cf; border-color: #c6d7ff; }
-.historial-badge-warning { background: #fff4e6; color: #d97706; border-color: #ffd7b0; }
+.historial-badge-success { background: rgba(16, 185, 129, 0.05); color: #059669; border-color: rgba(16, 185, 129, 0.1); }
+.historial-badge-info { background: rgba(37, 99, 235, 0.05); color: #2563eb; border-color: rgba(37, 99, 235, 0.1); }
+.historial-badge-warning { background: rgba(245, 158, 11, 0.05); color: #d97706; border-color: rgba(245, 158, 11, 0.1); }
 .historial-badge-gray { background: #f1f5f9; color: #6b7280; border-color: #e2e8f0; }
 
 .historial-quantity-container { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.historial-stock-change { font-size: 0.78rem; color: #6b7280; }
 
-.cliente-doc { display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:9999px; background:#eaf1ff; color:#1e56cf; border:1px solid #c6d7ff; font-size:0.78rem; font-weight:600; }
+.cliente-doc { display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:9999px; background:rgba(37, 99, 235, 0.05); color:#2563eb; border:1px solid rgba(37, 99, 235, 0.1); font-size:0.75rem; font-weight:600; }
 
-/* Scroll horizontal bajo la tabla */
-.historial-hscroll-track { height: 10px; background: #e5e7eb; border-radius: 9999px; margin-top: 10px; position: relative; width: 100%; display: none; }
-.historial-hscroll-thumb { height: 10px; background: #9ca3af; border-radius: 9999px; width: 60px; position: absolute; left: 0; }
-.historial-hscroll { scrollbar-width: none; }
-.historial-hscroll::-webkit-scrollbar { display: none; }
-
-/* Tooltip estilo burbuja para badges */
-[data-tooltip] { position: relative; }
-[data-tooltip]::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1f2937;
-    color: #fff;
-    padding: 6px 10px;
-    border-radius: 8px;
-    font-size: 0.78rem;
-    white-space: nowrap;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .15s ease;
-}
-[data-tooltip]::before {
-    content: '';
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 6px solid transparent;
-    border-top-color: #1f2937;
-    opacity: 0;
-    transition: opacity .15s ease;
-}
-[data-tooltip]:hover::after,
-[data-tooltip]:hover::before { opacity: 1; }
-
-/* Total badge pastel */
-.total-badge { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:0; min-height:unset; border-radius:0; background:transparent; color:#0a7c4a; border:none; font-weight:700; }
-.estado-parcialmente-devuelto { background:#fef3c7; color:#d97706; padding:6px 12px; border-radius:9999px; font-size:0.75rem; display:inline-flex; align-items:center; justify-content:center; min-height:28px; }
-.historial-badge-yape { background:#f1ecff; color:#6f4bd8; border-color:#d6c9ff; }
+.total-badge { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:0; min-height:unset; border-radius:0; background:transparent; color:#059669; border:none; font-weight:700; }
+.historial-badge-yape { background:rgba(124, 58, 237, 0.05); color:#7c3aed; border-color:rgba(124, 58, 237, 0.1); }
 </style>
 @endpush
 
 @section('content')
 
-<div class="grid grid-cols-12">
+<div class="grid grid-cols-12 gap-4">
+    
+    <div class="col-span-12 mb-1">
+        <div class="flex flex-col gap-0.5">
+            <h1 class="text-xl font-bold text-slate-800">{{ $title }}</h1>
+            <p class="text-xs text-slate-500">{{ $subTitle }}</p>
+        </div>
+    </div>
+
+    
+    <div class="col-span-12">
+        <div class="reportes-metrics-grid-4">
+            
+            <div class="reportes-metric-card gold">
+                <div class="reportes-metric-icon-small">
+                    <iconify-icon icon="solar:cart-large-2-bold-duotone"></iconify-icon>
+                </div>
+                <div class="reportes-metric-content">
+                    <p class="reportes-metric-label">Ventas Hoy</p>
+                    <h3 class="reportes-metric-value-medium">{{ $estadisticas['ventas_hoy'] }}</h3>
+                    <p class="reportes-metric-comparison">
+                        <iconify-icon icon="{{ $estadisticas['cambio_respecto_ayer'] >= 0 ? 'solar:trend-up-bold' : 'solar:trend-down-bold' }}"></iconify-icon>
+                        {{ abs($estadisticas['cambio_respecto_ayer']) }} vs ayer
+                    </p>
+                </div>
+            </div>
+
+            
+            <div class="reportes-metric-card teal">
+                <div class="reportes-metric-icon-small">
+                    <iconify-icon icon="solar:wad-of-money-bold-duotone"></iconify-icon>
+                </div>
+                <div class="reportes-metric-content">
+                    <p class="reportes-metric-label">Ingresos Hoy</p>
+                    <h3 class="reportes-metric-value-medium">S/ {{ number_format($estadisticas['ingresos_hoy'], 2) }}</h3>
+                    <p class="reportes-metric-comparison">Dinero en Caja</p>
+                </div>
+            </div>
+
+            
+            <div class="reportes-metric-card purple">
+                <div class="reportes-metric-icon-small">
+                    <iconify-icon icon="solar:ticket-sale-bold-duotone"></iconify-icon>
+                </div>
+                <div class="reportes-metric-content">
+                    <p class="reportes-metric-label">Ticket Promedio</p>
+                    <h3 class="reportes-metric-value-medium">
+                        S/ {{ $estadisticas['ventas_mes'] > 0 ? number_format($estadisticas['ingresos_mes'] / $estadisticas['ventas_mes'], 2) : '0.00' }}
+                    </h3>
+                    <p class="reportes-metric-comparison">Media mensual</p>
+                </div>
+            </div>
+
+            
+            <div class="reportes-metric-card red">
+                <div class="reportes-metric-icon-small">
+                    <iconify-icon icon="solar:calendar-date-bold-duotone"></iconify-icon>
+                </div>
+                <div class="reportes-metric-content">
+                    <p class="reportes-metric-label">Ventas del Mes</p>
+                    <h3 class="reportes-metric-value-medium">{{ $estadisticas['ventas_mes'] }}</h3>
+                    <p class="reportes-metric-comparison">Total del periodo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="col-span-12">
 
         
+        
 
-        <!-- Filtros Mejorados Sin Etiquetas -->
+        
         <div class="historial-table-container-improved">
             <div class="historial-table-header-improved">
                 <div class="historial-filters-layout-improved">
-                    <!-- Filtros a la izquierda -->
+                    
                     <div class="historial-filters-left-improved">
                         <form method="GET" action="{{ route('ventas.historial') }}" id="filtrosForm">
-                            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
                                 <input type="search" 
                                        name="search"
                                        value="{{ request('search') }}"
                                        class="historial-input-clean" 
                                        placeholder="Buscar ventas..." 
-                                       id="searchHistorial">
+                                       id="searchHistorial"
+                                       style="min-width: 220px; flex: 1;">
                                 
-                                <div class="historial-select-with-label">
-                                    <span class="historial-inline-label">Método</span>
-                                    <div class="historial-select-wrapper-clean">
-                                        <select class="historial-select-clean" name="metodo_pago" id="filtroMetodo">
-                                            <option value="">Todos</option>
-                                            <option value="efectivo" {{ request('metodo_pago') == 'efectivo' ? 'selected' : '' }}>Efectivo</option>
-                                            <option value="tarjeta" {{ request('metodo_pago') == 'tarjeta' ? 'selected' : '' }}>Tarjeta</option>
-                                            <option value="yape" {{ request('metodo_pago') == 'yape' ? 'selected' : '' }}>Yape</option>
-                                        </select>
-                                        <div class="historial-select-arrow-clean">
-                                            <iconify-icon icon="solar:alt-arrow-down-bold"></iconify-icon>
-                                        </div>
-                                    </div>
+                                <div class="historial-select-with-label" style="min-width: auto;">
+                                    <span class="historial-inline-label">Desde</span>
+                                    <input type="date" 
+                                           name="fecha_desde" 
+                                           value="{{ request('fecha_desde') }}" 
+                                           class="historial-input-clean" 
+                                           id="fechaDesde"
+                                           max="{{ date('Y-m-d') }}"
+                                           style="width: 130px; padding: 0.5rem 0.4rem;">
                                 </div>
                                 
+                                <div class="historial-select-with-label" style="min-width: auto;">
+                                    <span class="historial-inline-label">Hasta</span>
+                                    <input type="date" 
+                                           name="fecha_hasta" 
+                                           value="{{ request('fecha_hasta') }}" 
+                                           class="historial-input-clean" 
+                                           id="fechaHasta"
+                                           max="{{ date('Y-m-d') }}"
+                                           style="width: 130px; padding: 0.5rem 0.4rem;">
+                                </div>
                                 
-                                
-                                <div class="historial-select-with-label">
+                                <div class="historial-select-with-label" style="min-width: auto;">
                                     <span class="historial-inline-label">Usuario</span>
                                     <div class="historial-select-wrapper-clean">
-                                        <select class="historial-select-clean" name="usuario_id" id="filtroUsuario">
+                                        <select class="historial-select-clean" name="usuario_id" id="filtroUsuario" style="width: 140px;">
                                             <option value="">Todos</option>
                                             @foreach($usuarios as $usuario)
                                                 <option value="{{ $usuario->id }}" {{ request('usuario_id') == $usuario->id ? 'selected' : '' }}>
@@ -441,12 +490,12 @@
                         </form>
                     </div>
                     
-                    <!-- Botón a la derecha -->
+                    
                     <div class="historial-filters-right">
-                        <a href="{{ route('punto-venta.index') }}" class="historial-btn-nueva-entrada">
-                            <iconify-icon icon="solar:add-circle-bold-duotone"></iconify-icon>
-                            Nueva Venta
-                        </a>
+                        <button type="button" onclick="limpiarFiltrosVentas()" class="historial-btn-limpiar" title="Limpiar todos los filtros">
+                            <iconify-icon icon="solar:eraser-bold-duotone"></iconify-icon>
+                            Limpiar Filtros
+                        </button>
                     </div>
                 </div>
             </div>
@@ -461,156 +510,147 @@
                             <th>Productos</th>
                             <th>Cliente</th>
                             <th>Método de Pago</th>
-                            <th>Comprobante</th>
                             <th>Total</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="tablaHistorialBody">
                         @forelse($ventas as $venta)
-                            <tr class="historial-row @if($venta->estado === 'devuelta') venta-devuelta-completa @elseif($venta->estado === 'parcialmente_devuelta') venta-parcialmente-devuelta @endif">
+                            <tr class="historial-row 
+                                @if($venta->estado === 'devuelta') venta-anulada-row 
+                                @elseif($venta->estado === 'parcialmente_devuelta') venta-parcial-row 
+                                @endif">
                                 <td>
-                                    <div class="historial-date">
-                {{ optional($venta->fecha_venta ?? $venta->created_at)->format('d/m/Y') ?? '-' }}
-                                    </div>
-                                    <div class="historial-time">
-                {{ optional($venta->fecha_venta ?? $venta->created_at)->format('g:i A') ?? '-' }}
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <iconify-icon icon="solar:calendar-bold-duotone" style="color: #94a3b8; font-size: 1.2rem;"></iconify-icon>
+                                        <div>
+                                            <div class="historial-date" style="font-weight: 600; color: #64748b; font-size: 0.85rem;">
+                                                {{ optional($venta->fecha_venta ?? $venta->created_at)->format('d/m/Y') ?? '-' }}
+                                            </div>
+                                            <div class="historial-time" style="font-size: 0.7rem; color: #94a3b8;">
+                                                {{ optional($venta->fecha_venta ?? $venta->created_at)->format('g:i A') ?? '-' }}
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="historial-sale-info">
-                                        <div class="historial-sale-number">
-                                            {{ $venta->numero_venta }}
+                                        <div class="historial-sale-number" style="font-weight: 500; color: #64748b; font-size: 0.85rem;">
+                                            #{{ $venta->numero_venta }}
+                                        </div>
+                                        <div style="margin-top: 4px;">
                                             @if($venta->estado === 'devuelta')
-                                                <span style="background: #fee2e2; color: #dc2626; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-left: 4px;">
-                                                    ✓ DEVUELTA
+                                                <span class="status-badge-premium status-returned">
+                                                    Anulada
                                                 </span>
                                             @elseif($venta->estado === 'parcialmente_devuelta')
-                                                <span class="estado-parcialmente-devuelto" data-tooltip="Parcialmente devuelta">◐ PARCIAL</span>
+                                                <span class="status-badge-premium status-partial">
+                                                    Parcial
+                                                </span>
+                                            @else
+                                                <span class="status-badge-premium status-paid">
+                                                    Pagado
+                                                </span>
                                             @endif
                                         </div>
                                     </div>
                                 </td>
                             <td>
-                                @php($unidades = $venta->detalles->sum('cantidad'))
-                                @php($prodCount = $venta->detalles->count())
                                 <div class="historial-quantity-container">
-                                    @php($tooltipText = $prodCount === 1 ? '1 producto' : ($prodCount . ' productos diferentes'))
-                                    <span class="historial-badge historial-badge-success" @if($venta->estado !== 'devuelta') data-tooltip="{{ $tooltipText }}" @endif>
-                                        {{ $unidades }} {{ $unidades == 1 ? 'unidad' : 'unidades' }}
-                                    </span>
-                                    @if($venta->tiene_devoluciones && $venta->cantidad_productos_devueltos > 0)
-                                        <div class="historial-stock-change" style="color: #dc2626; font-weight: 500;">
-                                            <i class="material-icons" style="font-size: 12px;">remove_circle</i>
-                                            {{ $venta->cantidad_productos_devueltos }} devueltas
-                                        </div>
-                                    @endif
+                                    @php
+                                        $presentaciones = [];
+                                        foreach ($venta->detalles as $detalle) {
+                                            $nombrePres = $detalle->presentacion_nombre ?: 'Unidad';
+                                            $presentaciones[$nombrePres] = ($presentaciones[$nombrePres] ?? 0) + $detalle->cantidad;
+                                        }
+                                    @endphp
+                                    
+                                    @foreach($presentaciones as $nombre => $cantidad)
+                                        @php
+                                            $cleanName = strtolower($nombre);
+                                            $class = 'pres-generico';
+                                            if (str_contains($cleanName, 'unidad')) $class = 'pres-unidad';
+                                            elseif (str_contains($cleanName, 'blister')) $class = 'pres-blister';
+                                            elseif (str_contains($cleanName, 'caja')) $class = 'pres-caja';
+                                        @endphp
+                                        <span class="presentacion-item-badge {{ $class }}">
+                                            {{ $cantidad }} {{ $nombre }}
+                                        </span>
+                                    @endforeach
                                 </div>
                             </td>
                             <td>
                                 @php($cliente = $venta->cliente)
                                 @if($cliente)
-                                    <div class="historial-provider-name">{{ $cliente->nombre_completo }}</div>
+                                    <div class="historial-provider-name" style="font-weight: 600; color: #475569; font-size: 0.85rem;">{{ $cliente->nombre_completo }}</div>
                                     @if($cliente->dni)
-                                        <div class="cliente-doc">DNI: {{ $cliente->dni }}</div>
+                                        <div class="cliente-doc" style="margin-top: 2px; font-size: 0.7rem;">DNI: {{ $cliente->dni }}</div>
                                     @endif
                                 @elseif(!empty($venta->cliente_razon_social))
-                                    <div class="historial-provider-name">{{ $venta->cliente_razon_social }}</div>
+                                    <div class="historial-provider-name" style="font-weight: 600; color: #475569; font-size: 0.85rem;">{{ $venta->cliente_razon_social }}</div>
                                 @else
-                                    <span class="historial-badge historial-badge-gray">Sin datos</span>
+                                    <span class="historial-badge" style="background: rgba(148, 163, 184, 0.08); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.15); font-size: 0.75rem; padding: 4px 10px;">
+                                        Cliente General
+                                    </span>
                                 @endif
                             </td>
                             <td>
                                 <div class="historial-payment-method">
                                     @if($venta->metodo_pago == 'efectivo')
-                                        <span class="historial-badge historial-badge-success">
-                                            <iconify-icon icon="solar:wallet-money-bold-duotone"></iconify-icon>
+                                        <span class="historial-badge" style="background: rgba(16, 185, 129, 0.05); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.12); font-size: 0.75rem;">
+                                            <iconify-icon icon="solar:wad-of-money-bold-duotone" style="font-size: 1rem;"></iconify-icon>
                                             Efectivo
                                         </span>
-                                        @if($venta->vuelto > 0)
-                                            <div class="historial-payment-details">
-                                                Vuelto: S/ {{ number_format($venta->vuelto, 2) }}
-                                            </div>
-                                        @endif
                                     @elseif($venta->metodo_pago == 'tarjeta')
-                                        <span class="historial-badge historial-badge-info">
-                                            <iconify-icon icon="solar:card-bold-duotone"></iconify-icon>
+                                        <span class="historial-badge" style="background: rgba(37, 99, 235, 0.05); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.12); font-size: 0.75rem;">
+                                            <iconify-icon icon="solar:card-bold-duotone" style="font-size: 1rem;"></iconify-icon>
                                             Tarjeta
                                         </span>
                                     @elseif($venta->metodo_pago == 'yape')
-                                        <span class="historial-badge historial-badge-yape">
-                                            <iconify-icon icon="solar:phone-bold-duotone"></iconify-icon>
+                                        <span class="historial-badge" style="background: rgba(124, 58, 237, 0.05); color: #7c3aed; border: 1px solid rgba(124, 58, 237, 0.12); font-size: 0.75rem;">
+                                            <iconify-icon icon="solar:phone-bold-duotone" style="font-size: 1rem;"></iconify-icon>
                                             Yape
                                         </span>
                                     @endif
                                 </div>
                             </td>
                             <td>
-                                @if($venta->tipo_comprobante == 'boleta')
-                                    <span class="historial-badge historial-badge-info">
-                                        <iconify-icon icon="solar:document-text-bold-duotone"></iconify-icon>
-                                        Boleta
-                                    </span>
-                                @elseif($venta->tipo_comprobante == 'ticket')
-                                    <span class="historial-badge historial-badge-info">
-                                        <iconify-icon icon="mdi:receipt-outline"></iconify-icon>
-                                        Ticket
-                                    </span>
-                                @else
-                                    <span class="historial-badge historial-badge-gray">No</span>
-                                @endif
-                            </td>
-                            <td>
                                 <div class="historial-price-total">
                                     @if($venta->estado === 'devuelta')
-                                        <div style="position: relative;">
-                                            <span style="text-decoration: line-through; color: #9ca3af; font-size: 0.875rem;">S/ {{ number_format($venta->total, 2) }}</span>
-                                            <br>
-                                            <span style="color: #dc2626; font-weight: 600; font-size: 1.1rem;">S/ 0.00</span>
-                                            <span style="background: #fee2e2; color: #dc2626; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-left: 4px;">
-                                                DEVUELTO
-                                            </span>
-                                        </div>
+                                        <span class="total-tachado">S/ {{ number_format($venta->total, 2) }}</span>
+                                        <span style="color: #ef4444; font-weight: 700; font-size: 1.05rem;">S/ 0.00</span>
                                     @elseif($venta->tiene_devoluciones)
-                                        <div style="position: relative;">
-                                            <span style="text-decoration: line-through; color: #9ca3af; font-size: 0.875rem;">S/ {{ number_format($venta->total, 2) }}</span>
-                                            <br>
-                                            <span style="color: #059669; font-weight: 600;">S/ {{ number_format($venta->total_actual, 2) }}</span>
-                                            <span style="background: #fef3c7; color: #d97706; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-left: 4px;">
-                                                -S/ {{ number_format($venta->monto_total_devuelto, 2) }}
-                                            </span>
-                                        </div>
+                                        <span class="total-tachado">S/ {{ number_format($venta->total, 2) }}</span>
+                                        <span class="price-total-green">S/ {{ number_format($venta->total_actual, 2) }}</span>
                                     @else
-                                        <span class="total-badge">S/ {{ number_format($venta->total, 2) }}</span>
+                                        <span class="price-total-green">S/ {{ number_format($venta->total, 2) }}</span>
+                                    @endif
+
+                                    @if($venta->metodo_pago == 'efectivo' && $venta->vuelto > 0)
+                                        <span class="vuelto-label">Vuelto: S/ {{ number_format($venta->vuelto, 2) }}</span>
                                     @endif
                                 </div>
                             </td>
                             <td>
                                 <div class="historial-actions-improved">
-                                    <button class="action-btn-primary" onclick="mostrarDetalleVenta({{ $venta->id }})" title="Ver">
-                                        <i class="material-icons">visibility</i>
+                                    <button class="action-btn-view" onclick="mostrarDetalleVenta({{ $venta->id }})" title="Ver Detalles">
+                                        <iconify-icon icon="heroicons:eye"></iconify-icon>
                                     </button>
-                                    <button class="action-btn-secondary" onclick="mostrarModalImpresionHistorial({{ $venta->id }})" title="Imprimir">
-                                        <i class="material-icons">print</i>
+                                    <button class="action-btn-print" onclick="mostrarModalImpresionHistorial({{ $venta->id }})" title="Imprimir">
+                                        <iconify-icon icon="heroicons:printer"></iconify-icon>
                                     </button>
                                 </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8">
-                                <div class="historial-empty-improved">
-                                    <div class="historial-empty-icon">
-                                        <iconify-icon icon="solar:cart-bold-duotone"></iconify-icon>
+                            <td colspan="7">
+                                <div style="padding: 4rem 2rem; text-align: center;">
+                                    <div style="width: 80px; height: 80px; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                                        <iconify-icon icon="solar:magnifer-zoom-out-bold-duotone" style="font-size: 3rem;"></iconify-icon>
                                     </div>
-                                    <h3>No hay ventas registradas</h3>
-                                    <p>Aún no se han registrado ventas en el sistema</p>
-                                    <div class="historial-empty-actions">
-                                        <a href="{{ route('punto-venta.index') }}" class="historial-btn-primary-small">
-                                            <iconify-icon icon="solar:add-circle-bold-duotone"></iconify-icon>
-                                            Realizar Primera Venta
-                                        </a>
-                                    </div>
+                                    <h3 style="font-weight: 800; color: #1e293b; font-size: 1.5rem; margin-bottom: 0.5rem;">No se encontraron resultados</h3>
+                                    <p style="color: #64748b; font-size: 1rem;">No hay ventas registradas que coincidan con los filtros aplicados.</p>
                                 </div>
                             </td>
                         </tr>
@@ -622,10 +662,10 @@
                     <div class="historial-hscroll-thumb"></div>
                 </div>
                 
-                <!-- Paginación Mejorada -->
+                
                 @if($ventas->hasPages())
                 <div class="historial-pagination-improved">
-                    <!-- Información de paginación -->
+                    
                     <div class="historial-pagination-info">
                         <p class="text-sm text-gray-700">
                             Mostrando 
@@ -638,7 +678,7 @@
                         </p>
                     </div>
                     
-                    <!-- Controles de paginación -->
+                    
                     <div class="historial-pagination-controls">
                         {{-- Botón Primera página --}}
                         @if ($ventas->onFirstPage())
@@ -706,10 +746,16 @@
 
 @endsection
 
-
 @push('scripts')
 <script>
-if (typeof window.mostrarModalImpresionHistorial !== 'function') {
+    function limpiarFiltrosVentas() {
+        const form = document.getElementById('filtrosForm');
+        form.querySelectorAll('input').forEach(i => i.value = '');
+        form.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+        form.submit();
+    }
+
+    if (typeof window.mostrarModalImpresionHistorial !== 'function') {
     window.mostrarModalImpresionHistorial = function(ventaId) {
         Swal.fire({
             title: '',
@@ -801,5 +847,54 @@ if (typeof window.mostrarModalImpresionHistorial !== 'function') {
         }
     };
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const fechaDesde = document.getElementById('fechaDesde');
+    const fechaHasta = document.getElementById('fechaHasta');
+    const filtrosForm = document.getElementById('filtrosForm');
+    
+    if (fechaDesde && fechaHasta) {
+
+        fechaDesde.addEventListener('change', function() {
+            if (fechaHasta.value && fechaDesde.value > fechaHasta.value) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Fecha inválida',
+                    text: 'La fecha "Desde" no puede ser mayor que la fecha "Hasta"',
+                    confirmButtonColor: '#dc2626'
+                });
+                fechaDesde.value = '';
+            }
+
+            if (fechaDesde.value) {
+                fechaHasta.min = fechaDesde.value;
+            }
+        });
+        
+        fechaHasta.addEventListener('change', function() {
+            if (fechaDesde.value && fechaHasta.value < fechaDesde.value) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Fecha inválida',
+                    text: 'La fecha "Hasta" no puede ser menor que la fecha "Desde"',
+                    confirmButtonColor: '#dc2626'
+                });
+                fechaHasta.value = '';
+            }
+        });
+
+        fechaDesde.addEventListener('change', function() {
+            if (this.value) {
+                filtrosForm.submit();
+            }
+        });
+        
+        fechaHasta.addEventListener('change', function() {
+            if (this.value) {
+                filtrosForm.submit();
+            }
+        });
+    }
+});
 </script>
 @endpush

@@ -1,7 +1,7 @@
 @extends('layout.layout')
 @php
-    $title='Gestión de Productos';
-    $subTitle = 'Lista de Productos';
+    $title='Gestión de Usuarios';
+    $subTitle = 'Lista de Usuarios';
     $script='
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
@@ -12,28 +12,25 @@
     ';
     use Carbon\Carbon;
 @endphp
-<head>
-    <title>Lista de productos</title>
-    <!-- Vite removido para evitar errores de conexión -->
+
+@push('head')
+    <title>Gestión de Usuarios</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/tablas.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/crud.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/modal_agregar.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/modal_ver.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/modal_editar.css') }}">
-    <!-- Estilos modernos para badges de ubicación -->
     <link rel="stylesheet" href="{{ asset('assets/css/ubicacion/productos/tablas.css') }}?v={{ time() }}">
-    <!-- FontAwesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Scripts moved to section for better organization -->
-</head>
+@endpush
 
 @section('content')
 
-    <!-- Modal de Detalles -->
+    
     <div id="modalDetalles" class="modal-overlay fixed inset-0 hidden items-center justify-center z-50">
         <div class="modal-container max-h-[90vh] overflow-y-auto">
-            <!-- Header -->
+            
             <div class="modal-header-detail">
                 <h3 class="modal-title-detail">
                     <iconify-icon icon="heroicons:eye-solid" class="text-xl"></iconify-icon>
@@ -44,13 +41,13 @@
                 </button>
             </div>
 
-            <!-- Content -->
+            
             <div class="modal-content-details">
                 <div class="details-grid-container">
 
-                    <!-- Columna Izquierda: Imagen y Datos Principales -->
+                    
                     <div class="details-col">
-                        <!-- Imagen y Nombre -->
+                        
                         <div class="detail-section product-main-info">
                             <div class="product-image-container">
                                 <img id="modal-imagen" src="" alt="Producto">
@@ -63,7 +60,7 @@
                             <p id="modal-concentracion" class="text-md text-gray-500"></p>
                         </div>
                         
-                        <!-- Información General -->
+                        
                         <div class="detail-section">
                             <h4 class="detail-section-title">
                                 <iconify-icon icon="heroicons:identification-solid"></iconify-icon>
@@ -85,7 +82,7 @@
                             </div>
                         </div>
 
-                        <!-- Estado -->
+                        
                         <div class="detail-section">
                             <h4 class="detail-section-title">
                                 <iconify-icon icon="heroicons:check-badge-solid"></iconify-icon>
@@ -97,9 +94,9 @@
                         </div>
                     </div>
 
-                    <!-- Columna Derecha: Resto de la Información -->
+                    
                     <div class="details-col">
-                        <!-- Códigos y Lote -->
+                        
                          <div class="detail-section">
                             <h4 class="detail-section-title">
                                 <iconify-icon icon="heroicons:qr-code-solid"></iconify-icon>
@@ -121,7 +118,7 @@
                             </div>
                         </div>
 
-                        <!-- Stock y Precios -->
+                        
                         <div class="detail-section">
                             <h4 class="detail-section-title">
                                 <iconify-icon icon="heroicons:banknotes-solid"></iconify-icon>
@@ -147,7 +144,7 @@
                             </div>
                         </div>
 
-                        <!-- Fechas y Ubicación -->
+                        
                         <div class="detail-section">
                              <h4 class="detail-section-title">
                                 <iconify-icon icon="heroicons:calendar-days-solid"></iconify-icon>
@@ -175,9 +172,7 @@
         </div>
     </div>
 
-
-
-    <!-- Modal Editar Producto -->
+    
     <div id="modalEditar" class="modal-overlay fixed inset-0 hidden items-center justify-center z-50">
         <div class="modal-container bg-white w-11/12 md:max-w-3xl mx-auto rounded-lg shadow-lg z-50 overflow-y-auto">
             <div class="modal-header">
@@ -192,7 +187,7 @@
                 <form id="formEditarProducto" class="space-y-6" enctype="multipart/form-data" novalidate>
                     <input type="hidden" id="edit-producto-id" name="producto_id">
         
-                    <!-- Sección: Información Principal -->
+                    
                     <div class="form-section">
                         <h4 class="form-section-title">
                             <iconify-icon icon="heroicons:identification-solid"></iconify-icon>
@@ -244,7 +239,7 @@
                         </div>
                     </div>
         
-                    <!-- Sección: Detalles y Códigos -->
+                    
                     <div class="form-section">
                         <h4 class="form-section-title">
                             <iconify-icon icon="heroicons:document-text-solid"></iconify-icon>
@@ -289,7 +284,7 @@
                         </div>
                     </div>
                     
-                    <!-- Sección: Stock y Precios -->
+                    
                     <div class="form-section">
                         <h4 class="form-section-title">
                             <iconify-icon icon="heroicons:circle-stack-solid"></iconify-icon>
@@ -315,7 +310,7 @@
                         </div>
                     </div>
         
-                    <!-- Sección: Fechas -->
+                    
                     <div class="form-section">
                         <h4 class="form-section-title">
                              <iconify-icon icon="heroicons:calendar-days-solid"></iconify-icon>
@@ -333,7 +328,7 @@
                         </div>
                     </div>
                     
-                    <!-- Sección: Ubicación -->
+                    
                     <div class="form-section">
                         <h4 class="form-section-title">
                             <iconify-icon icon="heroicons:map-pin-solid"></iconify-icon>
@@ -350,7 +345,7 @@
                         </div>
                     </div>
                     
-                     <!-- Sección: Imagen -->
+                     
                     <div class="form-section">
                         <h4 class="form-section-title">
                              <iconify-icon icon="heroicons:photo-solid"></iconify-icon>
@@ -370,7 +365,7 @@
                         </div>
                     </div>
         
-                    <!-- Botones de acción -->
+                    
                     <div class="form-actions flex justify-end gap-4 pt-4">
                         <button type="button"
                                 class="btn-cancel-edit px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors border border-gray-300">
@@ -387,9 +382,7 @@
         </div>
     </div>
 
-
-
-    <!-- Modal Agregar Producto -->
+    
     <div id="modalAgregar" class="modal-overlay fixed inset-0 hidden items-center justify-center z-50">
         <div class="modal-container bg-white w-11/12 md:max-w-3xl mx-auto rounded-lg shadow-lg z-50 overflow-y-auto">
             <div class="modal-header">
@@ -403,7 +396,7 @@
             <div class="modal-content p-6">
                 <form id="formAgregarProducto" class="space-y-6" enctype="multipart/form-data" novalidate>
         
-                    <!-- Sección: Información Principal -->
+                    
                     <div class="form-section">
                         <h4 class="form-section-title">
                             <iconify-icon icon="heroicons:identification-solid"></iconify-icon>
@@ -441,7 +434,7 @@
                         </div>
                     </div>
         
-                    <!-- Sección: Detalles y Códigos -->
+                    
                     <div class="form-section">
                         <h4 class="form-section-title">
                             <iconify-icon icon="heroicons:document-text-solid"></iconify-icon>
@@ -486,7 +479,7 @@
                         </div>
                     </div>
                     
-                    <!-- Sección: Stock y Precios -->
+                    
                     <div class="form-section">
                         <h4 class="form-section-title">
                             <iconify-icon icon="heroicons:circle-stack-solid"></iconify-icon>
@@ -512,7 +505,7 @@
                         </div>
                     </div>
         
-                    <!-- Sección: Fechas -->
+                    
                     <div class="form-section">
                         <h4 class="form-section-title">
                              <iconify-icon icon="heroicons:calendar-days-solid"></iconify-icon>
@@ -530,7 +523,7 @@
                         </div>
                     </div>
                     
-                     <!-- Sección: Imagen -->
+                     
                     <div class="form-section">
                         <h4 class="form-section-title">
                              <iconify-icon icon="heroicons:photo-solid"></iconify-icon>
@@ -549,7 +542,7 @@
                         </div>
                     </div>
         
-                    <!-- Botones de acción -->
+                    
                     <div class="form-actions flex justify-end gap-4 pt-4">
                         <button type="button"
                                 class="btn-cancel px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors border border-gray-300">
@@ -566,10 +559,7 @@
         </div>
     </div>
 
-
-
     
-
 
     <div class="grid grid-cols-12">
         <div class="col-span-12">
@@ -578,7 +568,7 @@
                     <h6 class="card-title mb-0 text-lg">Lista de Productos</h6>
                 </div>
                 <div class="card-body">
-                    <!-- Barra de herramientas -->
+                    
                     <div class="filtros-bar">
                         <input type="search" 
                             id="searchInput" 
@@ -770,9 +760,8 @@
 
 @endsection
 
-<!-- JavaScript inline para garantizar que las funciones estén disponibles -->
 <script>
-// Función global para verificar si SweetAlert2 está disponible
+
 function verificarSwal() {
     if (typeof Swal === 'undefined') {
         console.error('SweetAlert2 no está cargado');
@@ -781,14 +770,12 @@ function verificarSwal() {
     return true;
 }
 
-// Función global eliminarProducto (debe estar disponible inmediatamente)
 function eliminarProducto(id) {
     if (!verificarSwal()) {
         alert('Error: Sistema no inicializado correctamente');
         return;
     }
-    
-    // Buscar información del producto
+
     const row = document.querySelector(`tr[data-id="${id}"]`);
     if (!row) {
         Swal.fire('Error', 'No se pudo encontrar el producto', 'error');
@@ -822,7 +809,7 @@ function eliminarProducto(id) {
         cancelButtonText: 'Cancelar'
     }).then((result) => {
         if (result.isConfirmed) {
-            // Mostrar loading
+
             Swal.fire({
                 title: 'Eliminando producto...',
                 text: 'Por favor, espere...',
@@ -873,7 +860,6 @@ function eliminarProducto(id) {
     });
 }
 
-// Función auxiliar para productos
 function obtenerProductoDeLaFila(row) {
   return {
     id: row.getAttribute('data-id'),
@@ -895,7 +881,6 @@ function obtenerProductoDeLaFila(row) {
   };
 }
 
-// Función auxiliar para renderizado
 function renderCategorias(categorias) {
     let html = '';
     categorias.forEach(cat => {
@@ -905,7 +890,7 @@ function renderCategorias(categorias) {
                 <td>${cat.nombre}</td>
                 <td>${cat.descripcion || ''}</td>
                 <td>${cat.productos_count || 0}</td>
-                <td><!-- Acciones --></td>
+                <td></td>
             </tr>
         `;
     });
@@ -915,7 +900,6 @@ function renderCategorias(categorias) {
 }
 }
 
-// Función global para cerrar modal de detalles
 function cerrarModalDetalles() {
     const modal = document.getElementById('modalDetalles');
     if (modal) {
@@ -924,11 +908,9 @@ function cerrarModalDetalles() {
     }
 }
 
-// Inicialización cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM cargado - Inicializando funciones de productos');
-    
-    // Verificar que SweetAlert2 esté cargado
+
     setTimeout(() => {
         if (typeof Swal !== 'undefined') {
             console.log('✓ SweetAlert2 cargado correctamente');
@@ -936,18 +918,16 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('✗ SweetAlert2 no está disponible');
         }
     }, 100);
-    
-    // Event listeners para modal de detalles
+
     const modalDetalles = document.getElementById('modalDetalles');
     if (modalDetalles) {
-        // Click fuera del modal para cerrar
+
         modalDetalles.addEventListener('click', function(e) {
             if (e.target === this) {
                 cerrarModalDetalles();
             }
         });
-        
-        // Escape key para cerrar
+
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && !modalDetalles.classList.contains('hidden')) {
                 cerrarModalDetalles();

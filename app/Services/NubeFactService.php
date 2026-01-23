@@ -216,11 +216,19 @@ class NubeFactService
             $valorUnitario = $esGravado ? round($precioUnitario / (1 + $porcentajeIGV / 100), 6) : $precioUnitario;
             $tipoIGV = $esGravado ? '1' : '20';
 
+            // Construir descripción del producto
             $descParts = array_filter([
                 $producto->nombre,
                 $producto->concentracion ?? null,
-                $producto->presentacion ?? null,
             ]);
+            
+            // Si hay presentación vendida, agregarla
+            if (!empty($detalle->presentacion_nombre)) {
+                $descParts[] = $detalle->presentacion_nombre;
+            } elseif (!empty($producto->presentacion)) {
+                $descParts[] = $producto->presentacion;
+            }
+            
             $descripcion = trim(implode(' ', $descParts));
 
             $items[] = [

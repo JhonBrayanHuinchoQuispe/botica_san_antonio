@@ -360,8 +360,21 @@ class POSProfesional {
 
         // Debe existir al menos un producto
         if (this.carrito.length > 0) {
-            // Bloquear si alguna línea supera el stock disponible
-            const hayExcesoStock = this.carrito.some(ci => (parseInt(ci.cantidad) || 0) > (parseInt(ci.stock_disponible) || 0));
+            // Bloquear si alguna línea supera el stock disponible (considerando presentaciones)
+            const hayExcesoStock = this.carrito.some(ci => {
+                const cantidad = parseInt(ci.cantidad) || 0;
+                const stockDisponible = parseInt(ci.stock_disponible) || 0;
+                
+                // Si es una presentación, calcular unidades necesarias
+                if (ci.presentacion_id && ci.unidades_por_presentacion) {
+                    const unidadesNecesarias = cantidad * ci.unidades_por_presentacion;
+                    return unidadesNecesarias > stockDisponible;
+                }
+                
+                // Si es unidad simple, comparar directo
+                return cantidad > stockDisponible;
+            });
+            
             if (this.metodosPagoSeleccionado === 'efectivo') {
                 const efectivoInput = document.getElementById('efectivoRecibido');
                 const efectivoRecibido = efectivoInput ? parseFloat(efectivoInput.value) || 0 : 0;
@@ -426,8 +439,13 @@ class POSProfesional {
 
         if (btnProcesar) {
             btnProcesar.disabled = !puedeProcesar;
-            btnProcesar.style.opacity = puedeProcesar ? '1' : '0.6';
+            btnProcesar.style.opacity = puedeProcesar ? '1' : '0.5';
             btnProcesar.style.cursor = puedeProcesar ? 'pointer' : 'not-allowed';
+            if (puedeProcesar) {
+                btnProcesar.classList.remove('disabled');
+            } else {
+                btnProcesar.classList.add('disabled');
+            }
         }
 
         console.log(`🔄 Validación procesamiento: ${puedeProcesar ? 'PUEDE' : 'NO PUEDE'} procesar (${this.metodosPagoSeleccionado})`);
@@ -484,7 +502,7 @@ class POSProfesional {
                     id: p.id,
                     nombre: p.nombre,
                     concentracion: p.concentracion || null,
-                    presentacion: p.presentacion || p.categoria || 'Presentación estándar',
+                    presentaciones: p.presentaciones || [],
                     precio_venta: parseFloat(p.precio_venta || p.precio || 0),
                     stock_actual: parseInt(p.stock_actual ?? p.stock ?? 0, 10),
                     imagen: p.imagen_url || p.imagen || null,
@@ -544,7 +562,7 @@ class POSProfesional {
                     id: p.id,
                     nombre: p.nombre,
                     concentracion: p.concentracion || null,
-                    presentacion: p.presentacion || 'Presentación estándar',
+                    presentaciones: p.presentaciones || [],
                     precio_venta: parseFloat(p.precio_venta || 0),
                     stock_actual: parseInt(p.stock_actual || 0, 10),
                     imagen: p.imagen_url || p.imagen || null,
@@ -809,9 +827,28 @@ class POSProfesional {
             nombreCompleto = `${nombreCompleto} ${conc}`.trim();
         }
 
-        // Usar presentación real del producto
-        const presentacion = producto.presentacion || 'Presentación estándar';
-        const concText = producto.concentracion ? ` \u2022 ${producto.concentracion}` : '';
+        // Obtener presentaciones del producto
+        const presentaciones = producto.presentaciones || [];
+        
+        // Generar HTML de presentaciones (badges azules)
+        let presentacionesHTML = '';
+        if (presentaciones.length === 0) {
+            presentacionesHTML = '<span style="font-size: 11px; color: #6b7280;">Sin presentaciones</span>';
+        } else if (presentaciones.length === 1) {
+            const pres = presentaciones[0];
+            const nombre = pres.nombre_presentacion || pres.nombre || 'Unidad';
+            presentacionesHTML = `<span style="display: inline-block; padding: 3px 8px; background: #dbeafe; color: #1e40af; border-radius: 4px; font-size: 10px; font-weight: 600;">${nombre}</span>`;
+        } else {
+            // Múltiples presentaciones - mostrar las primeras 2 con indicador
+            presentacionesHTML = presentaciones.slice(0, 2).map(pres => {
+                const nombre = pres.nombre_presentacion || pres.nombre || 'Unidad';
+                return `<span style="display: inline-block; padding: 3px 8px; background: #dbeafe; color: #1e40af; border-radius: 4px; font-size: 10px; font-weight: 600; margin: 2px;">${nombre}</span>`;
+            }).join('');
+            
+            if (presentaciones.length > 2) {
+                presentacionesHTML += `<span style="display: inline-block; padding: 3px 8px; background: #f3f4f6; color: #6b7280; border-radius: 4px; font-size: 10px; font-weight: 600; margin: 2px;">+${presentaciones.length - 2}</span>`;
+            }
+        }
 
         // URL de imagen (normalizada)
         const imagenUrl = this.normalizarImagen(producto.imagen_url) || this.normalizarImagen(producto.imagen) || '/assets/images/default-product.svg';
@@ -840,7 +877,9 @@ class POSProfesional {
                     <div class="producto-nombre-completo">${nombreCompleto}</div>
                 </div>
                 
-                <div class="producto-laboratorio">${presentacion.toUpperCase()}${concText}</div>
+                <div class="producto-presentaciones-container" style="margin: 8px 0; min-height: 24px; display: flex; flex-wrap: wrap; gap: 4px;">
+                    ${presentacionesHTML}
+                </div>
                 
                 <div class="producto-detalles-farmacia">
                     <div class="producto-stock ${claseStock || 'disponible'}">
@@ -868,7 +907,20 @@ class POSProfesional {
         const esVencido = estadoStock.clase === 'vencido';
         if (producto.stock_actual > 0 && !esVencido) {
             card.addEventListener('click', () => {
-                this.agregarAlCarrito(producto.id);
+                // NUEVO FLUJO: Primero verificar lotes, luego presentaciones
+                const tieneLotes = producto.lotes_disponibles && producto.lotes_disponibles.length > 1;
+                const tienePresentaciones = presentaciones.length > 1;
+                
+                if (tieneLotes) {
+                    // Si tiene múltiples lotes, mostrar selector de lotes primero
+                    this.mostrarModalLotesYPresentaciones(producto);
+                } else if (tienePresentaciones) {
+                    // Si solo tiene presentaciones, mostrar selector de presentaciones
+                    this.mostrarSelectorPresentaciones(producto);
+                } else {
+                    // Si no tiene ni lotes ni presentaciones múltiples, agregar directo
+                    this.agregarAlCarrito(producto.id);
+                }
             });
         } else if (esVencido) {
             card.style.cursor = 'not-allowed';
@@ -1107,7 +1159,7 @@ class POSProfesional {
                 <h4 class="producto-nombre">${producto.nombre}</h4>
                 <div class="producto-detalles">
                     <span class="producto-concentracion">${producto.concentracion || ''}</span>
-                    <span class="producto-presentacion">${producto.presentacion}</span>
+                    <span class="producto-presentacion">${producto.presentaciones && producto.presentaciones.length > 0 ? producto.presentaciones[0].nombre_presentacion : 'N/A'}</span>
                 </div>
                 <div class="producto-categoria">
                     <iconify-icon icon="medical-icon:i-pharmacy"></iconify-icon>
@@ -1235,6 +1287,462 @@ class POSProfesional {
             `;
             contenedor.style.display = 'block';
         }
+    }
+
+    /**
+     * Mostrar modal de selección de lotes PRIMERO, luego presentaciones
+     */
+    async mostrarModalLotesYPresentaciones(producto) {
+        const loteSeleccionado = await this.mostrarModalSelectorLotes(producto);
+        
+        if (!loteSeleccionado || loteSeleccionado === 'auto') {
+            return; // Usuario canceló
+        }
+        
+        // Ahora mostrar presentaciones si las tiene
+        const presentaciones = producto.presentaciones || [];
+        if (presentaciones.length > 1) {
+            this.mostrarSelectorPresentaciones(producto, loteSeleccionado);
+        } else {
+            // No tiene presentaciones, agregar directo con el lote seleccionado
+            this.agregarAlCarritoConLote(producto.id, loteSeleccionado);
+        }
+    }
+
+    /**
+     * Agregar al carrito con lote específico (sin presentación)
+     */
+    async agregarAlCarritoConLote(productoId, loteSeleccionado) {
+        const producto = this.productos.find(p => p.id == productoId);
+        if (!producto || producto.stock_actual <= 0) {
+            this.mostrarNotificacionRapida('error', '¡Sin stock!', 'Producto no disponible');
+            return;
+        }
+
+        const loteId = loteSeleccionado.id;
+        const loteCodigo = loteSeleccionado.codigo;
+        const loteVencimiento = loteSeleccionado.vencimiento;
+        const precioVentaLote = parseFloat(loteSeleccionado.precio);
+        const stockDisponible = loteSeleccionado.cantidad;
+
+        // Verificar si ya existe en el carrito con el mismo lote
+        const itemKey = `${productoId}_${loteId}`;
+        const itemExistenteIndex = this.carrito.findIndex(item => {
+            const currentItemKey = item.lote_id ? `${item.id}_${item.lote_id}` : `${item.id}_auto`;
+            return currentItemKey === itemKey;
+        });
+
+        if (itemExistenteIndex >= 0) {
+            const itemExistente = this.carrito[itemExistenteIndex];
+            if (itemExistente.cantidad >= stockDisponible) {
+                this.mostrarNotificacionRapida('warning', '¡Stock límite!', `Máximo ${stockDisponible} unidades en este lote`);
+                return;
+            }
+            itemExistente.cantidad++;
+        } else {
+            this.carrito.push({
+                id: producto.id,
+                lote_id: loteId,
+                lote_codigo: loteCodigo,
+                lote_vencimiento: loteVencimiento,
+                nombre: producto.nombre,
+                concentracion: producto.concentracion,
+                precio: precioVentaLote || parseFloat(producto.precio_venta),
+                cantidad: 1,
+                stock_disponible: stockDisponible
+            });
+        }
+
+        this.renderizarCarrito();
+        this.calcularTotales();
+        this.actualizarContadorCarrito();
+        this.validarProcesamientoVenta();
+        this.mostrarNotificacionRapida('success', '¡Agregado!', `${producto.nombre} en carrito`);
+    }
+
+    mostrarSelectorPresentaciones(producto, loteSeleccionado = null) {
+        const presentaciones = producto.presentaciones || [];
+        
+        // Debug: Ver qué datos tenemos
+        console.log('🔍 Producto completo:', producto);
+        console.log('🔍 Presentaciones:', presentaciones);
+        console.log('🔍 Lote seleccionado:', loteSeleccionado);
+        
+        if (presentaciones.length === 0) {
+            if (loteSeleccionado) {
+                this.agregarAlCarritoConLote(producto.id, loteSeleccionado);
+            } else {
+                this.agregarAlCarrito(producto.id);
+            }
+            return;
+        }
+
+        // Crear modal personalizado (sin SweetAlert)
+        const modalId = 'modalPresentaciones';
+        let modal = document.getElementById(modalId);
+        
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = modalId;
+            modal.className = 'modal-presentaciones-overlay';
+            document.body.appendChild(modal);
+        }
+
+        // Generar filas de la tabla de presentaciones
+        const filasPresentaciones = presentaciones.map((pres, index) => {
+            // Debug cada presentación
+            console.log(`📦 Presentación ${index + 1}:`, pres);
+            
+            const nombre = pres.nombre_presentacion || pres.nombre || 'Unidad';
+            const unidades = parseInt(pres.unidades_por_presentacion || pres.unidades || 1);
+            
+            // Intentar obtener el precio de diferentes campos posibles
+            let precio = 0;
+            if (pres.precio_venta_presentacion) {
+                precio = parseFloat(pres.precio_venta_presentacion);
+            } else if (pres.precio_venta) {
+                precio = parseFloat(pres.precio_venta);
+            } else if (pres.precio) {
+                precio = parseFloat(pres.precio);
+            } else {
+                precio = parseFloat(producto.precio_venta || 0);
+            }
+            
+            console.log(`   → Nombre: ${nombre}, Unidades: ${unidades}, Precio: ${precio}`);
+            
+            return `
+                <tr class="presentacion-row-modal" data-presentacion-id="${pres.id}" data-presentacion-nombre="${nombre}" data-presentacion-precio="${precio}" data-presentacion-unidades="${unidades}">
+                    <td class="presentacion-col-nombre">${nombre}</td>
+                    <td class="presentacion-col-unidades">${unidades}</td>
+                    <td class="presentacion-col-precio">S/ ${precio.toFixed(2)}</td>
+                </tr>
+            `;
+        }).join('');
+
+        modal.innerHTML = `
+            <div class="modal-presentaciones-content">
+                <div class="modal-presentaciones-header">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 48px; height: 48px; background: #dbeafe; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-boxes" style="color: #1e40af; font-size: 24px;"></i>
+                        </div>
+                        <div>
+                            <h3 class="modal-presentaciones-title">Presentaciones</h3>
+                            <p class="modal-presentaciones-subtitle">${producto.nombre}</p>
+                        </div>
+                    </div>
+                    <button class="modal-presentaciones-close" onclick="window.pos.cerrarModalPresentaciones()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="modal-presentaciones-body">
+                    <table class="tabla-presentaciones-modal">
+                        <thead>
+                            <tr>
+                                <th>Presentación</th>
+                                <th>Unidades</th>
+                                <th>Precio Venta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filasPresentaciones}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        // Agregar estilos CSS
+        if (!document.getElementById('estilos-modal-presentaciones')) {
+            const style = document.createElement('style');
+            style.id = 'estilos-modal-presentaciones';
+            style.textContent = `
+                .modal-presentaciones-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.5);
+                    backdrop-filter: blur(4px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                    animation: fadeIn 0.2s ease;
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                
+                .modal-presentaciones-content {
+                    background: white;
+                    border-radius: 16px;
+                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                    max-width: 600px;
+                    width: 90%;
+                    max-height: 80vh;
+                    overflow: hidden;
+                    animation: slideUp 0.3s ease;
+                }
+                
+                @keyframes slideUp {
+                    from { transform: translateY(20px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+                
+                .modal-presentaciones-header {
+                    padding: 24px;
+                    border-bottom: 1px solid #e5e7eb;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    background: #f9fafb;
+                }
+                
+                .modal-presentaciones-title {
+                    font-size: 20px;
+                    font-weight: 700;
+                    color: #1f2937;
+                    margin: 0;
+                }
+                
+                .modal-presentaciones-subtitle {
+                    font-size: 14px;
+                    color: #6b7280;
+                    margin: 4px 0 0 0;
+                }
+                
+                .modal-presentaciones-close {
+                    background: transparent;
+                    border: none;
+                    font-size: 24px;
+                    color: #6b7280;
+                    cursor: pointer;
+                    padding: 8px;
+                    border-radius: 8px;
+                    transition: all 0.2s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 40px;
+                    height: 40px;
+                }
+                
+                .modal-presentaciones-close:hover {
+                    background: #f3f4f6;
+                    color: #1f2937;
+                }
+                
+                .modal-presentaciones-body {
+                    padding: 24px;
+                    max-height: calc(80vh - 120px);
+                    overflow-y: auto;
+                }
+                
+                .tabla-presentaciones-modal {
+                    width: 100%;
+                    border-collapse: separate;
+                    border-spacing: 0;
+                }
+                
+                .tabla-presentaciones-modal thead {
+                    background: #f9fafb;
+                    position: sticky;
+                    top: 0;
+                    z-index: 10;
+                }
+                
+                .tabla-presentaciones-modal thead th {
+                    padding: 12px 16px;
+                    text-align: left;
+                    font-weight: 600;
+                    color: #6b7280;
+                    font-size: 12px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    border-bottom: 2px solid #e5e7eb;
+                }
+                
+                .tabla-presentaciones-modal thead th:nth-child(2),
+                .tabla-presentaciones-modal thead th:nth-child(3) {
+                    text-align: center;
+                }
+                
+                .tabla-presentaciones-modal tbody tr {
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    border-bottom: 1px solid #f3f4f6;
+                }
+                
+                .tabla-presentaciones-modal tbody tr:hover {
+                    background: #eff6ff;
+                    transform: scale(1.01);
+                }
+                
+                .tabla-presentaciones-modal tbody tr:active {
+                    transform: scale(0.99);
+                }
+                
+                .presentacion-col-nombre {
+                    padding: 16px;
+                    font-weight: 600;
+                    color: #1f2937;
+                    font-size: 15px;
+                }
+                
+                .presentacion-col-unidades {
+                    padding: 16px;
+                    text-align: center;
+                    color: #6b7280;
+                    font-size: 14px;
+                }
+                
+                .presentacion-col-precio {
+                    padding: 16px;
+                    text-align: center;
+                    font-weight: 700;
+                    color: #059669;
+                    font-size: 18px;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Agregar event listeners a las filas
+        setTimeout(() => {
+            const filas = modal.querySelectorAll('.presentacion-row-modal');
+            filas.forEach(fila => {
+                fila.addEventListener('click', () => {
+                    const presentacionId = fila.dataset.presentacionId;
+                    const presentacionNombre = fila.dataset.presentacionNombre;
+                    const precio = parseFloat(fila.dataset.presentacionPrecio);
+                    const unidades = parseInt(fila.dataset.presentacionUnidades || 1);
+                    
+                    this.cerrarModalPresentaciones();
+                    this.agregarAlCarritoConPresentacion(producto.id, presentacionId, presentacionNombre, precio, unidades, loteSeleccionado);
+                });
+            });
+        }, 50);
+
+        // Cerrar al hacer clic fuera
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.cerrarModalPresentaciones();
+            }
+        });
+    }
+
+    cerrarModalPresentaciones() {
+        const modal = document.getElementById('modalPresentaciones');
+        if (modal) {
+            modal.remove();
+        }
+    }
+
+    async agregarAlCarritoConPresentacion(productoId, presentacionId, presentacionNombre, precio, unidadesPorPresentacion = 1, loteSeleccionado = null) {
+        const producto = this.productos.find(p => p.id == productoId);
+        if (!producto || producto.stock_actual <= 0) {
+            this.mostrarNotificacionRapida('error', '¡Sin stock!', 'Producto no disponible');
+            return;
+        }
+
+        // Determinar stock disponible (del lote específico o total)
+        let stockDisponibleOriginal = parseInt(producto.stock_actual) || 0;
+        let loteId = null;
+        let loteCodigo = null;
+        let loteVencimiento = null;
+        
+        if (loteSeleccionado) {
+            stockDisponibleOriginal = loteSeleccionado.cantidad;
+            loteId = loteSeleccionado.id;
+            loteCodigo = loteSeleccionado.codigo;
+            loteVencimiento = loteSeleccionado.vencimiento;
+        }
+
+        // IMPORTANTE: Calcular cuántas unidades YA están en el carrito del mismo lote
+        let unidadesYaEnCarrito = 0;
+        this.carrito.forEach(item => {
+            const mismoProducto = (item.producto_id == productoId || item.id == productoId);
+            const mismoLote = loteId ? (item.lote_id == loteId) : true;
+            
+            if (mismoProducto && mismoLote) {
+                // Calcular unidades de este item
+                if (item.unidades_por_presentacion) {
+                    unidadesYaEnCarrito += item.cantidad * item.unidades_por_presentacion;
+                } else {
+                    unidadesYaEnCarrito += item.cantidad;
+                }
+            }
+        });
+
+        // Stock realmente disponible = stock original - lo que ya está en el carrito
+        const stockDisponible = stockDisponibleOriginal - unidadesYaEnCarrito;
+
+        console.log(`🔍 Validación de stock total:`, {
+            producto: producto.nombre,
+            presentacion: presentacionNombre,
+            lote_id: loteId,
+            stock_original: stockDisponibleOriginal,
+            unidades_en_carrito: unidadesYaEnCarrito,
+            stock_disponible_real: stockDisponible,
+            unidades_a_agregar: unidadesPorPresentacion
+        });
+
+        // Buscar si ya existe en el carrito con la misma presentación y lote
+        const itemExistente = this.carrito.find(item => {
+            const mismoProducto = item.producto_id == productoId;
+            const mismaPresentacion = item.presentacion_id == presentacionId;
+            const mismoLote = loteId ? (item.lote_id == loteId) : !item.lote_id;
+            return mismoProducto && mismaPresentacion && mismoLote;
+        });
+
+        // Calcular cuántas unidades se necesitan para esta presentación
+        const unidadesNecesarias = unidadesPorPresentacion;
+
+        // Validar stock (en unidades) considerando lo que YA está en el carrito
+        if (unidadesNecesarias > stockDisponible) {
+            const maxPresentaciones = Math.floor(stockDisponible / unidadesPorPresentacion);
+            this.mostrarNotificacionRapida('warning', '¡Stock insuficiente!', 
+                `Solo quedan ${stockDisponible} unidades disponibles del lote. Ya tienes ${unidadesYaEnCarrito} unidades en el carrito.`);
+            return;
+        }
+
+        if (itemExistente) {
+            // Incrementar cantidad de presentaciones
+            itemExistente.cantidad += 1;
+            // Actualizar stock_disponible para reflejar el stock original del lote
+            itemExistente.stock_disponible = stockDisponibleOriginal;
+            this.mostrarNotificacionRapida('success', '¡Actualizado!', `${producto.nombre} - ${presentacionNombre}`);
+        } else {
+            // Agregar nuevo item al carrito
+            this.carrito.push({
+                producto_id: productoId,
+                id: productoId, // Para compatibilidad
+                presentacion_id: presentacionId,
+                presentacion_nombre: presentacionNombre,
+                unidades_por_presentacion: unidadesPorPresentacion, // NUEVO: Guardar unidades
+                lote_id: loteId, // NUEVO: Guardar lote
+                lote_codigo: loteCodigo,
+                lote_vencimiento: loteVencimiento,
+                nombre: producto.nombre,
+                concentracion: producto.concentracion || '',
+                precio_venta: parseFloat(precio),
+                precio: parseFloat(precio), // Para compatibilidad
+                cantidad: 1, // Cantidad de PRESENTACIONES
+                stock_disponible: stockDisponibleOriginal, // Stock ORIGINAL del lote en UNIDADES
+                imagen: producto.imagen_url || producto.imagen || '/assets/images/default-product.svg'
+            });
+            this.mostrarNotificacionRapida('success', '¡Agregado!', `${producto.nombre} - ${presentacionNombre}`);
+        }
+
+        this.renderizarCarrito();
+        this.calcularTotales();
+        this.actualizarContadorCarrito();
+        this.validarProcesamientoVenta(); // IMPORTANTE: Validar el botón
     }
 
     async agregarAlCarrito(productoId) {
@@ -1373,24 +1881,23 @@ class POSProfesional {
             `${item.nombre} ${item.concentracion}` : 
             item.nombre;
         
-        // Info de lote
-        let infoLote = '';
-        /*
-        if (item.lote_codigo) {
-            infoLote = `<div class="text-xs text-gray-500 mt-1 flex items-center">
-                <iconify-icon icon="solar:box-minimalistic-linear" class="mr-1"></iconify-icon>
-                Lote: ${item.lote_codigo} 
-                ${item.lote_vencimiento ? `<span class="ml-2 text-red-500">Vence: ${item.lote_vencimiento}</span>` : ''}
+        // Info de presentación
+        let infoPresentacion = '';
+        if (item.presentacion_nombre) {
+            infoPresentacion = `<div style="display: inline-block; padding: 2px 6px; background: #dbeafe; color: #1e40af; border-radius: 4px; font-size: 10px; font-weight: 600; margin-top: 4px;">
+                ${item.presentacion_nombre}
             </div>`;
         }
-        */
 
         div.innerHTML = `
             <div class="carrito-item-row">
                 <div class="carrito-item-info">
-                    <div class="carrito-item-nombre-completo">${nombreCompleto}</div>
+                    <div class="carrito-item-nombre-completo">
+                        ${nombreCompleto}
+                        ${infoPresentacion}
+                    </div>
                     
-                    <div class="carrito-item-precio">S/. ${(item.precio * item.cantidad).toFixed(2)}</div>
+                    <div class="carrito-item-precio">S/. ${(item.precio_venta * item.cantidad).toFixed(2)}</div>
                 </div>
                 
                 <div class="carrito-item-controls">
@@ -1400,7 +1907,7 @@ class POSProfesional {
                                class="cantidad-input" 
                                value="${item.cantidad}" 
                                min="1" 
-                               max="${item.stock_disponible}"
+                               max="${item.stock_disponible || 999}"
                                oninput="pos.clampCantidadInput(${index}, this)"
                                onchange="pos.cambiarCantidad(${index}, this.value)">
                         <button class="cantidad-btn" onclick="pos.cambiarCantidad(${index}, ${item.cantidad + 1})">+</button>
@@ -1424,15 +1931,79 @@ class POSProfesional {
         }
 
         const item = this.carrito[index];
-        if (nuevaCantidad > item.stock_disponible) {
-            this.mostrarErrorStock(item.nombre, item.stock_disponible, nuevaCantidad);
+        const stockOriginalDelLote = parseInt(item.stock_disponible) || 999;
+        
+        // IMPORTANTE: Calcular cuántas unidades YA están en el carrito del mismo lote (excluyendo este item)
+        let unidadesOtrosItems = 0;
+        this.carrito.forEach((otroItem, otroIndex) => {
+            if (otroIndex === index) return; // Saltar el item actual
+            
+            const mismoProducto = (otroItem.producto_id == item.producto_id || otroItem.id == item.id);
+            const mismoLote = item.lote_id ? (otroItem.lote_id == item.lote_id) : true;
+            
+            if (mismoProducto && mismoLote) {
+                // Calcular unidades de este otro item
+                if (otroItem.unidades_por_presentacion) {
+                    unidadesOtrosItems += otroItem.cantidad * otroItem.unidades_por_presentacion;
+                } else {
+                    unidadesOtrosItems += otroItem.cantidad;
+                }
+            }
+        });
+        
+        // Stock realmente disponible = stock original - unidades de otros items
+        const stockDisponibleReal = stockOriginalDelLote - unidadesOtrosItems;
+        
+        // IMPORTANTE: Validar considerando unidades por presentación
+        let unidadesNecesarias = nuevaCantidad;
+        let maxPresentaciones = stockDisponibleReal;
+        let tipoCantidad = 'unidades';
+        
+        if (item.presentacion_id && item.unidades_por_presentacion) {
+            // Si es una presentación, calcular unidades necesarias
+            unidadesNecesarias = nuevaCantidad * item.unidades_por_presentacion;
+            maxPresentaciones = Math.floor(stockDisponibleReal / item.unidades_por_presentacion);
+            tipoCantidad = item.presentacion_nombre || 'presentaciones';
+            
+            console.log(`🔍 Validación de stock al cambiar cantidad:`, {
+                presentacion: item.presentacion_nombre,
+                cantidad_solicitada: nuevaCantidad,
+                unidades_por_presentacion: item.unidades_por_presentacion,
+                unidades_necesarias: unidadesNecesarias,
+                stock_original_lote: stockOriginalDelLote,
+                unidades_otros_items: unidadesOtrosItems,
+                stock_disponible_real: stockDisponibleReal,
+                max_presentaciones: maxPresentaciones
+            });
+        }
+        
+        if (unidadesNecesarias > stockDisponibleReal) {
+            // Mostrar notificación de stock excedido
+            if (item.presentacion_id && item.unidades_por_presentacion) {
+                this.mostrarNotificacionRapida('warning', '¡Stock insuficiente!', 
+                    `Solo quedan ${stockDisponibleReal} unidades disponibles del lote. Máximo: ${maxPresentaciones} ${tipoCantidad}`);
+                
+                // Ajustar a la cantidad máxima de presentaciones disponibles
+                item.cantidad = Math.max(0, maxPresentaciones);
+            } else {
+                this.mostrarNotificacionRapida('warning', '¡Stock insuficiente!', 
+                    `Solo quedan ${stockDisponibleReal} unidades disponibles del lote`);
+                
+                // Ajustar a la cantidad máxima disponible
+                item.cantidad = Math.max(0, stockDisponibleReal);
+            }
+            
+            this.renderizarCarrito();
+            this.calcularTotales();
+            this.actualizarContadorCarrito();
+            this.validarProcesamientoVenta();
             return;
         }
 
         item.cantidad = nuevaCantidad;
         this.renderizarCarrito();
         this.calcularTotales();
-        this.actualizarContadorCarrito(); // Actualizar contador del carrito
+        this.actualizarContadorCarrito();
         this.validarProcesamientoVenta();
     }
 
@@ -1550,7 +2121,11 @@ class POSProfesional {
     
     calcularSubtotal() {
         if (!this.carrito?.length) return 0;
-        return this.carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+        return this.carrito.reduce((sum, item) => {
+            const precio = item.precio_venta || item.precio || 0;
+            const cantidad = item.cantidad || 0;
+            return sum + (parseFloat(precio) * parseInt(cantidad));
+        }, 0);
     }
     
     calcularIGV(monto) {
@@ -1672,12 +2247,27 @@ class POSProfesional {
 
         // Formatear productos para el backend (optimizado)
         const datosVenta = {
-            productos: this.carrito.map(item => ({
-                id: item.id,
-                cantidad: item.cantidad,
-                precio: item.precio,
-                lote_id: item.lote_id // Include selected lote ID
-            })),
+            productos: this.carrito.map(item => {
+                // IMPORTANTE: Convertir cantidad de presentación a unidades para el backend
+                let cantidadEnUnidades = item.cantidad;
+                
+                if (item.presentacion_id && item.unidades_por_presentacion) {
+                    // Si es una presentación, multiplicar por las unidades
+                    cantidadEnUnidades = item.cantidad * item.unidades_por_presentacion;
+                    console.log(`🔢 Conversión: ${item.cantidad} ${item.presentacion_nombre} = ${cantidadEnUnidades} unidades`);
+                }
+                
+                return {
+                    id: item.id || item.producto_id, // Soportar ambos formatos
+                    cantidad: cantidadEnUnidades, // CANTIDAD EN UNIDADES para descontar del stock
+                    precio: item.precio || item.precio_venta, // Soportar ambos formatos
+                    lote_id: item.lote_id, // Include selected lote ID
+                    presentacion_id: item.presentacion_id || null, // Agregar presentación
+                    presentacion_nombre: item.presentacion_nombre || null, // Agregar nombre de presentación
+                    cantidad_presentacion: item.presentacion_id ? item.cantidad : null, // Cantidad original de presentaciones (para el ticket)
+                    unidades_por_presentacion: item.unidades_por_presentacion || null // Para referencia
+                };
+            }),
             metodo_pago: this.metodosPagoSeleccionado,
             tipo_comprobante: tipoComprobante,
             cliente_id: this.obtenerClienteIdParaVenta(),
@@ -1685,6 +2275,8 @@ class POSProfesional {
             descuento_tipo: this.descuento.tipo,
             descuento_valor: this.descuento.valor
         };
+
+        console.log('📋 Datos a enviar al backend:', datosVenta);
 
         console.log('📋 Procesando venta...', { metodo: this.metodosPagoSeleccionado, comprobante: tipoComprobante });
         
@@ -2759,28 +3351,45 @@ class POSProfesional {
     }
 
     imprimirDirecto(venta, tipoComprobante) {
-        console.log('🖨️ Imprimiendo directamente:', tipoComprobante, venta);
+        console.log('🖨️ Imprimiendo directamente:', tipoComprobante);
+        console.log('📋 Datos de venta completos:', venta);
+        console.log('📋 venta.sunat:', venta.sunat);
         
         let url = '';
         let titulo = '';
         let descripcion = '';
+        let usarNubeFact = false;
         
-        switch(tipoComprobante) {
-            case 'boleta':
-                url = `/punto-venta/pdf/${venta.id}`;
-                titulo = 'Imprimiendo Boleta';
-                descripcion = 'Generando boleta electrónica...';
-                break;
-            case 'ticket':
-                url = `/punto-venta/ticket/${venta.id}`;
-                titulo = 'Imprimiendo Ticket';
-                descripcion = 'Generando ticket térmico (80mm)...';
-                break;
+        // Verificar si hay PDF de NubeFact disponible
+        if (venta.sunat && venta.sunat.enlace_del_pdf) {
+            url = venta.sunat.enlace_del_pdf;
+            usarNubeFact = true;
+            titulo = 'Imprimiendo Comprobante Electrónico';
+            descripcion = 'Abriendo comprobante de NubeFact...';
+            console.log('✅ Usando PDF de NubeFact:', url);
+        } else {
+            // Fallback a ticket/boleta local si no hay NubeFact
+            console.log('⚠️ No hay PDF de NubeFact disponible');
+            console.log('⚠️ Razón: venta.sunat =', venta.sunat);
+            console.log('⚠️ Usando ticket local como fallback');
+            
+            switch(tipoComprobante) {
+                case 'boleta':
+                    url = `/punto-venta/pdf/${venta.id}`;
+                    titulo = 'Imprimiendo Boleta';
+                    descripcion = 'Generando boleta electrónica...';
+                    break;
+                case 'ticket':
+                    url = `/punto-venta/ticket/${venta.id}`;
+                    titulo = 'Imprimiendo Ticket';
+                    descripcion = 'Generando ticket térmico (80mm)...';
+                    break;
 
-            default:
-                console.error('❌ Tipo de comprobante no válido:', tipoComprobante);
-                this.mostrarError('Tipo de comprobante no válido');
-                return;
+                default:
+                    console.error('❌ Tipo de comprobante no válido:', tipoComprobante);
+                    this.mostrarError('Tipo de comprobante no válido');
+                    return;
+            }
         }
 
         // Mostrar loading mientras se prepara
@@ -2793,7 +3402,23 @@ class POSProfesional {
             }
         });
 
-        // Para Ticket usar iframe y disparar impresión automática; para Boleta abrir ventana
+        // Si es NubeFact, abrir directamente en nueva pestaña
+        if (usarNubeFact) {
+            const printWindow = window.open(url, '_blank', 'fullscreen=yes,scrollbars=yes');
+            if (printWindow) {
+                setTimeout(() => {
+                    Swal.close();
+                    this.mostrarMensajeExito('Comprobante electrónico generado correctamente');
+                }, 1000);
+                printWindow.focus();
+            } else {
+                Swal.close();
+                this.mostrarError('No se pudo abrir la ventana. Verifica que no esté bloqueada por el navegador.');
+            }
+            return;
+        }
+
+        // Para Ticket local usar iframe y disparar impresión automática; para Boleta abrir ventana
         if (tipoComprobante === 'ticket') {
             try {
                 const iframe = document.createElement('iframe');
@@ -3212,44 +3837,56 @@ class POSProfesional {
                 // Determinar color de fondo según vencimiento (Inline styles para asegurar visualización)
                 let rowStyle = 'background-color: #ffffff;';
                 let rowClass = 'hover:bg-gray-50';
+                let esVencido = false;
                 
                 if (dias < 0) {
-                    rowStyle = 'background-color: #fef2f2;'; // Rojo muy suave
-                    rowClass = 'hover:bg-red-50'; 
+                    rowStyle = 'background-color: #fef2f2; opacity: 0.8; cursor: not-allowed;'; // Rojo suave + deshabilitado
+                    rowClass = 'lote-vencido-row'; 
+                    esVencido = true;
                 } else if (dias <= 90) {
                     rowStyle = 'background-color: #fff7ed;'; // Naranja muy suave (Orange-50)
                     rowClass = 'hover:bg-orange-50';
                 }
 
                 const row = document.createElement('tr');
-                row.className = `${rowClass} cursor-pointer transition-colors border-b border-gray-100`;
+                row.className = `${rowClass} transition-colors border-b border-gray-100`;
+                if (!esVencido) row.classList.add('cursor-pointer');
                 row.style.cssText = rowStyle; // Aplicar estilo forzado
                 
                 row.innerHTML = `
                     <td class="px-4 py-3">
-                        <div class="font-semibold text-gray-800">${lote.lote || 'Sin código'}</div>
+                        <div class="font-semibold ${esVencido ? 'text-red-600' : 'text-gray-800'}">${lote.lote || 'Sin código'} ${esVencido ? '<span class="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded-full ml-2">VENCIDO</span>' : ''}</div>
                     </td>
                     <td class="px-4 py-3">
-                        <div class="font-medium text-gray-700">${vencimiento}</div>
-                        <div class="text-xs text-gray-500" style="${dias <= 90 ? 'color:#c2410c; font-weight:600;' : ''}">${diasText}</div>
+                        <div class="font-medium ${esVencido ? 'text-red-700' : 'text-gray-700'}">${vencimiento}</div>
+                        <div class="text-xs ${esVencido ? 'text-red-500 font-bold' : 'text-gray-500'}" style="${dias <= 90 || esVencido ? 'color:' + (esVencido ? '#dc2626' : '#c2410c') + '; font-weight:600;' : ''}">${diasText}</div>
                     </td>
                     <td class="px-4 py-3 text-center">
-                        <span class="font-bold text-lg text-gray-800">${lote.cantidad}</span>
+                        <span class="font-bold text-lg ${esVencido ? 'text-red-400' : 'text-gray-800'}">${lote.cantidad}</span>
                     </td>
                     <td class="px-4 py-3 text-center">
-                        <div class="font-semibold text-gray-800">S/ ${Number(precioVenta).toFixed(2)}</div>
+                        <div class="font-semibold ${esVencido ? 'text-red-400' : 'text-gray-800'}">S/ ${Number(precioVenta).toFixed(2)}</div>
                     </td>
                 `;
 
-                row.addEventListener('click', () => {
-                    modal.style.display = 'none';
-                    resolve({
-                        id: lote.id,
-                        codigo: lote.lote,
-                        vencimiento: lote.fecha_vencimiento,
-                        precio: precioVenta
+                if (esVencido) {
+                    row.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.mostrarError(`¡ATENCIÓN! El lote [${lote.lote || 'Sin código'}] está VENCIDO (${vencimiento}). Venta bloqueada por seguridad sanitaria.`);
                     });
-                });
+                } else {
+                    row.addEventListener('click', () => {
+                        modal.style.display = 'none';
+                        resolve({
+                            id: lote.id,
+                            codigo: lote.lote,
+                            vencimiento: lote.fecha_vencimiento,
+                            precio: precioVenta,
+                            cantidad: lote.cantidad // IMPORTANTE: Incluir la cantidad del lote
+                        });
+                    });
+                }
 
                 tbody.appendChild(row);
             });

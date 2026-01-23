@@ -22,10 +22,10 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <!-- Alertas de estado -->
+                    
                     <div id="alertas-container"></div>
                     
-                    <!-- Tabs de configuración -->
+                    
                     <ul class="nav nav-tabs" id="configTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="empresa-tab" data-bs-toggle="tab" data-bs-target="#empresa" type="button" role="tab">
@@ -50,7 +50,7 @@
                     </ul>
                     
                     <div class="tab-content mt-3" id="configTabsContent">
-                        <!-- Tab Datos de Empresa -->
+                        
                         <div class="tab-pane fade show active" id="empresa" role="tabpanel">
                             <form id="formEmpresa">
                                 @csrf
@@ -109,7 +109,7 @@
                             </form>
                         </div>
                         
-                        <!-- Tab Credenciales SUNAT -->
+                        
                         <div class="tab-pane fade" id="sunat" role="tabpanel">
                             <form id="formSunat">
                                 @csrf
@@ -151,7 +151,7 @@
                             </form>
                         </div>
                         
-                        <!-- Tab Certificado Digital -->
+                        
                         <div class="tab-pane fade" id="certificado" role="tabpanel">
                             <div class="row">
                                 <div class="col-md-8">
@@ -204,7 +204,7 @@
                             </div>
                         </div>
                         
-                        <!-- Tab Monitoreo -->
+                        
                         <div class="tab-pane fade" id="monitoreo" role="tabpanel">
                             <div class="row">
                                 <div class="col-md-6">
@@ -239,7 +239,7 @@
                         </div>
                     </div>
                     
-                    <!-- Botones de acción -->
+                    
                     <div class="mt-4 d-flex justify-content-end gap-2">
                         <button type="button" class="btn btn-secondary" onclick="window.history.back()">
                             <i class="fas fa-arrow-left me-1"></i> Volver
@@ -254,7 +254,6 @@
     </div>
 </div>
 
-<!-- Modal de Estado del Sistema -->
 <div class="modal fade" id="modalEstadoSistema" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -263,7 +262,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="modalEstadoContent">
-                <!-- Contenido dinámico -->
+                
             </div>
         </div>
     </div>
@@ -312,33 +311,28 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-    // Cargar estado del sistema al abrir el tab de monitoreo
+
     $('#monitoreo-tab').on('click', function() {
         cargarEstadoSistema();
     });
-    
-    // Guardar configuración
+
     $('#btnGuardarConfiguracion').on('click', function() {
         guardarConfiguracion();
     });
-    
-    // Subir certificado
+
     $('#formCertificado').on('submit', function(e) {
         e.preventDefault();
         subirCertificado();
     });
-    
-    // Probar conexión
+
     $('#btnProbarConexion').on('click', function() {
         probarConexion();
     });
-    
-    // Mostrar estado del sistema
+
     $('#btnEstadoSistema').on('click', function() {
         mostrarEstadoSistema();
     });
-    
-    // Validación de RUC
+
     $('#ruc').on('input', function() {
         let ruc = $(this).val().replace(/\D/g, '');
         $(this).val(ruc);
@@ -349,8 +343,7 @@ $(document).ready(function() {
             $(this).removeClass('is-valid').addClass('is-invalid');
         }
     });
-    
-    // Validación de Ubigeo
+
     $('#ubigeo').on('input', function() {
         let ubigeo = $(this).val().replace(/\D/g, '');
         $(this).val(ubigeo);
@@ -366,21 +359,17 @@ $(document).ready(function() {
 function guardarConfiguracion() {
     const btn = $('#btnGuardarConfiguracion');
     const originalText = btn.html();
-    
-    // Recopilar datos de todos los formularios
+
     const formData = new FormData();
-    
-    // Datos de empresa
+
     $('#formEmpresa').serializeArray().forEach(function(item) {
         formData.append(item.name, item.value);
     });
-    
-    // Datos de SUNAT
+
     $('#formSunat').serializeArray().forEach(function(item) {
         formData.append(item.name, item.value);
     });
-    
-    // Checkbox de producción
+
     formData.append('produccion', $('#produccion').is(':checked') ? '1' : '0');
     
     btn.html('<i class="fas fa-spinner fa-spin me-1"></i> Guardando...').prop('disabled', true);
@@ -498,8 +487,7 @@ function mostrarEstadoSistema() {
         method: 'GET',
         success: function(response) {
             let content = '<div class="row">';
-            
-            // Estado de configuración
+
             content += '<div class="col-md-6">';
             content += '<h6><i class="fas fa-cog me-1"></i> Configuración</h6>';
             content += '<ul class="list-unstyled">';
@@ -508,8 +496,7 @@ function mostrarEstadoSistema() {
             content += '<li><span class="status-indicator ' + (response.conexion_sunat ? 'status-success' : 'status-warning') + '"></span>Conexión SUNAT ' + (response.conexion_sunat ? 'OK' : 'Pendiente') + '</li>';
             content += '</ul>';
             content += '</div>';
-            
-            // Modo y estadísticas
+
             content += '<div class="col-md-6">';
             content += '<h6><i class="fas fa-chart-bar me-1"></i> Estadísticas</h6>';
             content += '<p><strong>Modo:</strong> ' + response.modo + '</p>';
@@ -525,7 +512,7 @@ function mostrarEstadoSistema() {
 }
 
 function actualizarEstadoSistema(data) {
-    // Actualizar estado del sistema
+
     let statusHtml = '<div class="list-group list-group-flush">';
     statusHtml += '<div class="list-group-item d-flex justify-content-between align-items-center">';
     statusHtml += 'Configuración <span class="badge ' + (data.configuracion_completa ? 'bg-success' : 'bg-danger') + '">' + (data.configuracion_completa ? 'Completa' : 'Incompleta') + '</span>';
@@ -542,8 +529,7 @@ function actualizarEstadoSistema(data) {
     statusHtml += '</div>';
     
     $('#sistema-status').html(statusHtml);
-    
-    // Actualizar últimas boletas
+
     let boletasHtml = '';
     if (data.ultimas_boletas && data.ultimas_boletas.length > 0) {
         boletasHtml = '<div class="list-group list-group-flush">';
@@ -584,8 +570,7 @@ function mostrarAlerta(tipo, mensaje) {
     `;
     
     $('#alertas-container').html(alertaHtml);
-    
-    // Auto-ocultar después de 5 segundos
+
     setTimeout(function() {
         $('.alert').fadeOut();
     }, 5000);

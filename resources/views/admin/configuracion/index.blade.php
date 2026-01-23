@@ -10,7 +10,7 @@
 
 @section('content')
 <div class="container-fluid">
-    <!-- Header -->
+    
     <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow-sm">
@@ -36,7 +36,7 @@
         </div>
     </div>
 
-    <!-- Navegación por pestañas -->
+    
     <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow-sm">
@@ -77,47 +77,45 @@
         </div>
     </div>
 
-    <!-- Contenido de las pestañas -->
+    
     <div class="tab-content" id="configTabsContent">
-        <!-- Empresa -->
+        
         <div class="tab-pane fade show active" id="empresa" role="tabpanel" aria-labelledby="empresa-tab">
             @include('admin.configuracion.empresa')
         </div>
 
-        <!-- IGV -->
+        
         <div class="tab-pane fade" id="igv" role="tabpanel" aria-labelledby="igv-tab">
             @include('admin.configuracion.igv')
         </div>
 
-        <!-- Comprobantes -->
+        
         <div class="tab-pane fade" id="comprobantes" role="tabpanel" aria-labelledby="comprobantes-tab">
             @include('admin.configuracion.comprobantes')
         </div>
 
-
-
-        <!-- Impresoras -->
+        
         <div class="tab-pane fade" id="impresoras" role="tabpanel" aria-labelledby="impresoras-tab">
             @include('admin.configuracion.impresoras')
         </div>
 
-        <!-- Tickets -->
+        
         <div class="tab-pane fade" id="tickets" role="tabpanel" aria-labelledby="tickets-tab">
             @include('admin.configuracion.tickets')
         </div>
 
-        <!-- Alertas -->
+        
         <div class="tab-pane fade" id="alertas" role="tabpanel" aria-labelledby="alertas-tab">
             @include('admin.configuracion.alertas')
         </div>
 
-        <!-- Cache -->
+        
         <div class="tab-pane fade" id="cache" role="tabpanel" aria-labelledby="cache-tab">
             @include('admin.configuracion.cache')
         </div>
     </div>
 
-    <!-- Panel de estado del sistema -->
+    
     <div class="row mt-4">
         <div class="col-12">
             <div class="card shadow-sm">
@@ -174,7 +172,6 @@
     </div>
 </div>
 
-<!-- Modal para importar configuración -->
 <div class="modal fade" id="modalImportarConfig" tabindex="-1" aria-labelledby="modalImportarConfigLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -206,7 +203,7 @@
 </div>
 
 <script>
-// Funciones para exportar/importar configuración
+
 async function exportarConfiguracion() {
     try {
         const response = await fetch('{{ route("admin.configuracion.exportar") }}', {
@@ -289,8 +286,7 @@ async function procesarImportacion() {
             }).then(() => {
                 location.reload();
             });
-            
-            // Cerrar modal
+
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalImportarConfig'));
             modal.hide();
         } else {
@@ -305,7 +301,6 @@ async function procesarImportacion() {
     }
 }
 
-// Verificar estado del sistema
 async function verificarEstadoSistema() {
     try {
         const response = await fetch('{{ route("admin.configuracion.estado") }}', {
@@ -316,8 +311,7 @@ async function verificarEstadoSistema() {
         });
         
         const estado = await response.json();
-        
-        // Actualizar indicadores
+
         document.getElementById('db-status').textContent = estado.database ? 'Conectado' : 'Desconectado';
         document.getElementById('db-status').className = `badge ${estado.database ? 'bg-success' : 'bg-danger'}`;
         
@@ -334,9 +328,8 @@ async function verificarEstadoSistema() {
     }
 }
 
-// Guardar pestaña activa en localStorage
 document.addEventListener('DOMContentLoaded', function() {
-    // Restaurar pestaña activa
+
     const activeTab = localStorage.getItem('activeConfigTab');
     if (activeTab) {
         const tabElement = document.querySelector(`#${activeTab}-tab`);
@@ -345,21 +338,18 @@ document.addEventListener('DOMContentLoaded', function() {
             tab.show();
         }
     }
-    
-    // Guardar pestaña activa cuando cambie
+
     document.querySelectorAll('#configTabs button[data-bs-toggle="tab"]').forEach(tab => {
         tab.addEventListener('shown.bs.tab', function(e) {
             const tabId = e.target.id.replace('-tab', '');
             localStorage.setItem('activeConfigTab', tabId);
         });
     });
-    
-    // Verificar estado del sistema cada 30 segundos
+
     verificarEstadoSistema();
     setInterval(verificarEstadoSistema, 30000);
 });
 
-// Función global para mostrar notificaciones
 function mostrarNotificacion(tipo, titulo, mensaje) {
     Swal.fire({
         icon: tipo,

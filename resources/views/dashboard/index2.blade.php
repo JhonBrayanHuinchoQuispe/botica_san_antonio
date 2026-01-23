@@ -9,19 +9,18 @@
 <head>
     <title>Dashboard - Botica San Antonio</title>
     
-    <!-- ⚡ PRELOAD RECURSOS CRÍTICOS PARA DASHBOARD -->
+    
     <link rel="preload" href="{{ asset('assets/js/homeOneChart.js') }}" as="script">
     <link rel="preload" href="{{ asset('assets/images/users/user1.png') }}" as="image">
     <link rel="preload" href="{{ asset('assets/images/users/user2.png') }}" as="image">
     <link rel="preload" href="{{ asset('assets/images/users/user3.png') }}" as="image">
     
-    <!-- ⚡ SCRIPT ESPECÍFICO PARA DASHBOARD PRINCIPAL -->
+    
     <script>
-        // Optimización específica para dashboard principal (página más pesada)
+
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🏠 Dashboard Principal - Iniciando optimizaciones...');
-            
-            // Precargar imágenes críticas del dashboard
+
             const criticalImages = [
                 '{{ asset("assets/images/users/user4.png") }}',
                 '{{ asset("assets/images/users/user5.png") }}'
@@ -31,20 +30,17 @@
                 const img = new Image();
                 img.src = src;
             });
-            
-            // Optimizar tablas con lazy loading
+
             const tables = document.querySelectorAll('table');
             tables.forEach(table => {
                 table.style.opacity = '0';
                 table.style.transition = 'opacity 0.3s ease';
-                
-                // Mostrar tabla cuando esté lista
+
                 setTimeout(() => {
                     table.style.opacity = '1';
                 }, 100);
             });
-            
-            // Observer para detectar cuando el gráfico está listo
+
             const chartContainer = document.getElementById('chart');
             const chartLoading = document.getElementById('chart-loading');
             
@@ -54,7 +50,7 @@
                         if (mutation.addedNodes.length > 0) {
                             const hasChart = chartContainer.querySelector('.apexcharts-canvas');
                             if (hasChart && chartLoading) {
-                                // Ocultar loading con animación suave
+
                                 chartLoading.style.transition = 'opacity 0.3s ease';
                                 chartLoading.style.opacity = '0';
                                 setTimeout(() => {
@@ -69,8 +65,7 @@
                 });
                 
                 observer.observe(chartContainer, { childList: true, subtree: true });
-                
-                // Fallback: ocultar loading después de 4 segundos
+
                 setTimeout(() => {
                     if (chartLoading && chartLoading.style.display !== 'none') {
                         chartLoading.style.transition = 'opacity 0.3s ease';
@@ -108,7 +103,7 @@
                     Stock de los últimos 30 días
                 </p>
             </div>
-        </div><!-- card end -->
+        </div>
         <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-blue-600/10 to-bg-white">
             <div class="card-body p-5">
                 <div class="flex flex-wrap items-center justify-between gap-3">
@@ -125,7 +120,7 @@
                     Ventas de los últimos 30 días
                 </p>
             </div>
-        </div><!-- card end -->
+        </div>
         <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-success-600/10 to-bg-white">
             <div class="card-body p-5">
                 <div class="flex flex-wrap items-center justify-between gap-3">
@@ -142,7 +137,7 @@
                     Last 30 days income
                 </p>
             </div>
-        </div><!-- card end -->
+        </div>
         <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-red-600/10 to-bg-white">
             <div class="card-body p-5">
                 <div class="flex flex-wrap items-center justify-between gap-3">
@@ -183,7 +178,7 @@
                         <span class="text-xs font-medium">+ S/1400 Por día</span>
                     </div>
                     <div id="chart" class="pt-[28px] apexcharts-tooltip-style-1">
-                        <!-- ⚡ Placeholder mientras carga el gráfico del dashboard -->
+                        
                         <div id="chart-loading" class="flex items-center justify-center h-64 text-gray-500 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div class="text-center">
                                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>

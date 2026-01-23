@@ -1738,6 +1738,295 @@ Route::prefix('nubefact')->group(function () {
     Route::post('/boleta/prueba', [NubeFactController::class, 'boletaPrueba']);
 });
 
+// ============================================
+// API MÓVIL - SIN AUTENTICACIÓN (para Flutter)
+// ============================================
+Route::prefix('mobile')->name('mobile.')->group(function () {
+    // Chat de IA para móvil (sin autenticación)
+    Route::post('/ai/chat', function(Request $request) {
+        $request->validate([
+            'message' => 'required|string|max:1000',
+        ]);
+
+        try {
+            $aiService = app(\App\Services\AIService::class);
+            $result = $aiService->chat($request->message);
+            
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'response' => 'Error procesando consulta: ' . $e->getMessage(),
+                'error' => 'internal_error'
+            ], 500);
+        }
+    })->name('ai.chat');
+    
+    // Predicciones para móvil
+    Route::get('/ai/predict/sales', function(Request $request) {
+        try {
+            $aiEngineUrl = config('services.ai_engine.url', 'http://76.13.71.180:8001');
+            $daysAhead = $request->get('days_ahead', 7);
+            
+            $response = Http::timeout(30)->get("{$aiEngineUrl}/predict/sales", [
+                'days_ahead' => $daysAhead
+            ]);
+            
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+            
+            return response()->json([
+                'success' => false,
+                'error' => 'Error al conectar con el servicio de predicciones'
+            ], 500);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Error interno: ' . $e->getMessage()
+            ], 500);
+        }
+    })->name('ai.predict.sales');
+    
+    Route::get('/ai/predict/stock', function(Request $request) {
+        try {
+            $aiEngineUrl = config('services.ai_engine.url', 'http://76.13.71.180:8001');
+            
+            $response = Http::timeout(30)->get("{$aiEngineUrl}/predict/stock");
+            
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+            
+            return response()->json([
+                'success' => false,
+                'error' => 'Error al conectar con el servicio de análisis de stock'
+            ], 500);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Error interno: ' . $e->getMessage()
+            ], 500);
+        }
+    })->name('ai.predict.stock');
+    
+    Route::get('/ai/analytics/trends', function(Request $request) {
+        try {
+            $aiEngineUrl = config('services.ai_engine.url', 'http://76.13.71.180:8001');
+            
+            $response = Http::timeout(30)->get("{$aiEngineUrl}/analytics/trends");
+            
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+            
+            return response()->json([
+                'success' => false,
+                'error' => 'Error al conectar con el servicio de análisis de tendencias'
+            ], 500);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Error interno: ' . $e->getMessage()
+            ], 500);
+        }
+    })->name('ai.analytics.trends');
+    
+    // Health check para móvil
+    Route::get('/ai/health', function() {
+        try {
+            $aiService = app(\App\Services\AIService::class);
+            $result = $aiService->healthCheck();
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'status' => 'error',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    })->name('ai.health');
+    
+    // Dar de baja lote (ajustar stock a 0)
+    Route::post('/lotes/{loteId}/baja', function(Request $request, $loteId) {
+        try {
+            $motivo = $request->input('motivo', 'Vencimiento/Merma');
+            
+            // Buscar el lote en diferentes tablas posibles
+            $lote = DB::table('lotes')->where('id', $loteId)->first();
+            
+            if (!$lote) {
+                // Intentar buscar en tabla de productos_lotes si existe
+                $lote = DB::table('productos_lotes')->where('id', $loteId)->first();
+            }
+            
+            if (!$lote) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lote no encontrado con ID: ' . $loteId
+                ], 404);
+            }
+            
+            // Determinar qué campos usar según la estructura
+            $cantidadActual = $lote->cantidad_actual ?? $lote->cantidad ?? 0;
+            $tableName = DB::table('lotes')->where('id', $loteId)->exists() ? 'lotes' : 'productos_lotes';
+            
+            // Actualizar stock a 0
+            $updateData = [
+                'updated_at' => now()
+            ];
+            
+            // Agregar campos según la estructura de la tabla
+            if (DB::getSchemaBuilder()->hasColumn($tableName, 'cantidad_actual')) {
+                $updateData['cantidad_actual'] = 0;
+            }
+            if (DB::getSchemaBuilder()->hasColumn($tableName, 'cantidad')) {
+                $updateData['cantidad'] = 0;
+            }
+            if (DB::getSchemaBuilder()->hasColumn($tableName, 'estado')) {
+                $updateData['estado'] = 'vencido';
+            }
+            
+            DB::table($tableName)->where('id', $loteId)->update($updateData);
+            
+            // Intentar registrar movimiento si la tabla existe
+            if (DB::getSchemaBuilder()->hasTable('lote_movimientos')) {
+                $movimientoData = [
+                    'lote_id' => $loteId,
+                    'tipo_movimiento' => 'baja',
+                    'cantidad' => $cantidadActual,
+                    'motivo' => $motivo,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+                
+                // Agregar campos opcionales si existen
+                if (DB::getSchemaBuilder()->hasColumn('lote_movimientos', 'cantidad_anterior')) {
+                    $movimientoData['cantidad_anterior'] = $cantidadActual;
+                }
+                if (DB::getSchemaBuilder()->hasColumn('lote_movimientos', 'cantidad_nueva')) {
+                    $movimientoData['cantidad_nueva'] = 0;
+                }
+                
+                DB::table('lote_movimientos')->insert($movimientoData);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Lote dado de baja correctamente'
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error al dar de baja lote: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al dar de baja el lote: ' . $e->getMessage()
+            ], 500);
+        }
+    })->name('mobile.lotes.baja');
+    
+    // Endpoint para obtener presentaciones de un producto
+    Route::get('/productos/{productId}/presentaciones', function ($productId) {
+        try {
+            \Log::info('Buscando presentaciones para producto: ' . $productId);
+            
+            // Buscar en diferentes tablas posibles
+            $presentaciones = [];
+            
+            // Opción 1: Tabla producto_presentaciones
+            if (DB::getSchemaBuilder()->hasTable('producto_presentaciones')) {
+                $presentaciones = DB::table('producto_presentaciones')
+                    ->where('producto_id', $productId)
+                    ->get()
+                    ->toArray();
+                    
+                if (!empty($presentaciones)) {
+                    \Log::info('Presentaciones encontradas en producto_presentaciones: ' . count($presentaciones));
+                    return response()->json([
+                        'success' => true,
+                        'data' => $presentaciones
+                    ]);
+                }
+            }
+            
+            // Opción 2: Tabla presentaciones con relación
+            if (DB::getSchemaBuilder()->hasTable('presentaciones')) {
+                $presentaciones = DB::table('presentaciones')
+                    ->where('producto_id', $productId)
+                    ->orWhere('id', function($query) use ($productId) {
+                        $query->select('presentacion_id')
+                              ->from('productos')
+                              ->where('id', $productId)
+                              ->limit(1);
+                    })
+                    ->get()
+                    ->toArray();
+                    
+                if (!empty($presentaciones)) {
+                    \Log::info('Presentaciones encontradas en presentaciones: ' . count($presentaciones));
+                    return response()->json([
+                        'success' => true,
+                        'data' => $presentaciones
+                    ]);
+                }
+            }
+            
+            // Opción 3: Buscar en lotes con diferentes presentaciones
+            if (DB::getSchemaBuilder()->hasTable('lotes')) {
+                $lotes = DB::table('lotes')
+                    ->where('producto_id', $productId)
+                    ->select('presentacion', 'cantidad', 'precio_venta')
+                    ->whereNotNull('presentacion')
+                    ->where('presentacion', '!=', '')
+                    ->get()
+                    ->toArray();
+                    
+                if (!empty($lotes)) {
+                    // Agrupar por presentación
+                    $presentacionesAgrupadas = [];
+                    foreach ($lotes as $lote) {
+                        $key = $lote->presentacion ?? 'Sin especificar';
+                        if (!isset($presentacionesAgrupadas[$key])) {
+                            $presentacionesAgrupadas[$key] = [
+                                'nombre' => $key,
+                                'presentacion' => $key,
+                                'cantidad' => 0,
+                                'precio' => $lote->precio_venta ?? 0
+                            ];
+                        }
+                        $presentacionesAgrupadas[$key]['cantidad'] += $lote->cantidad ?? 0;
+                    }
+                    
+                    $presentaciones = array_values($presentacionesAgrupadas);
+                    
+                    \Log::info('Presentaciones encontradas en lotes: ' . count($presentaciones));
+                    return response()->json([
+                        'success' => true,
+                        'data' => $presentaciones
+                    ]);
+                }
+            }
+            
+            // Si no se encontró nada, devolver array vacío
+            \Log::info('No se encontraron presentaciones para el producto: ' . $productId);
+            return response()->json([
+                'success' => true,
+                'data' => []
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error al obtener presentaciones: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener presentaciones: ' . $e->getMessage()
+            ], 500);
+        }
+    })->name('mobile.productos.presentaciones');
+});
+
 // Ruta de prueba para verificar que la API funciona
 Route::get('/test', function () {
     return response()->json([
@@ -1745,4 +2034,84 @@ Route::get('/test', function () {
         'message' => 'API funcionando correctamente',
         'timestamp' => now()
     ]);
+});
+
+// Rutas para notificaciones push (solo para pruebas)
+Route::prefix('notifications')->group(function () {
+    
+    // Enviar notificación de prueba
+    Route::post('/test', function () {
+        try {
+            $firebaseService = new \App\Services\FirebaseNotificationService();
+            $result = $firebaseService->sendTestNotification();
+            
+            return response()->json([
+                'success' => $result['success'],
+                'message' => $result['message'],
+                'data' => $result['response'] ?? null
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    });
+    
+    // Simular notificación de stock bajo
+    Route::post('/stock-bajo', function () {
+        try {
+            $firebaseService = new \App\Services\FirebaseNotificationService();
+            $result = $firebaseService->notifyLowStock('Paracetamol 500mg', 5, 20);
+            
+            return response()->json([
+                'success' => $result['success'],
+                'message' => $result['message'],
+                'data' => $result['response'] ?? null
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    });
+    
+    // Simular notificación de producto agotado
+    Route::post('/agotado', function () {
+        try {
+            $firebaseService = new \App\Services\FirebaseNotificationService();
+            $result = $firebaseService->notifyOutOfStock('Ibuprofeno 400mg');
+            
+            return response()->json([
+                'success' => $result['success'],
+                'message' => $result['message'],
+                'data' => $result['response'] ?? null
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    });
+    
+    // Simular notificación de nueva venta
+    Route::post('/nueva-venta', function () {
+        try {
+            $firebaseService = new \App\Services\FirebaseNotificationService();
+            $result = $firebaseService->notifyNewSale(150.50, 3);
+            
+            return response()->json([
+                'success' => $result['success'],
+                'message' => $result['message'],
+                'data' => $result['response'] ?? null
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    });
 });

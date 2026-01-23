@@ -3,7 +3,7 @@
     $title='Dashboard';
     $subTitle = 'Medical';
     $script = '<script>
-                    // ===================== Average Enrollment Rate Start =============================== 
+
                     function createChartTwo(chartId, color1, color2) {
                         var options = {
                             series: [{
@@ -36,7 +36,7 @@
                             stroke: {
                                 curve: "smooth",
                                 width: 3,
-                                colors: [color1, color2], // Use two colors for the lines
+                                colors: [color1, color2],
                                 lineCap: "round"
                             },
                             grid: {
@@ -71,40 +71,11 @@
                             },
                             fill: {
                                 type: "gradient",
-                                colors: [color1, color2], // Use two colors for the gradient
-                                // gradient: {
-                                //     shade: "light",
-                                //     type: "vertical",
-                                //     shadeIntensity: 0.5,
-                                //     gradientToColors: [`${color1}`, `${color2}00`], // Bottom gradient colors with transparency
-                                //     inverseColors: false,
-                                //     opacityFrom: .6,
-                                //     opacityTo: 0.3,
-                                //     stops: [0, 100],
-                                // },
-                                gradient: {
+                                colors: [color1, color2],
                                     shade: "light",
                                     type: "vertical",
                                     shadeIntensity: 0.5,
-                                    gradientToColors: [undefined, `${color2}00`], // Apply transparency to both colors
-                                    inverseColors: false,
-                                    opacityFrom: [0.4, 0.6], // Starting opacity for both colors
-                                    opacityTo: [0.3, 0.3], // Ending opacity for both colors
-                                    stops: [0, 100],
-                                },
-                            },
-                            markers: {
-                                colors: [color1, color2], // Use two colors for the markers
-                                strokeWidth: 3,
-                                size: 0,
-                                hover: {
-                                    size: 10
-                                }
-                            },
-                            xaxis: {
-                                labels: {
-                                    show: false
-                                },
+                                    gradientToColors: [undefined, `${color2}00`],
                                 categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
                                 tooltip: {
                                     enabled: false
@@ -140,10 +111,7 @@
                     }
 
                     createChartTwo("enrollmentChart", "#487FFF", "#FF9F29");
-                    // ===================== Average Enrollment Rate End =============================== 
 
-
-                    // ================================ User Activities Donut chart End ================================ 
                     var options = {
                         series: [30, 25],
                         colors: ["#FF9F29", "#45B369"],
@@ -155,34 +123,7 @@
                             type: "donut",
                             height: 260,
                             sparkline: {
-                                enabled: true // Remove whitespace
-                            },
-                            margin: {
-                                top: 0,
-                                right: 0,
-                                bottom: 0,
-                                left: 0
-                            },
-                            padding: {
-                                top: 0,
-                                right: 0,
-                                bottom: 0,
-                                left: 0
-                            }
-                        },
-                        stroke: {
-                            width: 0,
-                        },
-                        dataLabels: {
-                            enabled: false
-                        },
-                        responsive: [{
-                            breakpoint: 480,
-                            options: {
-                                chart: {
-                                    width: 200
-                                },
-                                legend: {
+                                enabled: true
                                     position: "bottom"
                                 }
                             }
@@ -191,10 +132,7 @@
 
                     var chart = new ApexCharts(document.querySelector("#statisticsDonutChart"), options);
                     chart.render();
-                    // ================================ User Activities Donut chart End ================================ 
 
-
-                    // ================================ Client Payment Status chart End ================================ 
                     var options = {
                         series: [{
                             name: "Net Profit",
@@ -219,7 +157,7 @@
                         grid: {
                             show: true,
                             borderColor: "#D1D5DB",
-                            strokeDashArray: 4, // Use a number for dashed style
+                            strokeDashArray: 4,
                             position: "back",
                         },
                         plotOptions: {
@@ -254,9 +192,7 @@
 
                     var chart = new ApexCharts(document.querySelector("#paymentStatusChart"), options);
                     chart.render();
-                    // ================================ Client Payment Status chart End ================================ 
 
-                    // ================================= Multiple Radial Bar Chart Start =============================
                     var options = {
                         series: [80, 40, 10],
                         chart: {
@@ -270,33 +206,22 @@
                         plotOptions: {
                             radialBar: {
                                 hollow: {
-                                    size: "10%", // Adjust this value to control the bar width
-                                },
-                                dataLabels: {
-                                    name: {
+                                    size: "10%",
                                         fontSize: "16px",
                                     },
                                     value: {
                                         fontSize: "16px",
                                     },
-                                    // total: {
-                                    //     show: true,
-                                    //     formatter: function (w) {
-                                    //         return "82%"
-                                    //     }
-                                    // }
+
                                 },
                                 track: {
-                                    margin: 20, // Space between the bars
-                                }
-                            }
-                        },
+                                    margin: 20,
                         labels: ["Cardiology", "Psychiatry", "Pediatrics"],
                     };
 
                     var chart = new ApexCharts(document.querySelector("#radialMultipleBar"), options);
                     chart.render();
-                    // ================================= Multiple Radial Bar Chart End =============================
+
                     </script>';
 @endphp
 
@@ -378,7 +303,7 @@
                         </div>
                     </div>
 
-                    <!-- Earning Statistic -->
+                    
                     <div class="col-span-12 2xl:col-span-12">
                         <div class="card border-0 h-full">
                             <div class="card-header">
@@ -412,8 +337,8 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Earning Statistic -->
-                    <!-- Patient Visited by Department -->
+                    
+                    
                     <div class="col-span-12 lg:col-span-6">
                         <div class="card border-0 h-full">
                             <div class="card-header">
@@ -437,8 +362,8 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Patient Visited by Department -->
-                    <!-- Patient Visit By Gender -->
+                    
+                    
                     <div class="col-span-12 lg:col-span-6">
                         <div class="card border-0 h-full">
                             <div class="card-header">
@@ -472,8 +397,8 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Patient Visit By Gender -->
-                    <!-- Top performance Start -->
+                    
+                    
                     <div class="col-span-12 2xl:col-span-4">
                         <div class="card border-0">
                             <div class="card-header border-bottom">
@@ -551,7 +476,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Top performance End -->
+                    
 
                     <div class="col-span-12 2xl:col-span-8">
                         <div class="card border-0 h-full">
@@ -622,7 +547,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Latest Performance End -->
+                    
                 </div>
             </div>
 

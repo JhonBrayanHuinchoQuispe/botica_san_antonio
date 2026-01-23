@@ -35,7 +35,7 @@
                     <form id="formConfiguracionImpresoras" onsubmit="guardarConfiguracionImpresoras(event)">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Impresora Principal -->
+                            
                             <div>
                                 <label class="form-label">Boleta (A4) - Dispositivo principal</label>
                                 <input type="text" name="impresora_principal" id="impresora_principal" 
@@ -45,7 +45,7 @@
                                 <small class="text-muted">Dispositivo predeterminado para imprimir boletas (A4)</small>
                             </div>
 
-                            <!-- Impresora de Tickets -->
+                            
                             <div>
                                 <label class="form-label">Tickets - Dispositivo de impresión</label>
                                 <input type="text" name="impresora_tickets" id="impresora_tickets" 
@@ -55,7 +55,7 @@
                                 <small class="text-muted">Dispositivo específico para tickets térmicos</small>
                             </div>
 
-                            <!-- Impresora de Reportes -->
+                            
                             <div>
                                 <label class="form-label">Reportes - Dispositivo de impresión</label>
                                 <input type="text" name="impresora_reportes" id="impresora_reportes" 
@@ -65,7 +65,7 @@
                                 <small class="text-muted">Dispositivo para reportes y documentos largos</small>
                             </div>
 
-                            <!-- Impresión Automática -->
+                            
                             <div>
                                 <label class="form-label">Impresión automática</label>
                                 <select name="imprimir_automatico" id="imprimir_automatico" class="form-control">
@@ -75,7 +75,7 @@
                                 <small class="text-muted">Imprimir automáticamente después de cada venta</small>
                             </div>
 
-                            <!-- Copias de Ticket -->
+                            
                             <div>
                                 <label class="form-label">Copias de ticket</label>
                                 <input type="number" name="copias_ticket" id="copias_ticket" 
@@ -85,7 +85,7 @@
                                 <small class="text-muted">Número de copias a imprimir por ticket</small>
                             </div>
 
-                            <!-- Ancho del Papel -->
+                            
                             <div>
                                 <label class="form-label">Ancho del Papel (mm)</label>
                                 <select name="papel_ticket_ancho" id="papel_ticket_ancho" class="form-control">
@@ -96,7 +96,7 @@
                             </div>
                         </div>
 
-                        <!-- Configuración tipo Tickets para Boleta -->
+                        
                         <div class="mt-8">
                             <h4 class="text-md font-semibold mb-4">Configuración de Boleta electrónica (estilo Tickets)</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -160,7 +160,7 @@
                             </div>
                         </div>
 
-                        <!-- Sección de Pruebas -->
+                        
                             <div class="mt-6 p-4 bg-gray-50 rounded-lg">
                             <h4 class="text-md font-semibold mb-3">Pruebas de salida</h4>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -170,7 +170,7 @@
                             </div>
                         </div>
 
-                        <!-- Información de Estado -->
+                        
                         <div class="mt-6 p-4 bg-blue-50 rounded-lg">
                             <h4 class="text-md font-semibold mb-3">Estado de dispositivos</h4>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -915,16 +915,15 @@ class AdminController extends Controller
     }
 
     /**
-     * Mostrar logs del sistema - Solo para Productos, Categorías y Presentaciones
+     * Mostrar logs del sistema - Solo para Productos y Categorías
      */
     public function logs(Request $request)
     {
-        // Filtrar solo auditorías de Productos, Categorías y Presentaciones
+        // Filtrar solo auditorías de Productos y Categorías
         $query = Audit::with('user', 'auditable')
             ->whereIn('auditable_type', [
                 'App\\Models\\Producto',
-                'App\\Models\\Categoria',
-                'App\\Models\\Presentacion'
+                'App\\Models\\Categoria'
             ])
             ->orderBy('created_at', 'desc');
 
@@ -956,9 +955,6 @@ class AdminController extends Controller
                     $query->where('nombre', 'LIKE', '%' . $searchTerm . '%');
                 })
                 ->orWhereHasMorph('auditable', ['App\\Models\\Categoria'], function($query) use ($searchTerm) {
-                    $query->where('nombre', 'LIKE', '%' . $searchTerm . '%');
-                })
-                ->orWhereHasMorph('auditable', ['App\\Models\\Presentacion'], function($query) use ($searchTerm) {
                     $query->where('nombre', 'LIKE', '%' . $searchTerm . '%');
                 });
             });

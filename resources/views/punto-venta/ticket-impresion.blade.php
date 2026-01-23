@@ -180,7 +180,7 @@
     </div>
     
     <script>
-        // Auto-imprimir si se abre en nueva ventana
+
         if (window.opener) {
             setTimeout(() => {
                 window.print();

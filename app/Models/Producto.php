@@ -25,14 +25,14 @@ class Producto extends Model implements Auditable
         'lote',
         'categoria',
         'marca',
-        'presentacion',
+        // REMOVIDO: 'presentacion', // Ahora se maneja en tabla producto_presentaciones
         'concentracion',
         'proveedor_id',
         'stock_actual',
         'stock_minimo',
         'ubicacion',
         'ubicacion_almacen',
-        'fecha_fabricacion',
+        // REMOVIDO: 'fecha_fabricacion', // Campo eliminado del sistema
         'fecha_vencimiento',
         'precio_compra',
         'precio_venta',
@@ -53,7 +53,7 @@ class Producto extends Model implements Auditable
         'precio_presentacion' => 'decimal:2',
         'permite_venta_unitaria' => 'boolean',
         'permite_venta_presentacion' => 'boolean',
-        'fecha_fabricacion' => 'date',
+        // REMOVIDO: 'fecha_fabricacion' => 'date', // Campo eliminado
         'fecha_vencimiento' => 'date',
         'proveedor_id' => 'integer'
     ];
@@ -71,6 +71,11 @@ class Producto extends Model implements Auditable
     public function movimientos()
     {
         return $this->hasMany(MovimientoStock::class);
+    }
+    
+    public function presentaciones()
+    {
+        return $this->hasMany(ProductoPresentacion::class, 'producto_id');
     }
 
     public function categoria_model()

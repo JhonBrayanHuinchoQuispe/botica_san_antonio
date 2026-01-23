@@ -10,7 +10,7 @@
 
 <head>
     <title>Lista de Categorías</title>
-    <link rel="stylesheet" href="{{ asset('assets/css/inventario/categoria/lista.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/inventario/categoria/lista-modern.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/categoria/agregar.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/categoria/editar.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/categoria/eliminar.css') }}">
@@ -74,12 +74,30 @@
                                     <tr data-id="{{ $categoria->id }}">
                                         <td data-label="ID">{{ $categoria->id }}</td>
                                         <td data-label="Nombre">{{ $categoria->nombre }}</td>
-                                        <td data-label="Descripción">{{ $categoria->descripcion ?: '' }}</td>
+                                        <td data-label="Descripción">
+                                            @if($categoria->descripcion)
+                                                <span class="desc-with-icon">
+                                                    <iconify-icon icon="solar:document-text-bold-duotone" class="desc-icon"></iconify-icon>
+                                                    {{ $categoria->descripcion }}
+                                                </span>
+                                            @else
+                                                <span class="desc-with-icon" style="color: #d1d5db;">
+                                                    <iconify-icon icon="solar:document-bold-duotone" class="desc-icon"></iconify-icon>
+                                                    Sin descripción
+                                                </span>
+                                            @endif
+                                        </td>
                                         <td data-label="Estado" class="estado-cell">
                                             @if($categoria->estado === 'activo')
-                                                <iconify-icon icon="solar:check-circle-bold" class="estado-icon" style="color:#22c55e;font-size:26px;" title="Activo"></iconify-icon>
+                                                <span class="estado-badge estado-badge-activo">
+                                                    <span class="dot"></span>
+                                                    Activo
+                                                </span>
                                             @else
-                                                <iconify-icon icon="solar:close-circle-bold" class="estado-icon" style="color:#ef4444;font-size:26px;" title="Inactivo"></iconify-icon>
+                                                <span class="estado-badge estado-badge-inactivo">
+                                                    <span class="dot"></span>
+                                                    Inactivo
+                                                </span>
                                             @endif
                                         </td>
                                         <td data-label="Acciones">
@@ -100,7 +118,7 @@
                     </table>
                 </div>
                 <div class="table-hscroll-track"><div class="table-hscroll-thumb"></div></div>
-                    <!-- Skeleton loading for Categorías -->
+                    
                     <div id="categoriasSkeleton" class="skeleton-table" style="display:none;">
                         @for ($i = 0; $i < 10; $i++)
                             <div class="skeleton-row">
@@ -113,7 +131,7 @@
                         @endfor
                     </div>
                 </div>
-                <!-- Paginación estilo Historial de Ventas -->
+                
                 <div id="categorias-pagination" class="historial-pagination-improved">
                     <div class="historial-pagination-info">
                         <p class="text-sm text-gray-700" id="categorias-pagination-info">Mostrando 0 a 0 de 0 categorías</p>
@@ -125,7 +143,6 @@
     </div>
 </div>
 
-<!-- Modal Agregar Categoría -->
 <div id="modalAgregarCategoria" class="modal-categoria-overlay" style="display:none;">
     <div class="modal-categoria-container">
         <div class="modal-categoria-header">
@@ -154,7 +171,6 @@
     </div>
 </div>
 
-<!-- Modal Editar Categoría -->
 <div id="modalEditarCategoria" class="modal-categoria-overlay" style="display:none;">
     <div class="modal-categoria-container">
         <div class="modal-categoria-header-edit">
@@ -186,7 +202,7 @@
 @endsection
 
 <style>
-/* Toggle switch minimal styles */
+
 .tabla-categorias td { vertical-align: middle; }
 .estado-cell { text-align: center; }
 .tabla-categorias td[data-label="Acciones"] { display: flex; align-items: center; gap: 12px; }
@@ -199,7 +215,7 @@
 </style>
 
 <style>
-/* Buscador unificado */
+
 .search-group { display:flex; align-items:center; gap:.5rem; border:1px solid #E9EDF5; border-radius:12px; padding:0 .85rem; height:44px; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,0.035); }
 .search-group:focus-within { border-color:#8b5cf6; box-shadow:0 0 0 2px rgba(139,92,246,.35); }
 .search-icon { color:#64748b; font-size:18px; }
@@ -229,7 +245,7 @@
 .estado-badge-inactivo .dot { background:#ef4444; }
 .desc-with-icon { display:inline-flex; align-items:center; gap:.4rem; color:#374151; }
 .desc-icon { color:#64748b; font-size:18px; }
-/* Scroll horizontal personalizado bajo la tabla */
+
 .table-hscroll-track{height:10px;background:#e5e7eb;border-radius:9999px;margin-top:10px;position:relative;display:none;width:100%}
 .table-hscroll-thumb{height:10px;background:#9ca3af;border-radius:9999px;width:60px;position:absolute;left:0}
 .table-hscroll{scrollbar-width:none}
@@ -239,7 +255,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    // Mostrar/ocultar botón limpiar del buscador
+
     const buscarInput = document.getElementById('buscarCategoria');
     const clearBtn = document.getElementById('clearBuscarCategoria');
     if (buscarInput && clearBtn) {
@@ -264,8 +280,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const row = chk.closest('tr');
                     const estadoCell = row.querySelector('td.estado-cell');
                     estadoCell.innerHTML = data.activo
-                        ? '<iconify-icon icon="solar:check-circle-bold" class="estado-icon" style="color:#22c55e;font-size:26px;" title="Activo"></iconify-icon>'
-                        : '<iconify-icon icon="solar:close-circle-bold" class="estado-icon" style="color:#ef4444;font-size:26px;" title="Inactivo"></iconify-icon>';
+                        ? '<span class="estado-badge estado-badge-activo"><span class="dot"></span>Activo</span>'
+                        : '<span class="estado-badge estado-badge-inactivo"><span class="dot"></span>Inactivo</span>';
                 }
             } catch (e) {
                 console.error(e);
@@ -298,7 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- Overlay de carga para edición -->
 <style>
 .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.6); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 9999; }
 .loading-overlay .loading-spinner {
@@ -306,9 +321,9 @@ document.addEventListener('DOMContentLoaded', () => {
   height: 36px;
   border-radius: 50%;
   position: relative;
-  /* Semicírculo rojo que gira */
+  
   background: conic-gradient(#f87171 0 180deg, transparent 180deg 360deg);
-  /* Grosor del aro */
+  
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0);
   mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0);
   animation: spin 0.7s linear infinite;
@@ -321,8 +336,8 @@ document.addEventListener('DOMContentLoaded', () => {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #f87171; /* círculo interno fijo */
-  box-shadow: 0 0 0 4px #fde2e2; /* halo suave alrededor para estilo similar a la referencia */
+  background: #f87171; 
+  box-shadow: 0 0 0 4px #fde2e2; 
 }
 .loading-overlay .loading-text { margin-top: .6rem; color: #f87171; font-weight: 400; font-size: 20px; text-shadow: none; }
 .loading-overlay .inner { display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -339,11 +354,11 @@ document.addEventListener('DOMContentLoaded', () => {
 ])
 
 <script>
-    // Inyectar datos del servidor a JavaScript para una carga inicial rápida
+
     window.categoriasIniciales = @json($categorias ?? []);
 </script>
 <style>
-/* Paginación estilo historial (rojo) */
+
 .historial-pagination-improved { padding: 1.5rem 2rem; border-top: 1px solid #e5e7eb; display:flex; justify-content:between; align-items:center; gap:1rem; background:white; }
 .historial-pagination-info { flex:1; }
 .historial-pagination-controls { display:flex; align-items:center; gap:.5rem; }
@@ -353,7 +368,6 @@ document.addEventListener('DOMContentLoaded', () => {
 .historial-pagination-btn-disabled { padding:.5rem .75rem; font-size:.875rem; font-weight:500; color:#9ca3af; background:#f9fafb; border:1px solid #e5e7eb; border-radius:6px; cursor:not-allowed; display:inline-flex; align-items:center; justify-content:center; min-width:2.5rem; }
 @media (max-width:768px){ .historial-pagination-improved{ flex-direction:column; align-items:stretch; gap:1rem; } .historial-pagination-controls{ justify-content:center; flex-wrap:wrap; } }
 
-/* Skeleton loading (Categorías) */
 .skeleton-table { padding: 8px 0; }
 .skeleton-row { display:grid; grid-template-columns: 64px 1fr 2fr 140px 170px; gap: 16px; align-items:center; padding: 14px 10px; border-bottom: 1px solid #f1f5f9; }
 .skeleton-bar { display:block; height: 16px; border-radius: 8px; background: linear-gradient(90deg, #e5e7eb 25%, #f1f5f9 37%, #e5e7eb 63%); background-size: 400% 100%; animation: skeleton-shimmer 1.2s ease-in-out infinite; }

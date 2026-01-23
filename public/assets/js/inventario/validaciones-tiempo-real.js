@@ -39,16 +39,14 @@ class ValidacionesTiempoReal {
             'edit-nombre': this.validateNombre.bind(this),
             'edit-categoria': this.validateCategoria.bind(this),
             'edit-marca': this.validateMarca.bind(this),
-            'edit-proveedor_id': this.validateProveedor.bind(this),
-            'edit-presentacion': this.validatePresentacion.bind(this),
+            'edit-proveedor': this.validateProveedor.bind(this),
             'edit-concentracion': this.validateConcentracion.bind(this),
             'edit-lote': this.validateLote.bind(this),
             'edit-codigo_barras': this.validateCodigoBarras.bind(this),
             'edit-stock_actual': this.validateStock.bind(this),
             'edit-stock_minimo': this.validateStock.bind(this),
-            'edit-precio_compra': this.validatePrecios.bind(this),
-            'edit-precio_venta': this.validatePrecios.bind(this),
-            'edit-fecha_fabricacion': this.validateFechas.bind(this),
+            'precio_compra_base_edit': this.validatePrecios.bind(this),
+            'precio_venta_base_edit': this.validatePrecios.bind(this),
             'edit-fecha_vencimiento': this.validateFechas.bind(this)
         });
     }
@@ -438,11 +436,18 @@ class ValidacionesTiempoReal {
         }
 
         if (fieldName === 'fecha_vencimiento') {
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            
+            // En edición permitimos cualquier fecha futura o de hoy
+            // En nuevo producto pedimos al menos 7 días
+            const diasMinimos = isEdit ? 0 : 7;
             const fechaMinima = new Date();
-            fechaMinima.setDate(fechaMinima.getDate() + 7);
+            fechaMinima.setDate(fechaMinima.getDate() + diasMinimos);
+            fechaMinima.setHours(0, 0, 0, 0);
             
             if (fecha < fechaMinima) {
-                this.showFieldError(field, 'La fecha de vencimiento debe ser al menos 7 días desde hoy');
+                this.showFieldError(field, isEdit ? 'La fecha no puede ser pasada' : 'La fecha debe ser al menos 7 días desde hoy');
                 return false;
             }
 
@@ -614,21 +619,34 @@ class ValidacionesTiempoReal {
         let isValid = true;
 
         // Validar campos requeridos
-        const validations = [
-            { field: form.querySelector(isEdit ? '#edit-nombre' : '[name="nombre"]'), validator: this.validateNombre.bind(this) },
-            { field: form.querySelector(isEdit ? '#edit-categoria' : '[name="categoria"]'), validator: this.validateCategoria.bind(this) },
-            { field: form.querySelector(isEdit ? '#edit-marca' : '[name="marca"]'), validator: this.validateMarca.bind(this) },
-            { field: form.querySelector(isEdit ? '#edit-proveedor' : '[name="proveedor_id"]'), validator: this.validateProveedor.bind(this) },
-            { field: form.querySelector(isEdit ? '#edit-presentacion' : '[name="presentacion"]'), validator: this.validatePresentacion.bind(this) },
-            { field: form.querySelector(isEdit ? '#edit-concentracion' : '[name="concentracion"]'), validator: this.validateConcentracion.bind(this) },
-            { field: form.querySelector(isEdit ? '#edit-lote' : '[name="lote"]'), validator: this.validateLote.bind(this) },
-            { field: form.querySelector(isEdit ? '#edit-codigo_barras' : '[name="codigo_barras"]'), validator: this.validateCodigoBarras.bind(this) },
-            { field: form.querySelector(isEdit ? '#edit-stock_actual' : '[name="stock_actual"]'), validator: this.validateStock.bind(this) },
-            { field: form.querySelector(isEdit ? '#edit-stock_minimo' : '[name="stock_minimo"]'), validator: this.validateStock.bind(this) },
-            { field: form.querySelector(isEdit ? '#edit-precio_compra' : '[name="precio_compra"]'), validator: this.validatePrecios.bind(this) },
-            { field: form.querySelector(isEdit ? '#edit-precio_venta' : '[name="precio_venta"]'), validator: this.validatePrecios.bind(this) },
-            { field: form.querySelector(isEdit ? '#edit-fecha_fabricacion' : '[name="fecha_fabricacion"]'), validator: this.validateFechas.bind(this) },
-            { field: form.querySelector(isEdit ? '#edit-fecha_vencimiento' : '[name="fecha_vencimiento"]'), validator: this.validateFechas.bind(this) }
+        const validations = isEdit ? [
+            { field: form.querySelector('#edit-nombre'), validator: this.validateNombre.bind(this) },
+            { field: form.querySelector('#edit-categoria'), validator: this.validateCategoria.bind(this) },
+            { field: form.querySelector('#edit-marca'), validator: this.validateMarca.bind(this) },
+            { field: form.querySelector('#edit-proveedor'), validator: this.validateProveedor.bind(this) },
+            { field: form.querySelector('#edit-concentracion'), validator: this.validateConcentracion.bind(this) },
+            { field: form.querySelector('#edit-lote'), validator: this.validateLote.bind(this) },
+            { field: form.querySelector('#edit-codigo_barras'), validator: this.validateCodigoBarras.bind(this) },
+            { field: form.querySelector('#edit-stock_actual'), validator: this.validateStock.bind(this) },
+            { field: form.querySelector('#edit-stock_minimo'), validator: this.validateStock.bind(this) },
+            { field: form.querySelector('#precio_compra_base_edit'), validator: this.validatePrecios.bind(this) },
+            { field: form.querySelector('#precio_venta_base_edit'), validator: this.validatePrecios.bind(this) }
+            // { field: form.querySelector('#edit-fecha_vencimiento'), validator: this.validateFechas.bind(this) }
+        ] : [
+            { field: form.querySelector('[name="nombre"]'), validator: this.validateNombre.bind(this) },
+            { field: form.querySelector('[name="categoria"]'), validator: this.validateCategoria.bind(this) },
+            { field: form.querySelector('[name="marca"]'), validator: this.validateMarca.bind(this) },
+            { field: form.querySelector('[name="proveedor_id"]'), validator: this.validateProveedor.bind(this) },
+            { field: form.querySelector('[name="presentacion"]'), validator: this.validatePresentacion.bind(this) },
+            { field: form.querySelector('[name="concentracion"]'), validator: this.validateConcentracion.bind(this) },
+            { field: form.querySelector('[name="lote"]'), validator: this.validateLote.bind(this) },
+            { field: form.querySelector('[name="codigo_barras"]'), validator: this.validateCodigoBarras.bind(this) },
+            { field: form.querySelector('[name="stock_actual"]'), validator: this.validateStock.bind(this) },
+            { field: form.querySelector('[name="stock_minimo"]'), validator: this.validateStock.bind(this) },
+            { field: form.querySelector('[name="precio_compra"]'), validator: this.validatePrecios.bind(this) },
+            { field: form.querySelector('[name="precio_venta"]'), validator: this.validatePrecios.bind(this) },
+            { field: form.querySelector('[name="fecha_fabricacion"]'), validator: this.validateFechas.bind(this) },
+            { field: form.querySelector('[name="fecha_vencimiento"]'), validator: this.validateFechas.bind(this) }
         ];
 
         for (const { field, validator } of validations) {

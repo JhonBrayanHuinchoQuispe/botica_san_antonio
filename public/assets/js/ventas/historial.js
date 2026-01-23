@@ -18,17 +18,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Configurar filtros automáticos
 function configurarFiltros() {
-    const filtros = ['filtroMetodo', 'filtroComprobante', 'filtroUsuario'];
+    const filtros = ['filtroUsuario'];
     
     filtros.forEach(filtroId => {
         const filtro = document.getElementById(filtroId);
         if (filtro) {
             filtro.addEventListener('change', function() {
                 console.log(`📊 Filtro ${filtroId} cambiado a:`, this.value);
-                document.getElementById('filtrosForm').submit();
+                ejecutarBusquedaAJAX();
             });
         }
     });
+
+    const fechaDesde = document.getElementById('fechaDesde');
+    const fechaHasta = document.getElementById('fechaHasta');
+    if (fechaDesde) fechaDesde.addEventListener('change', ejecutarBusquedaAJAX);
+    if (fechaHasta) fechaHasta.addEventListener('change', ejecutarBusquedaAJAX);
 }
 
 // Configurar búsqueda con delay
@@ -39,13 +44,9 @@ function configurarBusqueda() {
             clearTimeout(timeout);
             const query = this.value;
             
-            console.log('🔍 Búsqueda:', query);
-            
             timeout = setTimeout(() => {
-                if (query.length >= 3 || query.length === 0) {
-                    document.getElementById('filtrosForm').submit();
-                }
-            }, 200); // Reducido de 500ms a 200ms para mayor velocidad
+                ejecutarBusquedaAJAX();
+            }, 300);
         });
         
         // Enter para buscar inmediato
@@ -53,31 +54,113 @@ function configurarBusqueda() {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 clearTimeout(timeout);
-                document.getElementById('filtrosForm').submit();
+                ejecutarBusquedaAJAX();
             }
         });
     }
 }
 
-// Configurar acciones de los botones
+// Configurar acciones de los botones (ver detalle, imprimir, etc.)
 function configurarAcciones() {
-    // Botones de ver detalle
-    document.querySelectorAll('[onclick^="verDetalleVenta"]').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const ventaId = this.getAttribute('onclick').match(/\d+/)[0];
-            mostrarDetalleVenta(ventaId);
-        });
-    });
+    // Los botones de acción ya tienen onclick directamente en el HTML
+    // Esta función existe para re-configurar eventos después de AJAX si es necesario
+    console.log('🔧 Acciones configuradas');
+}
+
+// Ejecutar búsqueda vía AJAX
+function ejecutarBusquedaAJAX() {
+    const form = document.getElementById('filtrosForm');
+    if (!form) return;
+
+    const formData = new FormData(form);
+    const params = new URLSearchParams(formData);
     
-    // Botones de imprimir
-    document.querySelectorAll('[onclick^="imprimirComprobante"]').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const ventaId = this.getAttribute('onclick').match(/\d+/)[0];
-            imprimirComprobante(ventaId);
-        });
+    // Mostrar skeleton loading
+    mostrarSkeletonTable();
+
+    fetch(`${window.location.pathname}?${params.toString()}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newTableBody = doc.getElementById('tablaHistorialBody');
+        const currentTableBody = document.getElementById('tablaHistorialBody');
+        
+        if (newTableBody && currentTableBody) {
+            currentTableBody.innerHTML = newTableBody.innerHTML;
+        }
+
+        // Actualizar paginación si existe
+        const newPagination = doc.querySelector('.historial-pagination-improved');
+        const currentPagination = document.querySelector('.historial-pagination-improved');
+        if (newPagination && currentPagination) {
+            currentPagination.innerHTML = newPagination.innerHTML;
+        } else if (newPagination && !currentPagination) {
+            const container = document.querySelector('.historial-table-wrapper-improved');
+            if (container) container.insertAdjacentHTML('beforeend', newPagination.outerHTML);
+        } else if (!newPagination && currentPagination) {
+            currentPagination.remove();
+        }
+
+        // Actualizar URL sin recargar
+        window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
+        
+        // Re-configurar eventos de acciones (imprimir, ver detalle)
+        configurarAcciones();
+    })
+    .catch(error => {
+        console.error('Error en búsqueda AJAX:', error);
     });
+}
+
+function mostrarSkeletonTable() {
+    const tbody = document.getElementById('tablaHistorialBody');
+    if (!tbody) return;
+
+    let skeletonHtml = '';
+    for (let i = 0; i < 5; i++) {
+        skeletonHtml += `
+            <tr class="historial-row">
+                <td><div class="skeleton-loading skeleton-text" style="width: 120px;"></div></td>
+                <td><div class="skeleton-loading skeleton-badge"></div></td>
+                <td><div class="skeleton-loading skeleton-text" style="width: 100px;"></div></td>
+                <td><div class="skeleton-loading skeleton-text" style="width: 150px;"></div></td>
+                <td><div class="skeleton-loading skeleton-badge"></div></td>
+                <td><div class="skeleton-loading skeleton-text" style="width: 80px;"></div></td>
+                <td>
+                    <div style="display: flex; gap: 8px; justify-content: center;">
+                        <div class="skeleton-loading skeleton-circle"></div>
+                        <div class="skeleton-loading skeleton-circle"></div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+    tbody.innerHTML = skeletonHtml;
+}
+
+// Limpiar todos los filtros
+function limpiarFiltros() {
+    console.log('🧹 Limpiando filtros via AJAX');
+    
+    const form = document.getElementById('filtrosForm');
+    if (!form) return;
+
+    // Resetear todos los campos del formulario
+    form.reset();
+    
+    // Limpiar manualmente los inputs por si acaso
+    document.getElementById('searchHistorial').value = '';
+    document.getElementById('fechaDesde').value = '';
+    document.getElementById('fechaHasta').value = '';
+    document.getElementById('filtroUsuario').value = '';
+    
+    // Ejecutar búsqueda con filtros limpios
+    ejecutarBusquedaAJAX();
 }
 
 // Función mejorada para mostrar detalle de venta
@@ -193,11 +276,41 @@ function mostrarModalDetalleVenta(venta) {
                 }
             }
 
+            // Formatear cantidad con presentación si existe
+            let cantidadDisplay = cantidadRestante;
+            let cantidadDevueltaDisplay = cantidadDevuelta;
+            
+            // Agregar presentación al nombre del producto si existe
+            let nombreProducto = detalle.producto.nombre;
+            let concentracionProducto = detalle.producto.concentracion || '';
+            let presentacionProducto = '';
+            
+            if (detalle.presentacion_nombre) {
+                presentacionProducto = `<span style="display: inline-block; padding: 2px 8px; background: #dbeafe; color: #1e40af; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-left: 8px;">${detalle.presentacion_nombre}</span>`;
+                
+                // Si hay presentación, mostrarla en la cantidad
+                cantidadDisplay = `${cantidadRestante} ${detalle.presentacion_nombre}`;
+                if (tieneDevolucion && cantidadDevuelta > 0) {
+                    cantidadDevueltaDisplay = `${cantidadDevuelta} ${detalle.presentacion_nombre}`;
+                }
+                
+                // Si hay cantidad_unidades, mostrarla también
+                if (detalle.cantidad_unidades) {
+                    cantidadDisplay += `<div style="font-size:0.7rem; color:#6b7280; font-weight:500;">(${detalle.cantidad_unidades} unidades)</div>`;
+                }
+            }
+            
             return `
                 <tr style="background:${devolucionCompleta ? '#fff' : '#fff'};">
-                    <td style="padding:10px; color:#111827; font-weight:600;">${detalle.producto.nombre}<div style="color:#6b7280; font-size:0.8rem; font-weight:500;">${detalle.producto.concentracion || ''}</div></td>
+                    <td style="padding:10px; color:#111827; font-weight:600;">
+                        ${nombreProducto}
+                        <div style="color:#6b7280; font-size:0.8rem; font-weight:500; display: flex; align-items: center; gap: 4px; margin-top: 4px;">
+                            ${concentracionProducto}
+                            ${presentacionProducto}
+                        </div>
+                    </td>
                     <td style="padding:10px; text-align:center; vertical-align:middle;">${loteHtml}</td>
-                    <td style="padding:10px; text-align:center; color:${devolucionCompleta ? '#dc2626' : '#059669'}; font-weight:700;">${cantidadRestante}${tieneDevolucion ? `<div style=\"font-size:0.7rem; color:#dc2626; text-decoration:line-through;\">-${cantidadDevuelta}</div>` : ''}</td>
+                    <td style="padding:10px; text-align:center; color:${devolucionCompleta ? '#dc2626' : '#059669'}; font-weight:700;">${cantidadDisplay}${tieneDevolucion ? `<div style=\"font-size:0.7rem; color:#dc2626; text-decoration:line-through;\">-${cantidadDevueltaDisplay}</div>` : ''}</td>
                     <td style="padding:10px; text-align:center; color:#374151;">S/. ${parseFloat(detalle.precio_unitario).toFixed(2)}</td>
                     <td style="padding:10px; text-align:right; color:${devolucionCompleta ? '#dc2626' : '#059669'}; font-weight:700;">S/. ${subtotal}${tieneDevolucion ? `<div style=\"font-size:0.7rem; color:#dc2626; text-decoration:line-through;\">-S/. ${(cantidadDevuelta * detalle.precio_unitario).toFixed(2)}</div>` : ''}</td>
                     <td style="padding:10px; text-align:center;">${estado}</td>
@@ -809,6 +922,7 @@ window.imprimirBoletaDirecta = imprimirBoletaDirecta;
 window.imprimirTicketDirecta = imprimirTicketDirecta;
 window.mostrarModalWhatsApp = mostrarModalWhatsApp;
 window.enviarWhatsApp = enviarWhatsApp;
+window.limpiarFiltros = limpiarFiltros;
 
 console.log('✅ Historial de Ventas - JavaScript completamente cargado');
 function configurarScrollHorizontalTabla() {

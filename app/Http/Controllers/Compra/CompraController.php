@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Compra;
 use App\Http\Controllers\Controller;
 use App\Models\Producto;
 use App\Models\Categoria;
-use App\Models\Presentacion;
+// use App\Models\Presentacion; // REMOVIDO: La tabla presentaciones fue eliminada
 use App\Models\Proveedor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -101,10 +101,10 @@ class CompraController extends Controller
         try {
             $productos = Producto::orderBy('nombre')->get();
             $categorias = Categoria::orderBy('nombre')->get();
-            $presentaciones = Presentacion::orderBy('nombre')->get();
+            // $presentaciones = Presentacion::orderBy('nombre')->get(); // REMOVIDO: Ya no existe tabla presentaciones
             $proveedores = Proveedor::activos()->orderBy('razon_social')->get();
             
-            return view('compras.nueva', compact('productos', 'categorias', 'presentaciones', 'proveedores'));
+            return view('compras.nueva', compact('productos', 'categorias', 'proveedores'));
         } catch (\Exception $e) {
             Log::error('Error al cargar página de nueva entrada de mercadería: ' . $e->getMessage(), [
                 'file' => $e->getFile(),
@@ -122,16 +122,50 @@ class CompraController extends Controller
     /**
      * Mostrar historial de entradas
      */
-    public function historial()
+    public function historial(Request $request)
     {
-        $entradas = \App\Models\EntradaMercaderia::with(['producto', 'usuario', 'proveedor'])
-            ->orderBy('fecha_entrada', 'desc')
-            ->paginate(20);
+        $query = \App\Models\EntradaMercaderia::with(['producto', 'usuario', 'proveedor']);
+
+        // Aplicar filtros
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->whereHas('producto', function($qp) use ($search) {
+                    $qp->where('nombre', 'like', "%{$search}%")
+                       ->orWhere('codigo_barras', 'like', "%{$search}%");
+                })->orWhere('lote', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->has('fecha_desde') && !empty($request->fecha_desde)) {
+            $query->whereDate('fecha_entrada', '>=', $request->fecha_desde);
+        }
+
+        if ($request->has('fecha_hasta') && !empty($request->fecha_hasta)) {
+            $query->whereDate('fecha_entrada', '<=', $request->fecha_hasta);
+        }
+
+        if ($request->has('usuario_id') && !empty($request->usuario_id)) {
+            $query->where('usuario_id', $request->usuario_id);
+        }
+
+        if ($request->has('proveedor_id') && !empty($request->proveedor_id)) {
+            $query->where('proveedor_id', $request->proveedor_id);
+        }
+
+        $entradas = $query->orderBy('fecha_entrada', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        if ($request->ajax()) {
+            return view('compras.partials.tabla_historial', compact('entradas'))->render();
+        }
             
         $estadisticas = \App\Models\EntradaMercaderia::obtenerEstadisticas();
         $proveedores = Proveedor::orderBy('razon_social')->get();
+        $usuarios = \App\Models\User::orderBy('name')->get();
         
-        return view('compras.historial', compact('entradas', 'estadisticas', 'proveedores'));
+        return view('compras.historial', compact('entradas', 'estadisticas', 'proveedores', 'usuarios'));
     }
 
     /**
@@ -623,6 +657,51 @@ class CompraController extends Controller
                 }
             }
 
+            // Guardar precios y cantidades de presentaciones para este lote específico
+            if ($request->has('presentaciones')) {
+                $unidadesModificadas = $request->input('presentaciones_unidades', []);
+                $hasLotePresTable = Schema::hasTable('lote_presentaciones');
+                
+                foreach ($request->presentaciones as $presentacion_id => $precio_venta) {
+                    if ($precio_venta > 0) {
+                        // Si el ID es 0, es la presentación base (Unidad) que se actualiza en la tabla 'productos'
+                        if ($presentacion_id == 0) {
+                            $producto->update([
+                                'precio_venta' => $precio_venta,
+                                'precio_compra' => $validatedData['precio_compra'] ?? $producto->precio_compra
+                            ]);
+                            continue;
+                        }
+
+                        // Actualizar la tabla global de presentaciones del producto 
+                        \DB::table('producto_presentaciones')
+                            ->where('id', $presentacion_id)
+                            ->update([
+                                'precio_venta_presentacion' => $precio_venta,
+                                'unidades_por_presentacion' => $unidadesModificadas[$presentacion_id] ?? 1,
+                                'updated_at' => now()
+                            ]);
+
+                        // Guardar el registro específico para este lote si la tabla existe
+                        if ($hasLotePresTable) {
+                            $dataInsert = [
+                                'producto_ubicacion_id' => $lote->id,
+                                'producto_presentacion_id' => $presentacion_id,
+                                'precio_venta' => $precio_venta,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ];
+
+                            if (isset($unidadesModificadas[$presentacion_id])) {
+                                $dataInsert['unidades_por_presentacion'] = $unidadesModificadas[$presentacion_id];
+                            }
+
+                            \DB::table('lote_presentaciones')->insert($dataInsert);
+                        }
+                    }
+                }
+            }
+
             DB::commit();
 
             // Log de auditoría para entrada exitosa
@@ -732,16 +811,24 @@ class CompraController extends Controller
     }
 
     /**
-     * API para obtener lotes activos de un producto
+     * API para obtener lotes activos de un producto con información detallada
      */
     public function obtenerLotesActivos($id)
     {
         try {
             $lotes = \App\Models\ProductoUbicacion::where('producto_id', $id)
                 ->where('estado_lote', 'activo')
-                ->select('id', 'lote', 'fecha_vencimiento', 'cantidad')
+                ->select('id', 'lote', 'fecha_vencimiento', 'cantidad', 'proveedor_id', 'precio_compra_lote', 'precio_venta_lote')
                 ->orderBy('fecha_vencimiento', 'asc')
                 ->get();
+
+            // Enriquecer cada lote con sus precios y unidades de presentaciones específicos
+            $lotes->transform(function($lote) {
+                $lote->presentaciones_precios = DB::table('lote_presentaciones')
+                    ->where('producto_ubicacion_id', $lote->id)
+                    ->get(['producto_presentacion_id', 'precio_venta', 'unidades_por_presentacion']);
+                return $lote;
+            });
 
             return response()->json([
                 'success' => true,
@@ -779,7 +866,7 @@ class CompraController extends Controller
             $query = Producto::select([
                     'productos.id', 'productos.nombre', 'productos.codigo_barras', 
                     'productos.stock_actual', 'productos.precio_compra', 'productos.precio_venta',
-                    'productos.presentacion', 'productos.concentracion', 'productos.lote', 
+                    'productos.concentracion', 'productos.lote', 
                     'productos.fecha_vencimiento', 'productos.estado'
                 ])
                 ->where(function($q) use ($termino) {
@@ -796,7 +883,7 @@ class CompraController extends Controller
                     ->groupBy([
                         'productos.id', 'productos.nombre', 'productos.codigo_barras', 
                         'productos.stock_actual', 'productos.precio_compra', 
-                        'productos.precio_venta', 'productos.presentacion', 
+                        'productos.precio_venta', 
                         'productos.concentracion', 'productos.lote', 'productos.fecha_vencimiento',
                         'productos.estado'
                     ])
@@ -894,7 +981,6 @@ class CompraController extends Controller
                     'stock_actual' => $producto->stock_actual,
                     'precio_compra' => $producto->precio_compra,
                     'precio_venta' => $producto->precio_venta,
-                    'presentacion' => $producto->presentacion,
                     'concentracion' => $producto->concentracion,
                     'lote' => $producto->lote,
                     'fecha_vencimiento' => $producto->fecha_vencimiento,

@@ -14,22 +14,21 @@
     <title>Gestión de Roles y Permisos</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script>
-        // URLs absolutas para evitar 404 por diferencias de base path/host
+
         window.ROLES_API_URL = "{{ route('admin.roles.api') }}";
         window.ROLES_BASE_URL = "{{ url('/admin/roles') }}";
     </script>
     <link rel="stylesheet" href="{{ asset('assets/css/inventario/crud.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/admin/roles.css') }}?v={{ time() }}">
-    <!-- FontAwesome para iconos -->
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 @section('content')
 @include('components.loading-overlay', ['id' => 'loadingOverlay', 'label' => 'Cargando datos...'])
 
-<!-- Header con estadísticas elegantes -->
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-    <!-- Total Roles -->
+    
     <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-purple-600/10 to-bg-white">
         <div class="card-body h-full p-5">
             <div class="flex flex-wrap items-center justify-between gap-3">
@@ -51,7 +50,7 @@
         </div>
     </div>
 
-    <!-- Total Permisos -->
+    
     <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-blue-600/10 to-bg-white">
         <div class="card-body p-5">
             <div class="flex flex-wrap items-center justify-between gap-3">
@@ -73,7 +72,7 @@
         </div>
     </div>
 
-    <!-- Módulos del Sistema -->
+    
     <div class="card shadow-none border border-gray-200 rounded-lg h-full bg-gradient-to-r from-success-600/10 to-bg-white">
         <div class="card-body p-5">
             <div class="flex flex-wrap items-center justify-between gap-3">
@@ -96,10 +95,9 @@
     </div>
 </div>
 
-<!-- Controles Elegantes -->
 <div class="filter-section bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-4">
     <div class="flex flex-wrap items-center gap-4 justify-between">
-        <!-- Búsqueda Elegante -->
+        
         <div class="search-container-modern w-full sm:w-auto sm:min-w-[320px] flex-1">
             <div class="relative">
                 <input type="text" 
@@ -109,7 +107,7 @@
             </div>
         </div>
 
-        <!-- Acciones Elegantes -->
+        
         <div class="flex items-center gap-2">
             <button type="button" 
                     class="btn-action-elegant btn-export" 
@@ -130,7 +128,6 @@
     </div>
 </div>
 
-<!-- Tabla de Roles -->
 <div class="table-container">
     <div class="table-responsive">
         <table class="roles-table">
@@ -147,7 +144,7 @@
             <tbody>
                 @forelse($roles as $role)
                 <tr class="role-row" data-role-id="{{ $role->id }}">
-                    <!-- Celda de Rol -->
+                    
                     <td class="role-cell">
                         <div class="role-info">
                             <span class="role-color-indicator" style="background: {{ $role->color ?? '#e5e7eb' }}"></span>
@@ -170,7 +167,7 @@
                         </div>
                     </td>
 
-                    <!-- Descripción -->
+                    
                     <td class="description-cell">
                         @if($role->description)
                             <span class="description-text">{{ Str::limit($role->description, 60) }}</span>
@@ -179,7 +176,7 @@
                         @endif
                     </td>
 
-                    <!-- Permisos -->
+                    
                     <td class="permissions-cell">
                         <div class="permissions-info">
                             <div class="permissions-count">
@@ -195,7 +192,7 @@
                         </div>
                     </td>
 
-                    <!-- Usuarios -->
+                    
                     <td class="users-cell">
                         <div class="users-count">
                             <iconify-icon icon="solar:users-group-rounded-bold-duotone" class="users-icon"></iconify-icon>
@@ -204,7 +201,7 @@
                         </div>
                     </td>
 
-                    <!-- Estado -->
+                    
                     <td class="status-cell">
                         @if($role->is_active)
                         <span class="status-badge status-active">
@@ -219,7 +216,7 @@
                         @endif
                     </td>
 
-                    <!-- Acciones -->
+                    
                     <td class="actions-cell">
                         <div class="action-buttons">
                             <button class="action-btn btn-view" 
@@ -233,7 +230,7 @@
                                         title="Editar Rol">
                                     <iconify-icon icon="solar:pen-bold-duotone"></iconify-icon>
                                 </button>
-                                <!-- Estado (toggle) -->
+                                
                                 <label class="toggle-switch role-toggle" title="Activar/Desactivar">
                                     <input type="checkbox" class="role-status-toggle" data-role-id="{{ $role->id }}" {{ $role->is_active ? 'checked' : '' }}>
                                     <span class="toggle-slider"></span>
@@ -273,7 +270,7 @@
                 @endforelse
             </tbody>
 
-            <!-- Skeleton Loading para Roles -->
+            
             <tbody id="rolesSkeletonBody" style="display: none;">
                 @for ($i = 0; $i < 5; $i++)
                 <tr class="skeleton-row-table">
@@ -290,10 +287,9 @@
     </div>
 </div>
 
-<!-- MODAL PERMISOS DEL SISTEMA - COMPLETAMENTE NUEVO -->
 <div id="permissionsModal" class="permisos-modal-overlay hidden">
     <div class="permisos-modal-container">
-        <!-- Header -->
+        
         <div class="permisos-modal-header">
             <div class="permisos-header-content">
                 <div class="permisos-header-icon">
@@ -309,9 +305,9 @@
             </button>
         </div>
 
-        <!-- Body -->
+        
         <div class="permisos-modal-body">
-            <!-- Permisos por Módulo -->
+            
             <div class="permisos-modules-section">
                 <div class="permisos-modules-header">
                     <iconify-icon icon="solar:layers-bold-duotone"></iconify-icon>
@@ -353,7 +349,7 @@
             </div>
         </div>
 
-        <!-- Footer -->
+        
         <div class="permisos-modal-footer">
             <button type="button" class="permisos-btn-close" onclick="closePermissionsModal()">
                 <iconify-icon icon="solar:check-circle-bold-duotone"></iconify-icon>
@@ -363,10 +359,9 @@
     </div>
 </div>
 
-<!-- Modal Crear/Editar Rol -->
 <div id="roleModal" class="modal-profesional hidden">
     <div class="modal-profesional-container">
-        <!-- Header Profesional -->
+        
         <div class="header-profesional">
             <div class="header-content">
                 <div class="header-left">
@@ -384,17 +379,17 @@
             </div>
         </div>
 
-        <!-- Progress Bar -->
+        
         <div class="progress-container">
             <div class="progress-bar" id="roleProgressBar"></div>
         </div>
 
-        <!-- Content -->
+        
         <div class="modal-content-profesional">
             <form id="roleForm" enctype="multipart/form-data" novalidate>
                 <input type="hidden" id="roleId" name="role_id">
 
-                <!-- Sección 1: Información del Rol -->
+                
                 <div class="seccion-form seccion-azul">
                     <div class="seccion-header">
                         <div class="seccion-icon icon-azul">
@@ -443,7 +438,7 @@
                     </div>
                 </div>
 
-                <!-- Sección 2: Asignación de Permisos -->
+                
                 <div class="seccion-form seccion-purpura">
                     <div class="seccion-header">
                         <div class="seccion-icon icon-purpura">
@@ -461,7 +456,7 @@
                         </div>
                     </div>
 
-                    <!-- Controles de selección -->
+                    
                     <div class="controles-permisos">
                         <button type="button" class="btn-control-permisos btn-seleccionar" onclick="selectAllPermissions()">
                             <iconify-icon icon="solar:check-circle-bold-duotone"></iconify-icon>
@@ -473,21 +468,20 @@
                         </button>
                     </div>
 
-                    <!-- 💡 Tip compacto -->
+                    
                     <div style="display: flex; align-items: center; gap: 8px; background: #f3f4f6; padding: 12px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; color: #4b5563;">
                         <iconify-icon icon="solar:lightbulb-bold-duotone" style="color: #f59e0b; font-size: 16px;"></iconify-icon>
                         <span><strong>Tip:</strong> Puedes seleccionar módulos completos marcando el checkbox del encabezado.</span>
                     </div>
 
-                    <!-- Permisos por módulo -->
+                    
                     <div class="modulos-permisos">
                         @php
-                            // Diccionario de etiquetas amigables en español
+
                             $permLabels = [
-                                // Dashboard
+
                                 'dashboard.access' => 'Dashboard',
 
-                                // Ventas
                                 'ventas.view' => 'Ver ventas',
                                 'ventas.create' => 'Crear venta',
                                 'ventas.edit' => 'Editar venta',
@@ -496,19 +490,16 @@
                                 'ventas.devoluciones' => 'Devoluciones de ventas',
                                 'ventas.clientes' => 'Clientes de ventas',
 
-                                // Inventario
                                 'inventario.view' => 'Ver inventario',
                                 'inventario.create' => 'Crear inventario',
                                 'inventario.edit' => 'Editar inventario',
                                 'inventario.delete' => 'Eliminar inventario',
 
-                                // Productos
                                 'productos.view' => 'Ver productos',
                                 'productos.create' => 'Crear producto',
                                 'productos.edit' => 'Editar producto',
                                 'productos.delete' => 'Eliminar producto',
 
-                                // Usuarios
                                 'usuarios.view' => 'Ver usuarios',
                                 'usuarios.create' => 'Crear usuario',
                                 'usuarios.edit' => 'Editar usuario',
@@ -516,7 +507,6 @@
                                 'usuarios.activate' => 'Activar usuario',
                                 'usuarios.roles' => 'Roles de usuario',
 
-                                // Compras
                                 'compras.view' => 'Ver compras',
                                 'compras.create' => 'Crear compra',
                                 'compras.edit' => 'Editar compra',
@@ -525,7 +515,7 @@
                         @endphp
                         @foreach($permisos as $modulo => $permisosPorModulo)
                         <div class="modulo-permiso-card">
-                            <!-- Header del módulo con checkbox principal -->
+                            
                             <div class="modulo-header">
                                 <div class="modulo-titulo">
                                     <iconify-icon icon="solar:layers-bold-duotone" class="modulo-icon"></iconify-icon>
@@ -537,15 +527,15 @@
                                 </div>
                             </div>
                             
-                            <!-- Permisos del módulo -->
+                            
                             <div class="permisos-grid">
                                 @php $dashboardShown = false; @endphp
                                 @foreach($permisosPorModulo as $permiso)
                                 @php
                                     $name = $permiso->name;
-                                    // Etiqueta amigable por diccionario o fallback
+
                                     $label = $permLabels[$name] ?? ($permiso->display_name ?? ucfirst(str_replace('.', ' ', $name)));
-                                    // Colapsar dashboard a una sola entrada visible
+
                                     if (str_starts_with($name, 'dashboard.')) {
                                         $label = 'Dashboard';
                                     }
@@ -583,7 +573,7 @@
             </form>
         </div>
 
-        <!-- Footer Profesional -->
+        
         <div class="footer-profesional">
             <div class="footer-botones">
                 <button type="button" class="btn-cancelar" onclick="closeRoleModal()">

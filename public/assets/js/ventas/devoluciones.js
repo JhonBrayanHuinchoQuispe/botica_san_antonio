@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
     actualizarEstadoBotonProcesar();
 });
 
-// Buscar venta por número
+// Buscar venta por número vía AJAX
 function buscarVenta() {
     const numeroVenta = document.getElementById('numeroVenta').value.trim();
     
@@ -85,10 +85,58 @@ function buscarVenta() {
     // Mostrar overlay profesional
     showLoading('Buscando venta...');
     
-    // Enviar búsqueda al servidor
-    const url = new URL(window.location);
-    url.searchParams.set('numero_venta', numeroVenta);
-    window.location.href = url.toString();
+    // Petición AJAX
+    fetch(`${window.location.pathname}?numero_venta=${numeroVenta}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        hideLoading();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newContent = doc.getElementById('devolucionContentArea');
+        const currentContent = document.getElementById('devolucionContentArea');
+        
+        if (newContent && currentContent) {
+            currentContent.innerHTML = newContent.innerHTML;
+            
+            // Re-configurar eventos para los nuevos elementos
+            configurarEventosProductos();
+            configurarEventosCantidad();
+            
+            // Re-configurar formulario si existe
+            const formDevolucion = document.getElementById('devolucionForm');
+            if (formDevolucion) {
+                formDevolucion.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    procesarDevolucion();
+                });
+            }
+
+            // Configurar evento de motivo
+            document.querySelectorAll('.motivo-select').forEach(select => {
+                select.addEventListener('change', actualizarEstadoBotonProcesar);
+            });
+
+            // Evaluar estado inicial del botón
+            actualizarEstadoBotonProcesar();
+
+            // Actualizar URL sin recargar
+            window.history.pushState({}, '', `${window.location.pathname}?numero_venta=${numeroVenta}`);
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        console.error('Error al buscar venta:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error de conexión',
+            text: 'No se pudo buscar la venta. Intente nuevamente.',
+            confirmButtonColor: '#dc2626'
+        });
+    });
 }
 
 // Configurar eventos de productos

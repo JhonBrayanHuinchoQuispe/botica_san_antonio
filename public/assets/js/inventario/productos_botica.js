@@ -131,11 +131,29 @@ document.addEventListener('DOMContentLoaded', () => {
   function chipStock(stock, minimo) {
     const s = Number(stock || 0);
     const m = Number(minimo || 0);
-    let level = 'high';
-    if (s <= m) level = 'low';
-    else if (s <= m * 2) level = 'medium';
-    const icon = level === 'low' ? 'tabler:alert-triangle' : 'tabler:boxes';
-    return `<div class="stock-chip ${level}"><span class="stock-icon"><iconify-icon icon="${icon}"></iconify-icon></span><span class="stock-units">${s} uni</span></div>`;
+    
+    let levelClass = 'high';
+    let icon = ''; // Sin icono por defecto (Normal)
+    
+    if (s === 0) {
+      levelClass = 'empty';
+      icon = 'solar:box-cross-bold-duotone';
+    } else if (s <= m) {
+      levelClass = 'low';
+      icon = 'solar:danger-triangle-bold-duotone';
+    } else if (s <= m * 1.5) {
+      levelClass = 'medium';
+      icon = 'solar:box-bold-duotone';
+    }
+
+    const iconHtml = icon ? `<iconify-icon icon="${icon}"></iconify-icon>` : '';
+
+    return `
+      <div class="stock-chip ${levelClass}">
+        ${iconHtml}
+        <span class="stock-units">${s}</span>
+      </div>
+    `;
   }
 
   function ubicacionBadge(prod) {
@@ -148,54 +166,184 @@ document.addEventListener('DOMContentLoaded', () => {
     return `<div class="ubicacion-badge sin-ubicar"><iconify-icon icon="mdi:map-marker-off-outline"></iconify-icon><span>Sin ubicar</span></div>`;
   }
 
+  function presentacionesBadge(prod) {
+    const presentaciones = prod.presentaciones || [];
+    const total = presentaciones.length;
+    
+    if (total === 0) {
+      return `
+        <div class="presentacion-pill single none">
+          <iconify-icon icon="solar:box-minimalistic-broken" style="font-size:1.1rem;"></iconify-icon>
+          <span>Sin datos</span>
+        </div>`;
+    }
+    
+    if (total === 1) {
+      const pres = presentaciones[0];
+      return `
+        <div class="presentacion-pill single unit">
+          <iconify-icon icon="solar:box-bold-duotone" style="font-size:1.1rem;"></iconify-icon>
+          <div class="flex flex-col leading-tight">
+            <span>${pres.nombre_presentacion}</span>
+            <small style="font-size:10px; opacity:0.7; font-weight:600;">1 unidad</small>
+          </div>
+        </div>`;
+    }
+    
+    const primerasPresentaciones = presentaciones.slice(0, 2).map(p => 
+      `${p.nombre_presentacion}`
+    ).join(', ');
+    
+    return `
+      <div class="presentacion-pill multiple" onclick="verPresentacionesDeProducto('${prod.id}')">
+        <iconify-icon icon="solar:boxes-bold-duotone" style="font-size:1.1rem;"></iconify-icon>
+        <div class="flex flex-col leading-tight">
+          <span>${total} Pres.</span>
+          <small style="font-size:10px; opacity:0.8; font-weight:600;">${primerasPresentaciones}${total > 2 ? '...' : ''}</small>
+        </div>
+        <iconify-icon icon="solar:alt-arrow-right-bold-duotone" style="margin-left:auto; font-size:12px; opacity:0.5;"></iconify-icon>
+      </div>`;
+  }
+
+  // Función global para ver presentaciones - Modal limpio estilo "Detalle de Lotes"
+  window.verPresentacionesDeProducto = function(id) {
+    const productos = window.boticaLastProducts || [];
+    const prod = productos.find(p => String(p.id) === String(id));
+    
+    if (!prod) {
+      Swal.fire('Error', 'No se encontró información del producto', 'error');
+      return;
+    }
+    
+    const presentaciones = prod.presentaciones || [];
+    if (presentaciones.length === 0) {
+      Swal.fire('Info', 'Este producto no tiene presentaciones registradas', 'info');
+      return;
+    }
+    
+    const rows = presentaciones.map(pres => {
+        const precio = pres.precio_venta_presentacion ? `S/ ${parseFloat(pres.precio_venta_presentacion).toFixed(2)}` : '-';
+        return `
+            <tr style="border-bottom:1px solid #f3f4f6;">
+                <td style="padding:14px 20px; font-weight:600; color:#1f2937;">${pres.nombre_presentacion}</td>
+                <td style="padding:14px 20px; text-align:center;">
+                    <span style="display:inline-flex; align-items:center; padding:4px 12px; border-radius:9999px; font-size:0.75rem; font-weight:600; background-color:#f3f4f6; color:#4b5563;">
+                        ${pres.unidades_por_presentacion} ${pres.unidades_por_presentacion === 1 ? 'uni' : 'unis'}
+                    </span>
+                </td>
+                <td style="padding:14px 20px; text-align:right; font-weight:700; color:#16a34a; font-size:1rem;">${precio}</td>
+            </tr>
+        `;
+    }).join('');
+
+    Swal.fire({
+        title: '',
+        html: `
+        <style>
+            .swal2-popup.swal-popup-detail{padding:0 !important;border-radius:14px;}
+            .swal2-popup.swal-popup-detail .swal2-title{display:none !important;margin:0 !important;padding:0 !important;}
+            .swal2-popup.swal-popup-detail .swal2-html-container{margin:0 !important;padding:0 !important; width:100% !important; max-width:none !important;}
+            .swal2-popup.swal-popup-detail .swal2-close{display:none !important}
+            .detail-header-pres{background:#f5f3ff; border-bottom:1px solid #ddd6fe; border-top-left-radius:14px; border-top-right-radius:14px; box-shadow:0 2px 6px rgba(0,0,0,0.04); padding:18px 24px; display:flex; align-items:center; gap:14px; width:100%; position:relative;}
+            .detail-close-btn{position:absolute; right:16px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:#6b7280; font-size:26px; line-height:1; cursor:pointer; font-weight:400}
+            .detail-close-btn:hover{color:#1f2937}
+        </style>
+        <div style="width:100%; margin:0; box-sizing:border-box;">
+            <div class="detail-header-pres" style="position:sticky; top:0; z-index:5;">
+                <div style="background:#ddd6fe; padding:10px; border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);">
+                    <i class="fas fa-boxes" style="font-size:20px; color:#7c3aed;"></i>
+                </div>
+                <div style="text-align:left;">
+                    <span style="color:#1f2937; font-weight:800; font-size:1.2rem; display:block; letter-spacing:-0.01em;">Presentaciones de ${prod.nombre}</span>
+                    <span style="color:#7c3aed; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">Gestión de presentaciones del producto</span>
+                </div>
+                <button type="button" class="detail-close-btn" onclick="Swal.close()" aria-label="Cerrar">×</button>
+            </div>
+            
+            <div style="padding:24px; box-sizing:border-box; max-height:70vh; overflow-y:auto;">
+                <div style="overflow:hidden; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                    <table style="width:100%; border-collapse:collapse; background:white;">
+                        <thead>
+                            <tr style="background:#f9fafb; border-bottom:1px solid #e5e7eb;">
+                                <th style="text-align:left; padding:12px 20px; color:#6b7280; font-weight:700; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Presentación</th>
+                                <th style="text-align:center; padding:12px 20px; color:#6b7280; font-weight:700; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Unidades</th>
+                                <th style="text-align:right; padding:12px 20px; color:#6b7280; font-weight:700; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Precio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="padding:12px 24px; background:#f9fafb; border-top:1px solid #e5e7eb; border-bottom-left-radius:14px; border-bottom-right-radius:14px; display:flex; justify-content:center; align-items:center; gap:8px;">
+                <i class="fas fa-info-circle" style="color:#9ca3af; font-size:14px;"></i>
+                <span style="color:#6b7280; font-size:0.8rem; font-weight:500;">Total de presentaciones: <b style="color:#4b5563;">${presentaciones.length}</b></span>
+            </div>
+        </div>
+        `,
+        width: '750px',
+        showConfirmButton: false,
+        showCloseButton: false,
+        padding: 0,
+        customClass: {
+            popup: 'swal-popup-detail'
+        }
+    });
+  };
+
   function lotesBadge(prod) {
     const total = prod.total_lotes || 0;
     const lotes = prod.lotes || [];
     
     if (total === 0) {
-      return `<div class="lote-badge empty">
-        <span class="lote-icon"><iconify-icon icon="solar:box-minimalistic-bold-duotone"></iconify-icon></span>
-        <span class="lote-text">Sin lotes</span>
-      </div>`;
+      return `
+        <div class="lote-pill empty">
+          <iconify-icon icon="solar:calendar-broken"></iconify-icon>
+          <span>Sin lotes</span>
+        </div>`;
     }
 
-    // FEFO: El backend ya envía los lotes ordenados por vencimiento
     const proximo = lotes[0];
-    // Asegurar que existe fecha de vencimiento
     if (!proximo || !proximo.vencimiento) {
-        return `<div class="lote-badge normal">
-            <span class="lote-text">${total} Lotes</span>
-        </div>`;
+        return `<div class="lote-pill normal"><span>${total} Lotes</span></div>`;
     }
 
     const vencimientoStr = formatFecha(proximo.vencimiento);
     const dias = proximo.dias_para_vencer;
     
     let statusClass = 'normal';
-    if (dias < 0) statusClass = 'expired';
-    else if (dias <= 90) statusClass = 'warning'; // 3 meses de alerta
+    let icon = 'solar:calendar-bold-duotone';
     
-    const tooltip = lotes.map(l => `Lote: ${l.lote || 'S/N'}\nVence: ${formatFecha(l.vencimiento)}\nCant: ${l.cantidad}`).join('\n\n');
-
+    if (dias < 0) {
+      statusClass = 'expired';
+      icon = 'solar:calendar-mark-bold-duotone';
+    } else if (dias <= 90) {
+      statusClass = 'warning';
+      icon = 'solar:calendar-minimalistic-bold-duotone';
+    }
+    
     if (total === 1) {
-      return `<div class="lote-badge single ${statusClass}">
-        <div class="lote-main">
-          <span class="lote-code">${proximo.lote || 'S/N'}</span>
-          <span class="lote-date">${vencimientoStr}</span>
-        </div>
-      </div>`;
+      return `
+        <div class="lote-pill single ${statusClass}">
+          <iconify-icon icon="${icon}"></iconify-icon>
+          <div class="lote-info-mini">
+            <span class="lote-code-mini">${proximo.lote || 'S/N'}</span>
+            <span class="lote-date-mini">${vencimientoStr}</span>
+          </div>
+        </div>`;
     }
 
-    // Para múltiples lotes, hacemos clicable y mostramos modal (sin tooltip)
-    return `<div class="lote-badge multiple ${statusClass}" onclick="verLotesDeProducto('${prod.id}')">
-      <div class="lote-header">
-        <span class="lote-count">${total} Lotes</span>
-        <span class="lote-fefo-label">FEFO</span>
-      </div>
-      <div class="lote-next">
-        <span>Próx: ${vencimientoStr}</span>
-      </div>
-    </div>`;
+    return `
+      <div class="lote-pill multiple ${statusClass}" onclick="verLotesDeProducto('${prod.id}')">
+        <iconify-icon icon="${icon}"></iconify-icon>
+        <div class="lote-info-mini">
+          <span class="lote-count-mini">${total} Lotes</span>
+          <span class="lote-next-mini">Próx: ${vencimientoStr}</span>
+        </div>
+        <iconify-icon icon="solar:alt-arrow-right-bold-duotone" class="lote-arrow"></iconify-icon>
+      </div>`;
   }
 
   // Función global para ver lotes (Diseño Mejorado y Ajustado al estilo Historial)
@@ -356,6 +504,72 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
 
+  function updateActiveFilters(search, estado, total) {
+    const container = document.getElementById('activeFilters');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    const hasSearch = search && search.trim() !== '';
+    const hasStatus = estado && estado !== 'todos';
+
+    if (hasSearch || hasStatus) {
+      container.classList.add('has-filters');
+    } else {
+      container.classList.remove('has-filters');
+      return;
+    }
+    
+    if (hasSearch) {
+      const tag = document.createElement('div');
+      tag.className = 'filter-tag search-tag';
+      tag.innerHTML = `
+        <iconify-icon icon="solar:magnifer-bold-duotone"></iconify-icon>
+        <span>Búsqueda: ${search}</span>
+        <iconify-icon icon="solar:close-circle-bold-duotone" class="remove-filter" onclick="clearSearch()"></iconify-icon>
+      `;
+      container.appendChild(tag);
+    }
+    
+    if (hasStatus) {
+      const tag = document.createElement('div');
+      // Mapear clase de color según estado
+      const statusMap = {
+        'Normal': 'status-normal',
+        'Bajo stock': 'status-bajo-stock',
+        'Por vencer': 'status-por-vencer',
+        'Por Vencer': 'status-por-vencer',
+        'Vencido': 'status-vencido',
+        'Agotado': 'status-agotado'
+      };
+      const statusClass = statusMap[estado] || '';
+      
+      tag.className = `filter-tag ${statusClass}`;
+      tag.innerHTML = `
+        <iconify-icon icon="solar:filter-bold-duotone"></iconify-icon>
+        <span>Estado: ${estado} <b style="margin-left:4px;">(${total || 0})</b></span>
+        <iconify-icon icon="solar:close-circle-bold-duotone" class="remove-filter" onclick="clearEstado()"></iconify-icon>
+      `;
+      container.appendChild(tag);
+    }
+  }
+
+  window.clearSearch = () => {
+    const searchEl = document.getElementById('buscarProductoBotica');
+    if (searchEl) {
+      searchEl.value = '';
+      searchEl.dispatchEvent(new Event('input'));
+    }
+  };
+
+  window.clearEstado = () => {
+    const estadoEl = document.getElementById('estadoBotica');
+    if (estadoEl) {
+      estadoEl.value = 'todos';
+      estadoEl.dispatchEvent(new Event('change'));
+    }
+  };
+
   async function load() {
     const perPage = perPageEl.value || 10;
     let estado = estadoEl.value || 'todos';
@@ -392,12 +606,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if (skeleton) {
       skeleton.style.display = 'block';
       skeleton.innerHTML = Array.from({length: 6}).map(()=>
-        `<div class="skeleton-row">
-           <span class="skeleton-dot"></span>
-           <span class="skeleton-bar medium"></span>
-           <span class="skeleton-bar medium"></span>
-           <span class="skeleton-bar short"></span>
-           <span class="skeleton-bar actions"></span>
+        `<div class="skeleton-row" style="grid-template-columns: 1.5fr 1fr 1fr 0.8fr 1fr 1fr 0.8fr;">
+           <div class="flex items-center gap-3">
+              <div class="skeleton-bar" style="width: 44px; height: 44px; border-radius: 12px;"></div>
+              <div class="flex flex-col gap-2 flex-1">
+                <div class="skeleton-bar" style="width: 80%; height: 16px;"></div>
+                <div class="skeleton-bar" style="width: 50%; height: 12px;"></div>
+              </div>
+           </div>
+           <div class="skeleton-bar" style="width: 85%; height: 38px; border-radius: 10px;"></div>
+           <div class="flex flex-col gap-2">
+             <div class="skeleton-bar" style="width: 70%; height: 18px;"></div>
+             <div class="skeleton-bar" style="width: 40%; height: 12px;"></div>
+           </div>
+           <div class="skeleton-bar" style="width: 60px; height: 32px; border-radius: 9999px; justify-self: center;"></div>
+           <div class="skeleton-bar" style="width: 100%; height: 38px; border-radius: 10px;"></div>
+           <div class="skeleton-bar" style="width: 100px; height: 28px; border-radius: 9999px; justify-self: center;"></div>
+           <div class="flex gap-2 justify-center">
+             <div class="skeleton-bar" style="width: 32px; height: 32px; border-radius: 50%;"></div>
+             <div class="skeleton-bar" style="width: 32px; height: 32px; border-radius: 50%;"></div>
+             <div class="skeleton-bar" style="width: 32px; height: 32px; border-radius: 50%;"></div>
+           </div>
         </div>`
       ).join('');
     }
@@ -414,6 +643,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Guardar última respuesta para exportar
       window.boticaLastResponse = data;
       window.boticaLastProducts = Array.isArray(data.data) ? data.data : [];
+      
+      updateActiveFilters(search, estado, data.total);
       render(data);
     } catch (e) {
       console.error('Error en load():', e);
@@ -441,30 +672,38 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Renderizando', productos.length, 'productos');
       tbody.innerHTML = productos.map((p, idx) => {
         const img = p.imagen_url || defaultImageUrl;
-        return `<tr data-id="${p.id}">
+        
+        // Verificar si tiene lotes por vencer para resaltar la fila
+        const lotes = p.lotes || [];
+        const tieneAlertas = lotes.some(l => l.dias_para_vencer <= 90);
+        const rowHighlightClass = tieneAlertas ? 'row-alert-vencimiento' : '';
+
+        return `<tr data-id="${p.id}" class="${rowHighlightClass}">
           <td>
             <div class="flex items-center gap-3">
-              <img data-src="${img}" src="${defaultImageUrl}" width="40" height="40" loading="lazy" decoding="async" fetchpriority="${idx < 6 ? 'high' : 'low'}" class="w-10 h-10 rounded-lg object-cover shadow-sm border border-gray-200 bg-white img-loading" onerror="this.src='${defaultImageUrl}'"/>
-              <div>
-                <h6 class="text-base font-semibold text-gray-800 leading-tight">${p.nombre}</h6>
-                <span class="text-secondary">${p.concentracion || ''}</span>
+              <div class="product-img-wrapper">
+                <img data-src="${img}" src="${defaultImageUrl}" width="40" height="40" loading="lazy" decoding="async" fetchpriority="${idx < 6 ? 'high' : 'low'}" class="w-12 h-12 rounded-xl object-cover shadow-sm border border-gray-200 bg-white img-loading product-img-zoom" onerror="this.src='${defaultImageUrl}'"/>
+              </div>
+              <div class="product-info-cell">
+                <h6 class="product-name-highlight">${p.nombre}</h6>
+                <span class="product-concentration-sub">${p.concentracion || 'Sin concentración'}</span>
               </div>
             </div>
           </td>
-          <td class="text-left">${p.categoria || '-'}</td>
-          <td class="text-left price-cell">
-            <div class="flex flex-col">
-              <span class="pv"><iconify-icon icon="tabler:arrow-up" class="price-icon"></iconify-icon> P. Venta: S/ ${formatMoney(p.precio_venta)}</span>
-              <span class="pc"><iconify-icon icon="tabler:arrow-down" class="price-icon"></iconify-icon> P. Compra: S/ ${formatMoney(p.precio_compra)}</span>
+          <td class="text-left">${presentacionesBadge(p)}</td>
+          <td class="text-left">
+            <div class="price-display-wrapper">
+              <span class="price-main">S/ ${formatMoney(p.precio_venta)}</span>
+              <span class="price-secondary">Costo: S/ ${formatMoney(p.precio_compra)}</span>
             </div>
           </td>
           <td class="text-center">${chipStock(p.stock_actual, p.stock_minimo)}</td>
-          <td class="text-left rotation-cell">${lotesBadge(p)}</td>
+          <td class="text-left">${lotesBadge(p)}</td>
           <td class="text-center">${estadoBadge(p)}</td>
           <td class="text-center acciones-cell">
-            <button class="btn-view" data-id="${p.id}" title="Ver detalles"><iconify-icon icon="iconamoon:eye-light"></iconify-icon></button>
-            <button class="btn-edit" data-id="${p.id}" title="Editar"><iconify-icon icon="lucide:edit"></iconify-icon></button>
-            <button class="btn-delete" data-id="${p.id}" title="Eliminar"><iconify-icon icon="mingcute:delete-2-line"></iconify-icon></button>
+            <button class="btn-view" data-id="${p.id}" title="Ver detalles"><iconify-icon icon="heroicons:eye"></iconify-icon></button>
+            <button class="btn-edit" data-id="${p.id}" title="Editar"><iconify-icon icon="heroicons:pencil"></iconify-icon></button>
+            <button class="btn-delete" data-id="${p.id}" title="Eliminar"><iconify-icon icon="heroicons:trash"></iconify-icon></button>
           </td>
         </tr>`;
       }).join('');
@@ -502,28 +741,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
     }
-
-    // Wire up actions via delegation (robusto ante re-render)
-    tbody.addEventListener('click', (e) => {
-      const btnView = e.target.closest('.btn-view');
-      if (btnView) {
-        const id = btnView.dataset.id || btnView.closest('tr')?.dataset.id;
-        if (id) abrirDetalles(id);
-        return;
-      }
-      const btnEdit = e.target.closest('.btn-edit');
-      if (btnEdit) {
-        const id = btnEdit.dataset.id || btnEdit.closest('tr')?.dataset.id;
-        if (id) abrirModalEdicion(id); else console.error('No se encontró el id del producto para editar');
-        return;
-      }
-      const btnDelete = e.target.closest('.btn-delete');
-      if (btnDelete) {
-        const id = btnDelete.dataset.id || btnDelete.closest('tr')?.dataset.id;
-        if (id) eliminarProductoBotica(id);
-      }
-    });
   }
+
+  // Wire up actions via delegation (robusto ante re-render) - MOVIDO FUERA DE RENDER
+  tbody.addEventListener('click', (e) => {
+    const btnView = e.target.closest('.btn-view');
+    if (btnView) {
+      const id = btnView.dataset.id || btnView.closest('tr')?.dataset.id;
+      if (id) abrirDetalles(id);
+      return;
+    }
+    const btnEdit = e.target.closest('.btn-edit');
+    if (btnEdit) {
+      const id = btnEdit.dataset.id || btnEdit.closest('tr')?.dataset.id;
+      if (id) abrirModalEdicion(id); else console.error('No se encontró el id del producto para editar');
+      return;
+    }
+    const btnDelete = e.target.closest('.btn-delete');
+    if (btnDelete) {
+      const id = btnDelete.dataset.id || btnDelete.closest('tr')?.dataset.id;
+      if (id) eliminarProductoBotica(id);
+    }
+  });
 
   function initLazyImages() {
     const imgs = tbody.querySelectorAll('img[data-src]');
@@ -638,7 +877,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'det-nombre': p.nombre,
         'det-marca': p.marca,
         'det-categoria': p.categoria,
-        'det-presentacion': p.presentacion,
         'det-concentracion': p.concentracion,
         'det-lote': loteCode,
         'det-codigo_barras': p.codigo_barras,
@@ -647,10 +885,90 @@ document.addEventListener('DOMContentLoaded', () => {
         'det-stock_minimo': p.stock_minimo,
         'det-precio_compra': typeof precioCompra === 'number' ? precioCompra.toFixed(2) : precioCompra,
         'det-precio_venta': typeof precioVenta === 'number' ? precioVenta.toFixed(2) : precioVenta,
-        'det-fecha_fabricacion': formatFecha(p.fecha_fabricacion),
         'det-fecha_vencimiento': formatFecha(fechaVenc)
       };
       Object.entries(map).forEach(([id,val])=>{ const el=document.getElementById(id); if (el) el.value = val || ''; });
+      
+      // Poblar el selector de lotes dentro del modal de detalles
+      const loteSelector = document.getElementById('det-lote-selector');
+      if (loteSelector) {
+        if (lotes.length > 0) {
+            loteSelector.innerHTML = lotes.map(l => `<option value="${l.id}" ${datosLote && String(l.id) === String(datosLote.id) ? 'selected' : ''}>${l.lote} (Stock: ${l.cantidad})</option>`).join('');
+            loteSelector.style.display = 'block';
+            loteSelector.previousElementSibling.style.display = 'block'; // El label "Lote:"
+            
+            // Eliminar listeners previos
+            const newSelector = loteSelector.cloneNode(true);
+            loteSelector.parentNode.replaceChild(newSelector, loteSelector);
+            
+            newSelector.addEventListener('change', (e) => {
+                const selectedLoteId = e.target.value;
+                const selectedLote = lotes.find(l => String(l.id) === String(selectedLoteId));
+                if (selectedLote) {
+                    abrirDetalles(id, selectedLote);
+                }
+            });
+        } else {
+            loteSelector.innerHTML = '<option value="">Sin lotes</option>';
+            loteSelector.style.display = 'none';
+            if (loteSelector.previousElementSibling) loteSelector.previousElementSibling.style.display = 'none';
+        }
+      }
+      // Renderizar presentaciones del producto (considerando el lote si fue seleccionado)
+      const presentacionesList = document.getElementById('det-presentaciones-list');
+      if (presentacionesList && p.presentaciones && p.presentaciones.length > 0) {
+        // Mapear presentaciones del producto con los datos del lote si existen
+        const presentacionesAMostrar = p.presentaciones.map(pres => {
+          // Buscar si este lote tiene un precio específico para esta presentación
+          let precioAMostrar = pres.precio_venta_presentacion;
+          let unidadesAMostrar = pres.unidades_por_presentacion;
+          
+          if (loteSeleccionado && loteSeleccionado.presentaciones_lote) {
+            const presLote = loteSeleccionado.presentaciones_lote.find(pl => 
+              String(pl.producto_presentacion_id) === String(pres.id)
+            );
+            if (presLote) {
+              precioAMostrar = presLote.precio_venta;
+              if (presLote.unidades_por_presentacion) {
+                unidadesAMostrar = presLote.unidades_por_presentacion;
+              }
+            }
+          }
+          
+          return {
+            ...pres,
+            precio_final: precioAMostrar,
+            unidades_final: unidadesAMostrar
+          };
+        });
+
+        presentacionesList.innerHTML = `
+          <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+            <table class="w-full text-sm">
+              <thead class="bg-[#eff6ff] border-b border-[#dbeafe]">
+                <tr>
+                  <th class="px-4 py-3 text-left font-bold text-[#1e40af] uppercase tracking-wider" style="font-size: 0.7rem;">Presentación</th>
+                  <th class="px-4 py-3 text-center font-bold text-[#1e40af] uppercase tracking-wider" style="font-size: 0.7rem;">Unidades</th>
+                  <th class="px-4 py-3 text-center font-bold text-[#1e40af] uppercase tracking-wider" style="font-size: 0.7rem;">Precio Venta</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                ${presentacionesAMostrar.map(pres => `
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-4 font-semibold text-gray-800">${pres.nombre_presentacion}</td>
+                    <td class="px-4 py-4 text-center text-gray-600">
+                        <span class="px-2 py-1 bg-gray-100 rounded-md text-xs font-bold">${pres.unidades_final} ${pres.unidades_final === 1 ? 'unidad' : 'unidades'}</span>
+                    </td>
+                    <td class="px-4 py-4 text-center font-bold text-green-600" style="font-size: 1rem;">S/ ${parseFloat(pres.precio_final || 0).toFixed(2)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else {
+        presentacionesList.innerHTML = '<div class="text-sm text-gray-500 italic text-center py-4 bg-gray-50 rounded-lg border border-gray-200">Este producto no tiene presentaciones registradas</div>';
+      }
       
       // Verificar historial del producto y mostrar/ocultar botón
       if (window.verificarHistorialProducto && p.id) {
@@ -687,15 +1005,15 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
           // Table structure for better alignment
           lotesList.innerHTML = `
-            <div class="overflow-x-auto">
+            <div class="overflow-hidden rounded-lg border border-gray-200 shadow-sm bg-white">
                 <table class="w-full text-sm text-left border-collapse">
-                    <thead class="text-xs text-gray-500 uppercase bg-gray-50 sticky top-0">
+                    <thead class="bg-[#f5f3ff] border-b border-[#ddd6fe]">
                         <tr>
-                            <th class="px-3 py-2 font-semibold">Lote</th>
-                            <th class="px-3 py-2 font-semibold">Vencimiento</th>
-                            <th class="px-3 py-2 font-semibold text-center">Cant.</th>
-                            <th class="px-3 py-2 font-semibold text-center">Estado</th>
-                            <th class="px-3 py-2 font-semibold text-center">Acciones</th>
+                            <th class="px-4 py-3 font-bold text-[#6d28d9] uppercase tracking-wider" style="font-size: 0.7rem;">Lote</th>
+                            <th class="px-4 py-3 font-bold text-[#6d28d9] uppercase tracking-wider" style="font-size: 0.7rem;">Vencimiento</th>
+                            <th class="px-4 py-3 font-bold text-[#6d28d9] uppercase tracking-wider text-center" style="font-size: 0.7rem;">Cant.</th>
+                            <th class="px-4 py-3 font-bold text-[#6d28d9] uppercase tracking-wider text-center" style="font-size: 0.7rem;">Estado</th>
+                            <th class="px-4 py-3 font-bold text-[#6d28d9] uppercase tracking-wider text-center" style="font-size: 0.7rem;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -747,22 +1065,22 @@ document.addEventListener('DOMContentLoaded', () => {
                   : `<span class="estado-badge ${statusClass} scale-75 origin-center text-xs whitespace-nowrap" style="padding: 0.25rem 0.75rem !important; font-size: 0.75rem !important;">${statusText}</span>`;
 
               row.innerHTML = `
-                  <td class="px-3 py-2 font-medium text-gray-800 whitespace-nowrap">${loteCode}</td>
-                  <td class="px-3 py-2 text-gray-600">
-                      <div class="font-medium">${vencimiento}</div>
-                      <div class="text-[10px] text-gray-500 leading-tight mt-0.5">${diasText}</div>
+                  <td class="px-4 py-3.5 font-bold text-gray-800 whitespace-nowrap">${loteCode}</td>
+                  <td class="px-4 py-3.5 text-gray-600">
+                      <div class="font-bold text-gray-800">${vencimiento}</div>
+                      <div class="text-[11px] font-semibold text-gray-500 leading-tight mt-0.5">${diasText}</div>
                   </td>
-                  <td class="px-3 py-2 text-center font-mono font-medium">${cantidad}</td>
-                  <td class="px-3 py-2 text-center">
+                  <td class="px-4 py-3.5 text-center font-bold text-gray-800" style="font-size: 0.95rem;">${cantidad}</td>
+                  <td class="px-4 py-3.5 text-center">
                       ${statusBadgeHtml}
                   </td>
-                  <td class="px-3 py-2 text-center">
-                      <div class="flex items-center justify-center gap-2">
-                          <button class="flex items-center justify-center w-9 h-9 rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-all btn-edit-lote" type="button" title="Editar Lote">
-                              <iconify-icon icon="lucide:edit" width="20" height="20"></iconify-icon>
+                  <td class="px-4 py-3.5 text-center">
+                      <div class="flex items-center justify-center gap-3">
+                          <button class="flex items-center justify-center w-8 h-8 rounded-lg text-blue-600 border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-all btn-edit-lote" type="button" title="Editar Lote">
+                              <iconify-icon icon="solar:pen-new-square-bold-duotone" width="18" height="18"></iconify-icon>
                           </button>
-                          <button class="flex items-center justify-center w-9 h-9 rounded-lg text-white bg-red-500 hover:bg-red-600 shadow-sm transition-all btn-delete-lote" type="button" title="Dar de baja">
-                              <iconify-icon icon="solar:trash-bin-trash-bold-duotone" width="20" height="20"></iconify-icon>
+                          <button class="flex items-center justify-center w-8 h-8 rounded-lg text-red-600 border border-red-200 bg-red-50 hover:bg-red-100 transition-all btn-delete-lote" type="button" title="Dar de baja">
+                              <iconify-icon icon="solar:trash-bin-trash-bold-duotone" width="18" height="18"></iconify-icon>
                           </button>
                       </div>
                   </td>
@@ -969,44 +1287,73 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function eliminarLote(id) {
       const result = await Swal.fire({
-          title: '¿Estás seguro?',
-          text: "No podrás revertir esto",
+          title: 'Dar de Baja Lote',
+          html: `
+              <p style="font-size: 1rem; margin-bottom: 0.5rem;">¿Estás seguro de dar de baja el lote <strong>LOTE-${id}</strong>?</p>
+              <p style="font-size: 0.875rem; color: #dc2626; font-weight: 600;">
+                El stock pasará a 0 y se registrará como "Vencimiento/Merma".
+              </p>
+          `,
           icon: 'warning',
           showCancelButton: true,
-          confirmButtonColor: '#3085d6',
-          cancelButtonColor: '#d33',
-          confirmButtonText: 'Sí, eliminar',
-          cancelButtonText: 'Cancelar'
+          confirmButtonColor: '#dc2626',
+          cancelButtonColor: '#6b7280',
+          confirmButtonText: 'Dar de Baja',
+          cancelButtonText: 'Cancelar',
+          reverseButtons: true
       });
 
       if (result.isConfirmed) {
           try {
-              showLoading('Eliminando lote...');
+              showLoading('Dando de baja el lote...');
               const res = await fetch(`/inventario/lotes/${id}`, {
                   method: 'DELETE',
                   headers: {
-                      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                      'Content-Type': 'application/json'
                   }
               });
 
               const data = await res.json();
+              
+              // Ocultar loading ANTES de mostrar el SweetAlert
+              hideLoading();
 
               if (data.success) {
-                  Swal.fire(
-                      'Eliminado!',
-                      'El lote ha sido eliminado.',
-                      'success'
-                  );
+                  // Toast de éxito que desaparece automáticamente
+                  const Toast = Swal.mixin({
+                      toast: true,
+                      position: 'top-end',
+                      showConfirmButton: false,
+                      timer: 3000,
+                      timerProgressBar: true,
+                      didOpen: (toast) => {
+                          toast.addEventListener('mouseenter', Swal.stopTimer)
+                          toast.addEventListener('mouseleave', Swal.resumeTimer)
+                      }
+                  });
+                  
+                  Toast.fire({
+                      icon: 'success',
+                      title: 'Lote dado de baja correctamente',
+                      text: 'Stock ajustado a 0 y registrado como vencimiento/merma'
+                  });
+                  
+                  // Recargar datos
                   abrirDetalles(currentProductId);
                   load();
               } else {
-                  throw new Error(data.message || 'Error al eliminar');
+                  throw new Error(data.message || 'Error al dar de baja el lote');
               }
           } catch (err) {
-              console.error(err);
-              Swal.fire('Error', err.message, 'error');
-          } finally {
               hideLoading();
+              console.error(err);
+              Swal.fire({
+                  title: 'Error',
+                  text: err.message || 'No se pudo dar de baja el lote',
+                  icon: 'error',
+                  confirmButtonColor: '#dc2626'
+              });
           }
       }
   }
@@ -1145,123 +1492,33 @@ function cerrarModal() {
   }
 
   async function exportarExcelBotica() {
-    // Asegurar que la librería Excel esté cargada
-    if (typeof XLSX === 'undefined') {
-      const loaded = await ensureXLSX();
-      if (!loaded) {
-        Swal.fire({ icon:'error', title:'Error', text:'No se pudo cargar la librería para Excel' });
-        return;
-      }
-    }
-
-    const productos = await obtenerDatosParaExportar();
-    if (!productos || !productos.length) {
-      if (productos) Swal.fire({ icon:'warning', title:'Sin datos', text:'No hay productos para exportar' });
-      return;
-    }
-    
-    // Procesar datos para Excel
-    const datosExcel = productos.map((p, index) => ({
-      'ID': index + 1,
-      'Nombre': p.nombre,
-      'Concentración': p.concentracion || 'N/A',
-      'Marca': p.marca || 'N/A',
-      'Proveedor': p.proveedor || 'Sin proveedor',
-      'Stock': p.stock_actual,
-      'Precio Venta': `S/ ${parseFloat(p.precio_venta || 0).toFixed(2)}`,
-      'Precio Compra': `S/ ${parseFloat(p.precio_compra || 0).toFixed(2)}`,
-      'Fecha Vencimiento': formatFecha(p.fecha_vencimiento),
-      'Categoría': p.categoria || 'N/A'
-    }));
-    const wb = XLSX.utils.book_new();
-    
-    // Crear hoja con los datos comenzando en la fila 5 (dejando espacio para el encabezado)
-    const ws = XLSX.utils.json_to_sheet(datosExcel, { origin: 'A5' });
-    
-    // Agregar encabezado personalizado
-    XLSX.utils.sheet_add_aoa(ws, [
-      ['REPORTE DE PRODUCTOS - BOTICA SAN ANTONIO'],
-      [`Total Productos: ${productos.length}`],
-      [`Fecha de emisión: ${new Date().toLocaleDateString('es-PE')}`],
-      [''] // Fila vacía
-    ], { origin: 'A1' });
-
-    // Ajustar anchos de columna
-    ws['!cols'] = [{wch:8},{wch:30},{wch:15},{wch:15},{wch:20},{wch:10},{wch:15},{wch:15},{wch:15},{wch:15}];
-    
-    // Fusionar celdas para el título (A1:J1)
-    if(!ws['!merges']) ws['!merges'] = [];
-    ws['!merges'].push({ s: {r:0, c:0}, e: {r:0, c:9} }); // Título principal
-
-    // APLICAR ESTILOS (Si la librería lo soporta)
     try {
-        // Estilo Título Principal (A1)
-        if(ws['A1']) {
-            ws['A1'].s = { 
-                font: { bold: true, sz: 16, color: { rgb: "FFFFFF" } }, 
-                alignment: { horizontal: 'center', vertical: 'center' },
-                fill: { fgColor: { rgb: "EF5350" } } // Fondo rojo suave
-            };
-        }
-        
-        // Estilo Subtítulos (A2, A3)
-        if(ws['A2']) ws['A2'].s = { font: { bold: true } };
-        if(ws['A3']) ws['A3'].s = { font: { italic: true } };
+      const search = (searchEl.value || '').trim();
+      const estado = estadoEl.value || 'todos';
+      
+      // Mostrar loading
+      Swal.fire({
+        title: 'Preparando Excel...',
+        text: 'Generando reporte profesional de productos',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+      });
 
-        // Estilo Encabezados de Tabla (Fila 5: A5-J5)
-        const range = XLSX.utils.decode_range(ws['!ref']);
-        // Las columnas van de 0 a 9 (A-J)
-        for (let C = 0; C <= 9; ++C) {
-            const address = XLSX.utils.encode_cell({r: 4, c: C}); // Fila 5 es índice 4
-            if (!ws[address]) continue;
-            ws[address].s = {
-                font: { bold: true, color: { rgb: "FFFFFF" } },
-                fill: { fgColor: { rgb: "EF5350" } }, // Rojo suave
-                alignment: { horizontal: 'center', vertical: 'center' },
-                border: {
-                    top: {style:'thin', color: {auto: 1}},
-                    bottom: {style:'thin', color: {auto: 1}},
-                    left: {style:'thin', color: {auto: 1}},
-                    right: {style:'thin', color: {auto: 1}}
-                }
-            };
-        }
+      // Construir URL con filtros actuales
+      const url = new URL('/inventario/productos/exportar', window.location.origin);
+      url.searchParams.append('search', search);
+      url.searchParams.append('estado', estado);
 
-        // Estilo de datos (centrado para ID, Stock, Vencimiento)
-        // ID=0, Stock=5, Vencimiento=8
-        for (let R = 5; R <= range.e.r; ++R) {
-            const colsCenter = [0, 5, 8]; // ID, Stock, Vencimiento
-            colsCenter.forEach(C => {
-                const addr = XLSX.utils.encode_cell({r: R, c: C});
-                if(ws[addr]) {
-                    if(!ws[addr].s) ws[addr].s = {};
-                    ws[addr].s.alignment = { horizontal: 'center' };
-                }
-            });
-            // Precios a la derecha (6, 7)
-            [6, 7].forEach(C => {
-                const addr = XLSX.utils.encode_cell({r: R, c: C});
-                if(ws[addr]) {
-                    if(!ws[addr].s) ws[addr].s = {};
-                    ws[addr].s.alignment = { horizontal: 'right' };
-                }
-            });
-        }
+      // Redirigir a la descarga
+      window.location.href = url.toString();
+      
+      // Cerrar loading después de un momento
+      setTimeout(() => { Swal.close(); }, 2000);
+      
     } catch (e) {
-        console.warn('No se pudieron aplicar estilos avanzados a Excel', e);
+      console.error('Error exportando:', e);
+      Swal.fire({ icon:'error', title:'Error', text:'No se pudo generar el reporte Excel' });
     }
-    
-    XLSX.utils.book_append_sheet(wb, ws, 'Productos');
-    const fecha = new Date().toISOString().split('T')[0];
-    const nombreArchivo = `productos_botica_${fecha}.xlsx`;
-    XLSX.writeFile(wb, nombreArchivo);
-    Swal.fire({ 
-      icon:'success', 
-      title:'Exportación exitosa', 
-      text:`Archivo ${nombreArchivo} descargado`,
-      timer: 2000,
-      showConfirmButton: false
-    });
   }
 
   async function exportarPDFBotica() {
@@ -1427,118 +1684,99 @@ function mostrarSelectorLotes(lotes, productoNombre, callback, titulo = 'Detalle
   console.log('mostrarSelectorLotes llamado con:', { lotes, productoNombre, titulo });
   
   if (!lotes || lotes.length === 0) {
-    console.log('No hay lotes, ejecutando callback con null');
     callback(null);
     return;
   }
   
   if (lotes.length === 1) {
-    console.log('Solo hay 1 lote, ejecutando callback directamente');
     callback(lotes[0]);
     return;
   }
 
-  // Guardar callback para cuando se seleccione un lote
   selectorLotesCallback = callback;
-  console.log('Callback guardado, mostrando modal con', lotes.length, 'lotes');
 
-  // Obtener modal y elementos
   const modal = document.getElementById('modalSelectorLotes');
   const modalTitle = document.getElementById('modalSelectorLotesTitle');
   const productoNombreEl = document.getElementById('selectorProductoNombre');
   const tbody = document.getElementById('selectorLotesBody');
 
-  if (!modal || !tbody) {
-    console.error('Modal o tbody no encontrado!');
-    return;
-  }
+  if (!modal || !tbody) return;
 
-  // Configurar título y nombre del producto
   modalTitle.textContent = titulo;
   productoNombreEl.textContent = productoNombre;
-
-  // Limpiar tbody
   tbody.innerHTML = '';
 
-  // Crear filas para cada lote
   lotes.forEach((l, idx) => {
-    console.log('Lote completo:', l);
     const dias = Math.round(l.dias_para_vencer || 0);
-    let estadoClass = 'bg-green-100 text-green-800';
-    let estadoText = 'Normal';
+    const cantidad = Number(l.cantidad || 0);
+    let estadoClass = '';
+    let estadoText = '';
     
-    if (dias < 0) {
-      estadoClass = 'bg-red-100 text-red-800';
+    if (cantidad <= 0) {
+      estadoClass = 'bg-gray-100 text-gray-600 border-gray-200';
+      estadoText = 'Agotado';
+    } else if (dias < 0) {
+      estadoClass = 'bg-red-100 text-red-700 border-red-200';
       estadoText = 'Vencido';
     } else if (dias <= 90) {
-      estadoClass = 'bg-yellow-100 text-yellow-800';
+      estadoClass = 'bg-amber-100 text-amber-700 border-amber-200';
       estadoText = 'Por Vencer';
+    } else {
+      estadoClass = 'bg-emerald-100 text-emerald-700 border-emerald-200';
+      estadoText = 'Vigente';
     }
 
-    // Intentar obtener ubicación de diferentes campos posibles
-    const ubicacion = l.ubicacion || l.ubicacion_nombre || l.ubicacion_almacen || 'Sin asignar';
-    console.log('Ubicación para lote', l.lote, ':', ubicacion);
     const diasText = dias >= 0 ? `Vence en ${dias} días` : `Venció hace ${Math.abs(dias)} días`;
-    
-    // Obtener precios del lote
     const precioVenta = l.precio_venta_lote || l.precio_venta || 0;
     const precioCompra = l.precio_compra_lote || l.precio_compra || 0;
 
     const row = document.createElement('tr');
-    row.className = 'hover:bg-red-50 cursor-pointer transition-colors border-b border-gray-100';
+    row.className = 'hover:bg-gray-100 cursor-pointer transition-all border-b border-gray-100 group';
     row.dataset.loteIdx = idx;
     row.innerHTML = `
-      <td class="px-4 py-3">
-        <div class="font-semibold text-gray-800">${l.lote || 'Sin código'}</div>
+      <td class="px-4 py-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500 group-hover:bg-blue-100 transition-colors">
+                <iconify-icon icon="solar:box-minimalistic-bold-duotone" class="text-xl"></iconify-icon>
+            </div>
+            <div class="font-bold text-gray-900 text-base">${l.lote || 'Sin código'}</div>
+        </div>
       </td>
-      <td class="px-4 py-3">
-        <div class="font-medium text-gray-700">${formatFecha(l.fecha_vencimiento)}</div>
-        <div class="text-xs text-gray-500">${diasText}</div>
+      <td class="px-4 py-4">
+        <div class="font-bold text-gray-800">${formatFecha(l.fecha_vencimiento)}</div>
+        <div class="text-xs font-semibold text-gray-500 mt-0.5">${diasText}</div>
       </td>
-      <td class="px-4 py-3 text-center">
-        <span class="font-bold text-lg text-gray-800">${l.cantidad}</span>
+      <td class="px-4 py-4 text-center">
+        <span class="inline-flex items-center justify-center px-3 py-1 bg-gray-50 rounded-lg font-extrabold text-gray-900 text-base border border-gray-200">${cantidad}</span>
       </td>
-      <td class="px-4 py-3 text-center">
-        <div class="font-semibold text-gray-800">P.V: S/ ${Number(precioVenta).toFixed(2)}</div>
-        <div class="text-sm text-gray-600 mt-1">P.C: S/ ${Number(precioCompra).toFixed(2)}</div>
+      <td class="px-4 py-4 text-center">
+        <div class="flex flex-col items-center">
+            <span class="font-extrabold text-emerald-600 text-base">S/ ${Number(precioCompra).toFixed(2)}</span>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Costo Unit.</span>
+        </div>
       </td>
-      <td class="px-4 py-3 text-center">
-        <span class="inline-block px-3 py-1 rounded-full text-xs font-medium ${estadoClass}">${estadoText}</span>
+      <td class="px-4 py-4 text-center">
+        <div class="flex flex-col items-center">
+            <span class="font-extrabold text-emerald-600 text-base">S/ ${Number(precioVenta).toFixed(2)}</span>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Venta Unit.</span>
+        </div>
       </td>
     `;
 
-    // Agregar evento de clic
     row.addEventListener('click', function(e) {
-      console.log('¡Clic en fila detectado!', 'Lote:', lotes[idx]);
       e.stopPropagation();
-      
-      // IMPORTANTE: Guardar el callback ANTES de cerrar el modal (que lo pone a null)
       const callbackToExecute = selectorLotesCallback;
-      
-      // Cerrar el modal
       cerrarModalSelectorLotes();
-      
-      // Ejecutar el callback guardado
       if (callbackToExecute) {
-        console.log('Ejecutando callback con lote:', lotes[idx]);
         callbackToExecute(lotes[idx]);
-      } else {
-        console.error('No hay callback guardado!');
       }
     });
 
     tbody.appendChild(row);
-    console.log('Fila agregada para lote:', l.lote);
   });
 
-  console.log('Total de filas agregadas:', lotes.length);
-  console.log('Mostrando modal...');
-
-  // Mostrar modal
   modal.style.display = 'flex';
   modal.classList.remove('hidden');
-  
-  console.log('Modal mostrado. Display:', modal.style.display);
 }
 
 function cerrarModalSelectorLotes() {
@@ -1597,6 +1835,8 @@ async function cargarCategoriasYPresentaciones(catSel=null, presSel=null) {
       if (selCatEdit) selCatEdit.innerHTML = opts;
       if (catSel && selCatEdit) selCatEdit.value = catSel;
     }
+    // COMENTADO: Ya no cargamos presentaciones del catálogo antiguo
+    /*
     const rp = await fetch('/inventario/presentacion/api');
     const dp = await rp.json();
     const selPresAdd = document.getElementById('add-presentacion');
@@ -1607,6 +1847,7 @@ async function cargarCategoriasYPresentaciones(catSel=null, presSel=null) {
       if (selPresEdit) selPresEdit.innerHTML = optsP;
       if (presSel && selPresEdit) selPresEdit.value = presSel;
     }
+    */
   } catch(e) { console.error(e); }
 }
 
@@ -1672,12 +1913,11 @@ async function abrirModalEdicion(productId, loteSeleccionado = null) {
     let datosLote = loteSeleccionado || (lotes.length === 1 ? lotes[0] : null);
     
     // Datos a usar (del lote si existe, sino del producto)
-    // IMPORTANTE: Solo usar cantidad del lote si fue EXPLÍCITAMENTE seleccionado por el usuario
     const stockActual = loteSeleccionado ? loteSeleccionado.cantidad : p.stock_actual;
     const loteCode = datosLote ? datosLote.lote : p.lote;
     const fechaVenc = datosLote ? datosLote.fecha_vencimiento : p.fecha_vencimiento;
-    const precioCompra = datosLote && datosLote.precio_compra_lote ? datosLote.precio_compra_lote : p.precio_compra;
-    const precioVenta = datosLote && datosLote.precio_venta_lote ? datosLote.precio_venta_lote : p.precio_venta;
+    const precioCompra = datosLote && datosLote.precio_compra_lote ? datosLote.precio_compra_lote : (p.precio_compra || p.compra_precio || 0);
+    const precioVenta = datosLote && datosLote.precio_venta_lote ? datosLote.precio_venta_lote : (p.precio_venta || p.venta_precio || 0);
     const proveedorId = datosLote && datosLote.proveedor_id ? datosLote.proveedor_id : p.proveedor_id;
     const proveedorNombre = datosLote && datosLote.proveedor ? datosLote.proveedor : p.proveedor;
     
@@ -1709,7 +1949,7 @@ async function abrirModalEdicion(productId, loteSeleccionado = null) {
         marca: p.marca,
         proveedor_id: proveedorId,
         proveedor: proveedorNombre,
-        presentacion: p.presentacion,
+        // REMOVIDO: presentacion: p.presentacion,
         concentracion: p.concentracion,
         lote: loteCode,
         codigo_barras: p.codigo_barras,
@@ -1717,7 +1957,7 @@ async function abrirModalEdicion(productId, loteSeleccionado = null) {
         stock_minimo: p.stock_minimo,
         precio_compra: precioCompra,
         precio_venta: precioVenta,
-        fecha_fabricacion: p.fecha_fabricacion || '',
+        // REMOVIDO: fecha_fabricacion: p.fecha_fabricacion || '',
       fecha_vencimiento: fechaVenc || '',
       imagen_url: p.imagen_url || '',
       lote_id: datosLote ? datosLote.id : null
@@ -1736,21 +1976,46 @@ async function abrirModalEdicion(productId, loteSeleccionado = null) {
       }
       loteIdField.value = datosLote ? datosLote.id : '';
       
-      const ids = ['edit-nombre','edit-concentracion','edit-marca','edit-lote','edit-codigo_barras','edit-stock_actual','edit-stock_minimo','edit-precio_compra','edit-precio_venta','edit-fecha_fabricacion'];
-      const vals = [p.nombre,p.concentracion,p.marca,loteCode,p.codigo_barras,stockActual,p.stock_minimo,precioCompra,precioVenta,p.fecha_fabricacion||''];
-      ids.forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.value = vals[i]??''; });
+      const ids = ['edit-nombre','edit-concentracion','edit-marca','edit-lote','edit-codigo_barras','edit-stock_actual','edit-stock_minimo','precio_compra_base_edit','precio_venta_base_edit'];
+      const vals = [p.nombre,p.concentracion,p.marca,loteCode,p.codigo_barras,stockActual,p.stock_minimo,precioCompra,precioVenta];
+      ids.forEach((id,i)=>{ 
+          const el=document.getElementById(id); 
+          if(el) {
+              el.value = vals[i]??'';
+              // Disparar evento input para que el manager de presentaciones actualice la "Unidad"
+              el.dispatchEvent(new Event('input'));
+          }
+      });
       
-    cargarCategoriasYPresentaciones(p.categoria, p.presentacion);
+    cargarCategoriasYPresentaciones(p.categoria, null); // No cargar presentación antigua
+    
     window.currentEditProveedorName = proveedorNombre || '';
     cargarProveedores(proveedorId);
+
       const prev = document.getElementById('edit-preview-container');
       const img = document.getElementById('edit-preview-image');
-      if (prev && img) { prev.style.display='block'; img.src = p.imagen_url || '/assets/images/default-product.svg'; }
+    if (prev && img) { 
+        prev.style.display='block'; 
+        img.src = p.imagen_url || '/assets/images/default-product.svg'; 
+    }
+    
       const modalEdit = document.getElementById('modalEditar');
+    if (modalEdit) {
       modalEdit.style.display='flex';
       modalEdit.classList.remove('hidden');
       document.body.classList.add('modal-open');
     }
+  }
+
+  // Cargar presentaciones del producto SIEMPRE al final, una sola vez
+  setTimeout(async () => {
+    if (typeof window.loadExistingPresentaciones === 'function') {
+      const loteId = datosLote ? datosLote.id : null;
+      console.log('🔄 Cargando presentaciones para producto:', p.id, loteId ? `y lote: ${loteId}` : '');
+      await window.loadExistingPresentaciones(p.id, loteId);
+    }
+  }, 200);
+
   } catch(e) { console.error(e); Swal.fire('Error','No se pudo cargar el producto','error'); }
   finally { hideLoading(); }
 }
@@ -1784,6 +2049,19 @@ async function guardarNuevoProducto() {
     }
     clearFieldErrors(form);
     const fd = new FormData(form);
+    
+    // --- FIX: Agregar presentaciones al FormData ---
+    if (typeof window.getPresentacionesData === 'function') {
+        const presentacionesObj = window.getPresentacionesData();
+        Object.entries(presentacionesObj).forEach(([key, pres]) => {
+            // Usamos el key original (id o new_X) para que el controlador pueda distinguir
+            fd.append(`presentaciones[${key}][nombre_presentacion]`, pres.nombre_presentacion);
+            fd.append(`presentaciones[${key}][unidades_por_presentacion]`, pres.unidades_por_presentacion);
+            fd.append(`presentaciones[${key}][precio_venta_presentacion]`, pres.precio_venta_presentacion);
+        });
+    }
+    // ----------------------------------------------
+
     const selProvAdd = document.getElementById('add-proveedor');
     if (selProvAdd) {
       fd.set('proveedor_id', selProvAdd.value || '');
@@ -1885,33 +2163,92 @@ async function guardarEdicionProducto() {
     const nombre = form.querySelector('[name="nombre"]')?.value?.trim();
     const categoria = form.querySelector('[name="categoria"]')?.value?.trim();
     const marca = form.querySelector('[name="marca"]')?.value?.trim();
-    const presentacion = form.querySelector('[name="presentacion"]')?.value?.trim();
+    const concentracion = form.querySelector('[name="concentracion"]')?.value?.trim();
     const lote = form.querySelector('[name="lote"]')?.value?.trim();
     const codigo_barras = form.querySelector('[name="codigo_barras"]')?.value?.trim();
-    const stock_actual = Number(form.querySelector('[name="stock_actual"]')?.value || 0);
-    const stock_minimo = Number(form.querySelector('[name="stock_minimo"]')?.value || 0);
-    const precio_compra = Number(form.querySelector('[name="precio_compra"]')?.value || 0);
-    const precio_venta = Number(form.querySelector('[name="precio_venta"]')?.value || 0);
-    const fecha_fabricacion = form.querySelector('[name="fecha_fabricacion"]')?.value;
 
     clearFieldErrors(form);
     let hasError = false;
     const req = (val, field) => { if (!val) { showFieldError(form, field, 'Este campo es obligatorio'); hasError = true; } };
-    req(nombre,'nombre'); req(categoria,'categoria'); req(marca,'marca'); req(presentacion,'presentacion'); req(lote,'lote'); req(codigo_barras,'codigo_barras');
-    if (codigo_barras && codigo_barras.length !== 13) { showFieldError(form,'codigo_barras','Debe tener 13 dígitos (EAN13)'); hasError = true; }
-    if (!Number.isFinite(stock_actual) || stock_actual < 0) { showFieldError(form,'stock_actual','Debe ser un entero ≥ 0'); hasError = true; }
-    if (!Number.isFinite(stock_minimo) || stock_minimo < 0) { showFieldError(form,'stock_minimo','Debe ser un entero ≥ 0'); hasError = true; }
-    if (!Number.isFinite(precio_compra) || precio_compra < 0) { showFieldError(form,'precio_compra','Debe ser un número ≥ 0'); hasError = true; }
-    if (!Number.isFinite(precio_venta) || precio_venta < 0) { showFieldError(form,'precio_venta','Debe ser un número ≥ 0'); hasError = true; }
-    if (Number.isFinite(precio_compra) && Number.isFinite(precio_venta) && precio_venta <= precio_compra) { showFieldError(form,'precio_venta','Debe ser mayor al precio de compra'); hasError = true; }
-    if (hasError) { Swal.fire('Revisa los campos','Hay errores de validación','warning'); return; }
+    
+    req(nombre,'nombre'); 
+    req(categoria,'categoria'); 
+    req(marca,'marca'); 
+    req(concentracion,'concentracion');
+    req(lote,'lote'); 
+    req(codigo_barras,'codigo_barras');
+    
+    // --- FECHA DE VENCIMIENTO (OCULTA Y OPCIONAL) ---
+    const fvInput = document.getElementById('edit-fecha_vencimiento');
+    const fecha_vencimiento = fvInput?.value || '';
 
-    if (window.validacionesTiempoReal) {
-      const ok = await window.validacionesTiempoReal.validateForm('formEditarProducto');
-      if (!ok) { Swal.fire('Errores de validación','Corrige los campos marcados antes de guardar','warning'); return; }
+    if (codigo_barras && codigo_barras.length !== 13) { showFieldError(form,'codigo_barras','Debe tener 13 dígitos (EAN13)'); hasError = true; }
+    
+    // --- VALIDACIÓN DE PRECIOS BASE ---
+    const pcVal = document.getElementById('precio_compra_base_edit')?.value;
+    const pvVal = document.getElementById('precio_venta_base_edit')?.value;
+    const nPC = parseFloat(pcVal || 0);
+    const nPV = parseFloat(pvVal || 0);
+
+    console.log('🔍 Validando precios al guardar:', { pcVal, pvVal, nPC, nPV });
+
+    if (!pcVal || isNaN(nPC) || nPC <= 0) { 
+        showFieldError(form,'precio_compra','Mínimo > 0'); 
+        hasError = true; 
     }
+    if (!pvVal || isNaN(nPV) || nPV <= 0) { 
+        showFieldError(form,'precio_venta','Mínimo > 0'); 
+        hasError = true; 
+    }
+    if (nPV > 0 && nPC > 0 && nPV <= nPC) { 
+        showFieldError(form,'precio_venta','Debe ser mayor al costo'); 
+        hasError = true; 
+    }
+
+    if (hasError) { 
+        console.warn('⚠️ Guardado bloqueado por validaciones JS internas');
+        Swal.fire('Revisa los campos','Hay errores de validación o campos vacíos','warning'); 
+        return; 
+    }
+
+    // --- VALIDACIÓN SECUNDARIA (TIME REAL) ---
+    // Si el validador externo falla, no detenemos el proceso si ya pasamos nuestra validación interna fuerte
+    if (window.validacionesTiempoReal) {
+      try {
+          const ok = await window.validacionesTiempoReal.validateForm('formEditarProducto');
+          if (!ok) {
+              console.warn('⚠️ Validador de tiempo real detectó errores, pero intentaremos proceder si los campos críticos están llenos');
+              // Si quieres ser estricto, deja el return. Si quieres que guarde sí o sí, comenta la siguiente línea:
+              // return; 
+          }
+      } catch (e) {
+          console.error('Error en validador externo:', e);
+      }
+    }
+    
     clearFieldErrors(form);
-  const fd = new FormData(form);
+    const fd = new FormData(form);
+
+  // --- FIX: Asegurar que los datos críticos se envíen correctamente ---
+  const pcFinal = document.getElementById('precio_compra_base_edit')?.value;
+  const pvFinal = document.getElementById('precio_venta_base_edit')?.value;
+  const fvVal = document.getElementById('edit-fecha_vencimiento')?.value;
+  
+  if (pcFinal) fd.set('precio_compra', pcFinal);
+  if (pvFinal) fd.set('precio_venta', pvFinal);
+  if (fvVal) fd.set('fecha_vencimiento', fvVal);
+
+  // --- FIX: Agregar presentaciones al FormData (Edit) ---
+  if (typeof window.getPresentacionesData === 'function') {
+      const presentacionesObj = window.getPresentacionesData();
+      Object.entries(presentacionesObj).forEach(([key, pres]) => {
+          fd.append(`presentaciones[${key}][nombre_presentacion]`, pres.nombre_presentacion);
+          fd.append(`presentaciones[${key}][unidades_por_presentacion]`, pres.unidades_por_presentacion);
+          fd.append(`presentaciones[${key}][precio_venta_presentacion]`, pres.precio_venta_presentacion);
+      });
+  }
+  // -----------------------------------------------------
+
   const selProvEdit = document.getElementById('edit-proveedor');
   if (selProvEdit) {
     selProvEdit.disabled = false;

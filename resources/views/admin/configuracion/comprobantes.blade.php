@@ -23,7 +23,7 @@
                     <form id="formConfiguracionComprobantes" onsubmit="guardarConfiguracionComprobantes(event)">
                         @csrf
                         
-                        <!-- Numeración de Comprobantes -->
+                        
                         <div class="mb-6">
                             <h5 class="font-semibold mb-4">
                                 <iconify-icon icon="solar:hashtag-bold-duotone" class="mr-2"></iconify-icon>
@@ -127,7 +127,7 @@
                             </div>
                         </div>
 
-                        <!-- Configuración Electrónica -->
+                        
                         <div class="mb-6">
                             <h5 class="font-semibold mb-4">
                                 <iconify-icon icon="solar:cloud-upload-bold-duotone" class="mr-2"></iconify-icon>
@@ -152,7 +152,7 @@
                             </div>
                         </div>
 
-                        <!-- Configuración de Formato -->
+                        
                         <div class="mb-6">
                             <h5 class="font-semibold mb-4">
                                 <iconify-icon icon="solar:document-text-bold-duotone" class="mr-2"></iconify-icon>
@@ -209,7 +209,7 @@
                             </div>
                         </div>
 
-                        <!-- Configuración de Copias -->
+                        
                         <div class="mb-6">
                             <h5 class="font-semibold mb-4">
                                 <iconify-icon icon="solar:copy-bold-duotone" class="mr-2"></iconify-icon>
@@ -269,7 +269,7 @@
             </div>
         </div>
 
-        <!-- Panel de Información -->
+        
         <div class="col-lg-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-gray-100 p-4">
@@ -299,9 +299,7 @@
                 </div>
             </div>
 
-
-
-            <!-- Información -->
+            
             <div class="card shadow-sm mt-4">
                 <div class="card-header bg-gray-100 p-4">
                     <h4 class="text-md font-semibold">Información</h4>
@@ -375,8 +373,7 @@ async function guardarConfiguracionComprobantes(event) {
                 timer: 2000,
                 showConfirmButton: false
             });
-            
-            // Actualizar vista previa de números
+
             actualizarProximosNumeros();
         } else {
             throw new Error(result.message || 'Error al guardar la configuración');
@@ -390,7 +387,6 @@ async function guardarConfiguracionComprobantes(event) {
     }
 }
 
-// Validación en tiempo real de series
 document.getElementById('serie_boleta').addEventListener('input', function(e) {
     let value = e.target.value.toUpperCase();
     if (value.length > 4) value = value.substring(0, 4);
@@ -412,12 +408,10 @@ document.getElementById('serie_ticket').addEventListener('input', function(e) {
     actualizarProximosNumeros();
 });
 
-// Actualizar números en tiempo real
 document.getElementById('numeracion_boleta').addEventListener('input', actualizarProximosNumeros);
 document.getElementById('numeracion_factura').addEventListener('input', actualizarProximosNumeros);
 document.getElementById('numeracion_ticket').addEventListener('input', actualizarProximosNumeros);
 
-// Inicializar
 document.addEventListener('DOMContentLoaded', function() {
     actualizarProximosNumeros();
 });

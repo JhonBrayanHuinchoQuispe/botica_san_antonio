@@ -3,7 +3,7 @@
     $title='Add User';
     $subTitle = 'Add User';
     $script = '<script>
-                    // ================== Image Upload Js Start ===========================
+
                     function readURL(input) {
                         if (input.files && input.files[0]) {
                             var reader = new FileReader();
@@ -18,7 +18,7 @@
                     $("#imageUpload").change(function() {
                         readURL(this);
                     });
-                    // ================== Image Upload Js End ===========================
+
              </script>';
 @endphp
 
@@ -32,7 +32,7 @@
                         <div class="card-body">
                             <h6 class="text-base text-neutral-600 mb-4">Profile Image</h6>
 
-                            <!-- Upload Image Start -->
+                            
                             <div class="mb-6 mt-4">
                                 <div class="avatar-upload">
                                     <div class="avatar-edit absolute bottom-0 end-0 me-6 mt-4 z-[1] cursor-pointer ">
@@ -46,7 +46,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Upload Image End -->
+                            
 
                             <form action="#">
                                 <div class="mb-5">

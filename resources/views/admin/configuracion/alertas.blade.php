@@ -23,7 +23,7 @@
                     <form id="formConfiguracionAlertas" onsubmit="guardarConfiguracionAlertas(event)">
                         @csrf
                         
-                        <!-- Alertas de Stock -->
+                        
                         <div class="mb-6">
                             <h5 class="font-semibold mb-4">
                                 <iconify-icon icon="solar:box-bold-duotone" class="mr-2"></iconify-icon>
@@ -63,7 +63,7 @@
                             </div>
                         </div>
 
-                        <!-- Alertas de Vencimiento -->
+                        
                         <div class="mb-6">
                             <h5 class="font-semibold mb-4">
                                 <iconify-icon icon="solar:calendar-mark-bold-duotone" class="mr-2"></iconify-icon>
@@ -104,7 +104,7 @@
                             </div>
                         </div>
 
-                        <!-- Alertas por Email -->
+                        
                         <div class="mb-6">
                             <h5 class="font-semibold mb-4">
                                 <iconify-icon icon="solar:letter-bold-duotone" class="mr-2"></iconify-icon>
@@ -145,7 +145,7 @@
                             </div>
                         </div>
 
-                        <!-- Alertas del Sistema -->
+                        
                         <div class="mb-6">
                             <h5 class="font-semibold mb-4">
                                 <iconify-icon icon="solar:settings-bold-duotone" class="mr-2"></iconify-icon>
@@ -164,7 +164,7 @@
                             <small class="text-muted">Mostrar notificaciones en la interfaz del sistema</small>
                         </div>
 
-                        <!-- Configuraciones Adicionales -->
+                        
                         <div class="mb-6">
                             <h5 class="font-semibold mb-4">
                                 <iconify-icon icon="solar:widget-add-bold-duotone" class="mr-2"></iconify-icon>
@@ -241,7 +241,7 @@
             </div>
         </div>
 
-        <!-- Panel de Estado -->
+        
         <div class="col-lg-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-gray-100 p-4">
@@ -269,7 +269,7 @@
                 </div>
             </div>
 
-            <!-- Configuración Actual -->
+            
             <div class="card shadow-sm mt-4">
                 <div class="card-header bg-gray-100 p-4">
                     <h4 class="text-md font-semibold">Configuración Actual</h4>

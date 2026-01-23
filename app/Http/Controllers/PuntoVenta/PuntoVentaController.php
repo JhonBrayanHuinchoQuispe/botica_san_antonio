@@ -79,7 +79,7 @@ class PuntoVentaController extends Controller
                     'id' => $producto->id,
                     'nombre' => $producto->nombre,
                     'concentracion' => $producto->concentracion ?? null,
-                    'presentacion' => $producto->presentacion ?? 'Presentación estándar',
+                    // REMOVIDO: 'presentacion' => $producto->presentacion
                     'precio_venta' => isset($producto->precio_venta) ? (float)$producto->precio_venta : 0,
                     'stock_actual' => $stock,
                     'imagen_url' => $imagenUrl,
@@ -824,16 +824,16 @@ class PuntoVentaController extends Controller
 
             // 🔥 BÚSQUEDA INTELIGENTE MEJORADA
             // 1. Búsqueda exacta por nombre completo (prioridad máxima)
-            $productosExactos = Producto::select(['id', 'nombre', 'concentracion', 'presentacion', 'precio_venta', 'stock_actual', 'imagen', 'ubicacion_almacen', 'categoria', 'marca', 'fecha_vencimiento'])
-                ->with($withUbicaciones)
+            $productosExactos = Producto::select(['id', 'nombre', 'concentracion', 'precio_venta', 'stock_actual', 'imagen', 'ubicacion_almacen', 'categoria', 'marca', 'fecha_vencimiento'])
+                ->with(array_merge($withUbicaciones, ['presentaciones']))
                 ->whereRaw('LOWER(nombre) = ?', [strtolower($termino)])
                 ->orderBy('stock_actual', 'desc')
                 ->limit(5)
                 ->get();
 
             // 2. Búsqueda por nombres que empiecen con el término (prioridad alta)
-            $productosInicio = Producto::select(['id', 'nombre', 'concentracion', 'presentacion', 'precio_venta', 'stock_actual', 'imagen', 'ubicacion_almacen', 'categoria', 'marca', 'fecha_vencimiento'])
-                ->with($withUbicaciones)
+            $productosInicio = Producto::select(['id', 'nombre', 'concentracion', 'precio_venta', 'stock_actual', 'imagen', 'ubicacion_almacen', 'categoria', 'marca', 'fecha_vencimiento'])
+                ->with(array_merge($withUbicaciones, ['presentaciones']))
                 ->where('nombre', 'like', "{$termino}%")
                 ->whereNotIn('id', $productosExactos->pluck('id'))
                 ->orderBy('nombre', 'asc')
@@ -841,8 +841,8 @@ class PuntoVentaController extends Controller
                 ->get();
 
             // 3. Búsqueda por nombres que contengan el término (prioridad media)
-            $productosContienen = Producto::select(['id', 'nombre', 'concentracion', 'presentacion', 'precio_venta', 'stock_actual', 'imagen', 'ubicacion_almacen', 'categoria', 'marca', 'fecha_vencimiento'])
-                ->with($withUbicaciones)
+            $productosContienen = Producto::select(['id', 'nombre', 'concentracion', 'precio_venta', 'stock_actual', 'imagen', 'ubicacion_almacen', 'categoria', 'marca', 'fecha_vencimiento'])
+                ->with(array_merge($withUbicaciones, ['presentaciones']))
                 ->where('nombre', 'like', "%{$termino}%")
                 ->whereNotIn('id', $productosExactos->pluck('id')->merge($productosInicio->pluck('id')))
                 ->orderBy('stock_actual', 'desc')
@@ -853,8 +853,8 @@ class PuntoVentaController extends Controller
             $principioActivo = $this->extraerPrincipioActivo($termino);
             $productosPrincipio = collect();
             if ($principioActivo) {
-                $productosPrincipio = Producto::select(['id', 'nombre', 'concentracion', 'presentacion', 'precio_venta', 'stock_actual', 'imagen', 'ubicacion_almacen', 'categoria', 'marca', 'fecha_vencimiento'])
-                    ->with($withUbicaciones)
+                $productosPrincipio = Producto::select(['id', 'nombre', 'concentracion', 'precio_venta', 'stock_actual', 'imagen', 'ubicacion_almacen', 'categoria', 'marca', 'fecha_vencimiento'])
+                    ->with(array_merge($withUbicaciones, ['presentaciones']))
                     ->where('nombre', 'like', "%{$principioActivo}%")
                     ->whereNotIn('id', $productosExactos->pluck('id')->merge($productosInicio->pluck('id'))->merge($productosContienen->pluck('id')))
                     ->orderBy('stock_actual', 'desc')
@@ -863,8 +863,8 @@ class PuntoVentaController extends Controller
             }
 
             // 5. Búsqueda por marca (prioridad baja)
-            $productosMarca = Producto::select(['id', 'nombre', 'concentracion', 'presentacion', 'precio_venta', 'stock_actual', 'imagen', 'ubicacion_almacen', 'categoria', 'marca', 'fecha_vencimiento'])
-                ->with($withUbicaciones)
+            $productosMarca = Producto::select(['id', 'nombre', 'concentracion', 'precio_venta', 'stock_actual', 'imagen', 'ubicacion_almacen', 'categoria', 'marca', 'fecha_vencimiento'])
+                ->with(array_merge($withUbicaciones, ['presentaciones']))
                 ->where('marca', 'like', "%{$termino}%")
                 ->whereNotIn('id', $productosExactos->pluck('id')->merge($productosInicio->pluck('id'))->merge($productosContienen->pluck('id'))->merge($productosPrincipio->pluck('id')))
                 ->orderBy('stock_actual', 'desc')
@@ -942,11 +942,25 @@ class PuntoVentaController extends Controller
                         })->values();
                 }
 
+                // Formatear presentaciones disponibles
+                $presentacionesDisponibles = [];
+                if ($producto->relationLoaded('presentaciones') && $producto->presentaciones->count() > 0) {
+                    $presentacionesDisponibles = $producto->presentaciones->map(function($pres) {
+                        return [
+                            'id' => $pres->id,
+                            'nombre' => $pres->nombre_presentacion,
+                            'unidades' => $pres->unidades_por_presentacion,
+                            'precio_venta' => (float) $pres->precio_venta_presentacion
+                        ];
+                    })->toArray();
+                }
+
                 return [
                     'id' => $producto->id,
                     'nombre' => $producto->nombre,
                     'concentracion' => $producto->concentracion,
-                    'presentacion' => $producto->presentacion ?? 'Presentación estándar',
+                    'presentacion' => 'Ver presentaciones', // Texto genérico
+                    'presentaciones' => $presentacionesDisponibles, // ✅ Agregar presentaciones
                     'precio_venta' => (float) $producto->precio_venta,
                     'stock_actual' => $producto->stock_actual,
                     'imagen_url' => $producto->imagen_url,
@@ -1215,7 +1229,15 @@ class PuntoVentaController extends Controller
             foreach ($request->productos as $producto) {
                 $productosIds[] = $producto['id'];
                 $productosDetalles[$producto['id']] = $producto;
-                $subtotal += $producto['precio'] * $producto['cantidad'];
+                
+                // IMPORTANTE: Si hay presentación, usar cantidad_presentacion para el cálculo del subtotal
+                // cantidad_presentacion = cantidad de presentaciones vendidas (ej: 2 Blisters)
+                // cantidad = cantidad en unidades (ej: 40 unidades)
+                $cantidadParaCalculo = isset($producto['cantidad_presentacion']) && $producto['cantidad_presentacion'] > 0 
+                    ? $producto['cantidad_presentacion'] 
+                    : $producto['cantidad'];
+                
+                $subtotal += $producto['precio'] * $cantidadParaCalculo;
             }
 
             // Verificar stock de productos
@@ -1346,16 +1368,41 @@ class PuntoVentaController extends Controller
                     $loteId
                 );
 
-                $detallesVenta[] = [
+                // Preparar datos del detalle
+                // NOTA: $producto['cantidad'] ya viene en UNIDADES desde el frontend
+                // Si hay presentación, usamos cantidad_presentacion para el ticket
+                $cantidadParaTicket = $producto['cantidad']; // Por defecto, unidades
+                $cantidadEnUnidades = $producto['cantidad']; // Para descontar del stock
+                
+                if (isset($producto['presentacion_id']) && $producto['presentacion_id']) {
+                    // Si hay cantidad_presentacion, usarla para el ticket
+                    if (isset($producto['cantidad_presentacion'])) {
+                        $cantidadParaTicket = $producto['cantidad_presentacion'];
+                    }
+                }
+                
+                $detalleData = [
                     'venta_id' => $venta->id,
                     'producto_id' => $producto['id'],
-                    'cantidad' => $producto['cantidad'],
+                    'cantidad' => $cantidadParaTicket, // Cantidad para mostrar en el ticket
                     'precio_unitario' => $producto['precio'],
-                    'subtotal' => round($producto['precio'] * $producto['cantidad'], 2),
+                    'subtotal' => round($producto['precio'] * $cantidadParaTicket, 2),
                     'lotes_info' => json_encode($lotesUsados),
                     'created_at' => now(),
                     'updated_at' => now()
                 ];
+
+                // Agregar información de presentación si existe
+                if (isset($producto['presentacion_id']) && $producto['presentacion_id']) {
+                    $detalleData['tipo_cantidad'] = 'presentacion';
+                    $detalleData['presentacion_nombre'] = $producto['presentacion_nombre'] ?? null;
+                    $detalleData['cantidad_unidades'] = $cantidadEnUnidades; // Unidades reales descontadas
+                } else {
+                    $detalleData['tipo_cantidad'] = 'unidad';
+                    $detalleData['cantidad_unidades'] = $cantidadEnUnidades;
+                }
+
+                $detallesVenta[] = $detalleData;
             }
             
             // Insertar detalles de venta

@@ -36,4 +36,8 @@ return [
         'vapid_private' => env('VAPID_PRIVATE_KEY'),
     ],
 
+    'ai_engine' => [
+        'url' => env('IA_API_URL', 'http://76.13.71.180:8001'),
+    ],
+
 ];

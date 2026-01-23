@@ -7,7 +7,7 @@
 ])
 
 <div x-data="busquedaInstantanea" class="position-relative">
-    <!-- Campo de búsqueda -->
+    
     <div class="input-group">
         <input 
             type="text" 
@@ -25,7 +25,7 @@
         </div>
     </div>
 
-    <!-- Resultados de búsqueda -->
+    
     <div 
         x-show="mostrarResultados && resultados.length > 0"
         x-cloak
@@ -46,7 +46,7 @@
                 @mouseenter="$el.classList.add('bg-light')"
                 @mouseleave="$el.classList.remove('bg-light')"
             >
-                <!-- Imagen del producto (placeholder) -->
+                
                 <div class="me-3">
                     <div class="bg-secondary rounded d-flex align-items-center justify-content-center" 
                          style="width: 40px; height: 40px;">
@@ -54,7 +54,7 @@
                     </div>
                 </div>
 
-                <!-- Información del producto -->
+                
                 <div class="flex-grow-1">
                     <div class="fw-bold text-dark" x-text="producto.nombre"></div>
                     <div class="small text-muted">
@@ -73,14 +73,14 @@
                     @endif
                 </div>
 
-                <!-- Precio -->
+                
                 <div class="text-end">
                     <div class="fw-bold text-primary" x-text="'S/ ' + parseFloat(producto.precio_venta).toFixed(2)"></div>
                 </div>
             </div>
         </template>
 
-        <!-- Mensaje cuando no hay resultados -->
+        
         <div x-show="mostrarResultados && resultados.length === 0 && termino.length >= 2" 
              x-cloak
              class="p-3 text-center text-muted">
@@ -89,7 +89,7 @@
         </div>
     </div>
 
-    <!-- Mensaje de ayuda -->
+    
     <div x-show="termino.length > 0 && termino.length < 2" 
          x-cloak
          class="position-absolute w-100 bg-info text-white p-2 rounded mt-1 small"
@@ -119,7 +119,6 @@ document.addEventListener('alpine:init', () => {
     cursor: pointer;
 }
 
-/* Animaciones suaves */
 [x-cloak] { 
     display: none !important; 
 }
